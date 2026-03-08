@@ -94,6 +94,8 @@ permanent_poolmask(const int *handle,
 
    */
 
+  
+static int printed = 0;	
   int maxval = 0;
   int len;
   char *envname = NULL;
@@ -145,9 +147,10 @@ permanent_poolmask(const int *handle,
 
       if (myproc == 1) {
 	int j;
-	fprintf(stderr,
-	"***INFO: Only the following pools will be accessed : %s" , perm_pm )  ; 
-
+if (!printed) {
+    printf("***INFO: Only the following pools will be accessed : %s\n", perm_pm);
+    printed = 1;
+}
 
 	/* (dbname='%s', count=%d, nperm=%d)\n", 
 	dbname, n, pdb->nperm);
@@ -155,7 +158,7 @@ permanent_poolmask(const int *handle,
 	for (j=1; j<=pdb->nperm; j++) {
 	  if (pdb->perm_list[j]) fprintf(stderr,"%d ", j);
 	} /* for (j=0; j<pdb->nperm; j++) */
-	fprintf(stderr,"\n");
+	//printf("\n");
       }
     } /* if (n > 0) */
 
