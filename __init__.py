@@ -4,11 +4,11 @@
 #
 # Licensed under the Apache License, Version 2.0
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 # Ensure that the env is initialized whichever module is called !
 from .utils.setting_env import OdbEnv
 if not globals().get("_ODB_ENV_INITIALIZED", False):
     _env = OdbEnv()
-    _env.Init()
+    _env.init()
     _ODB_ENV_INITIALIZED = True
