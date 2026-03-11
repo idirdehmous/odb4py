@@ -2,7 +2,6 @@
 #define PYSPAM_H
 
 #define PY_SSIZE_T_CLEAN
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define ODB_STRLEN 8  // 8 chars + '\0' 
 #include <numpy/arrayobject.h>
 #include <numpy/ndarraytypes.h>
@@ -15,6 +14,16 @@
 #include  <Python.h>
 #include  "odbdump.h"
 #define SMAX 50 
+
+
+
+//  The unclude file could be renamed diffently , BUT  it stays  "pyspam.h"
+//  since with a module called  pyspam.c  that i learned writing 
+//  C extension for py  :-)  ... always remember !
+//  Link could be found here :
+//  https://docs.python.org/3/extending/extending.html  
+//  Valid the : 11/03/2026
+
 
 
 
@@ -53,8 +62,8 @@ static inline Bool PyObj_ToBool(PyObject *obj, Bool default_value)
         return default_value;
 
     int truth = PyObject_IsTrue(obj);
-    if (truth == -1) {          // erreur lors de l’évaluation de vérité
-        PyErr_Clear();          // on ignore l’erreur et retourne la valeur par défaut
+    if (truth == -1) {          
+        PyErr_Clear();         
         return default_value;
     }
 
@@ -77,7 +86,7 @@ return   x ;
 static inline double format_float  (double val, int precision) {
     if (!isfinite(val)) return val;
 
-    // Assure une précision raisonnable (0 à 15 décimales)
+    // Ensure decimal are between  0 and 15  
     if (precision <= 0) {
         printf("%s\n", "--WARNING : The number of decimal digits must >= 0 . -->  Fallback to default : fmt_float=15" ) ;
         precision = 15;
@@ -92,9 +101,6 @@ static inline double format_float  (double val, int precision) {
     snprintf(buffer, sizeof(buffer), fmt, val);
     return atof(buffer);
 }
-
-
-
 
 
 char* concat(const char *s1, const char *s2)
@@ -125,13 +131,9 @@ void strtonum(char str[], int num)
     str[len] = '\0';
 }
 
-
-
 int get_strlen (  const char *  string  ) {  int str_len  ;
 if ( string  ) { str_len=  strlen( string ); } else  { str_len=0   ;  };
 return str_len ;
 }
-
-
 #endif 
 
