@@ -13,24 +13,24 @@
 
 // Define the functions in the modules 
 static PyMethodDef module_methods[] = {
-    {"odbConnect",  (PyCFunction)(void(*)(void))    odbConnect_method    , METH_VARARGS | METH_KEYWORDS,  "Create ODB connection object"},
+    {"odb_connect",  (PyCFunction)(void(*)(void))    odb_connect_method    , METH_VARARGS | METH_KEYWORDS,  "Create ODB connection object"},
 
-    {"odbClose"  ,  (PyCFunction)(void(*)(void))    odbClose_method      , METH_VARARGS | METH_KEYWORDS,  "Close an opened ODB "},
+    {"odb_close"  ,  (PyCFunction)(void(*)(void))    odb_close_method      , METH_VARARGS | METH_KEYWORDS,  "Close an opened ODB "},
 
-    {"odbTables" ,  (PyCFunction)(void(*)(void))    odbTables_method     , METH_VARARGS | METH_KEYWORDS,  "Show all existing ODB tables"},
+    {"odb_info_tables" ,  (PyCFunction)(void(*)(void))    odb_info_tables_method     , METH_VARARGS | METH_KEYWORDS,  "Show all existing ODB tables"},
 
-    {"odbVarno"  ,  (PyCFunction)(void(*)(void))    odbVarno_method      , METH_VARARGS | METH_KEYWORDS,  "Print all ODB 'varno' parameters and their description"},
+    {"odb_info_varno"  ,  (PyCFunction)(void(*)(void))    odb_info_varno_method      , METH_VARARGS | METH_KEYWORDS,  "Print all ODB 'varno' parameters and their description"},
 
-    {"odbFunctions",  (PyCFunction)(void(*)(void))  odbFunctions_method  , METH_VARARGS | METH_KEYWORDS,  "Print all the possible functions that could be used in ODB sql statement"},
+    {"odb_info_funcs",  (PyCFunction)(void(*)(void))  odb_info_funcs_method  , METH_VARARGS | METH_KEYWORDS,  "Print all the possible functions that could be used in ODB sql statement"},
 
-    {"odbArray"  , (PyCFunction)(void(*)(void))  odbArray_method      , METH_VARARGS | METH_KEYWORDS,  "Fetch ODB rows as a numpy array with optional header(colnames)"} ,
+    {"odb_array"  , (PyCFunction)(void(*)(void))  odb_array_method      , METH_VARARGS | METH_KEYWORDS,  "Fetch ODB rows as a numpy array with optional header(colnames)"} ,
 
-    {"odbDict"   ,    (PyCFunction)(void(*)(void))  odbDict_method    , METH_VARARGS | METH_KEYWORDS,  "Fetch ODB rows as a python  dictionnary"},
-    {"odbDca"    ,    (PyCFunction)(void(*)(void))  odbDca_method      , METH_VARARGS | METH_KEYWORDS,  "Create DCA  (Direct Column  Access ) files "},
+    {"odb_dict"   ,    (PyCFunction)(void(*)(void))  odb_dict_method    , METH_VARARGS | METH_KEYWORDS,  "Fetch ODB rows as a python  dictionnary"},
+    {"odb_dca"    ,    (PyCFunction)(void(*)(void))  odb_dca_method      , METH_VARARGS | METH_KEYWORDS,  "Create DCA  (Direct Column  Access ) files "},
 
-    {"odbGcdist" , (PyCFunction)(void(*)(void))  odbGcdist_method , METH_VARARGS | METH_KEYWORDS,  "Compute great circle distance between numpy lat/lon pairs"},
+    {"odb_gcdist" , (PyCFunction)(void(*)(void))  odb_gcdist_method , METH_VARARGS | METH_KEYWORDS,  "Compute great circle distance between numpy lat/lon pairs"},
 
-    {"odbGeopoints" , (PyCFunction)(void(*)(void))  odbGeopoints_method , METH_VARARGS | METH_KEYWORDS,  "Fetch lat/lon/obsvalue according to some additional custom Where statement"},
+    {"odb_geopoints" , (PyCFunction)(void(*)(void))  odb_geopoints_method , METH_VARARGS | METH_KEYWORDS,  "Fetch lat/lon/obsvalue according to some additional custom Where statement"},
     {"odb2nc"  ,  (PyCFunction)(void(*)(void))     odb2nc_method   , METH_VARARGS | METH_KEYWORDS,   "Write data into netcdf file  "},
 
     {"version"   , odbMeta_version, METH_NOARGS, "Return the odb4py version."  },
