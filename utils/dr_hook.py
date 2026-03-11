@@ -17,14 +17,14 @@ class DrHook:
         return None 
 
 
-    def CallDrHook(self, var, value ):
+    def call_drhook(self, var, value ):
         self.varname=var
         self.value  =value  
 
         os.environ[self.varname]= value 
         return None 
 
-    def SetDrHook(self): 
+    def set_drhook(self): 
         dh_var={
         "DR_HOOK"                :"", 
         "DR_HOOK_OPT"            :"",
@@ -43,7 +43,7 @@ class DrHook:
            self.CallDrHook ( dh_var[var] , value )
          
         return None 
-    def SetSignal(self):
+    def set_signal(self):
         """
         Method : CAUGHTED SIGNALS 
 

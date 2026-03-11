@@ -8,7 +8,7 @@ import re
 from   glob         import glob
 
 
-from   .parser       import StringParser
+from   .parser       import SqlParser
 from   .exceptions   import *
 from   .odb_glossary import OdbLexic
 
@@ -25,7 +25,7 @@ class OdbObject:
 
 
 
-    def GetBasename(self):
+    def get_basename(self):
         base = os.path.basename(os.path.normpath(self.path))
         if base.startswith("CCMA"):
            cma_type = base 
@@ -42,7 +42,7 @@ class OdbObject:
 
 
     # ---------------------
-    def HasFlags(self, type_):
+    def has_flag(self, type_):
         flag = os.path.join(self.path, f"{type_}.flags")
         if os.path.isfile(flag):
            return flag  
@@ -50,30 +50,30 @@ class OdbObject:
            return None
 
 
-    def HasIoassign(self, type_):
+    def has_ioassign(self, type_):
         io_file = os.path.join(self.path, "IOASSIGN")
         if os.path.isfile(io_file):
            return io_file
        
-        sym = os.path.join(self.path, f"{type_}.IOASSIGN")
-        if os.path.islink(sym):
+        sym = os.path.join(self.path,   f"{type_}.IOASSIGN")
+        if not os.path.islink(sym):
+           os.symlink( sym   )
+           if not os.path.islink( "/".join(   (self.path, f"IOASSIGN.{type_}")  )):
+              os.symlink( self.path    ,   f"IOASSIGN.{type_}" )
+              return sym
+           return sym
+        else:
            return sym
 
-        else:
-           return None 
 
-
-    def HasIomap(self, type_):
+    def has_iomap(self, type_):
         iomap = os.path.join(self.path, f"{type_}.iomap")
         if os.path.isfile(iomap):
            return iomap 
         else: 
            return None
 
-
-
-    # ---------------------
-    def GetSize(self, path=None):
+    def get_size(self, path=None):
         """
         Equivalent to bash command : du --apparent-size --total -B1   ../../CCMA  or ECMA.obstype
         Count the file size using st_size and not with file blocks on the disk .
@@ -86,12 +86,12 @@ class OdbObject:
                 if entry.is_file():
                    total += entry.stat().st_size
                 elif entry.is_dir():
-                   total += self.GetSize(entry.path)
+                   total += self.get_size(entry.path)
         return total
 
 
     # ---------------------
-    def GetPools(self):
+    def get_pools(self):
         pools = []
         regex = r"^(?:0|[1-9]\d{0,2})$"
         for item in os.listdir(self.path):
@@ -101,9 +101,9 @@ class OdbObject:
 
 
     # ---------------------
-    def GetTables(self):
+    def get_tables(self):
         tables = []
-        for p in self.GetPools():
+        for p in self.get_pools():
             if p == "1":
                 pooldir = os.path.join(self.path, p)
                 if os.path.isdir(pooldir):
@@ -114,7 +114,7 @@ class OdbObject:
     # Get attributes 
     def _load_attributes(self):
         attrs = {}
-        dbname , type_, obstype = self.GetBasename()
+        dbname , type_, obstype = self.get_basename()
         attrs.update({ "name": dbname , 
                        "type": type_,    
                        "obstype": obstype,   })
@@ -129,30 +129,24 @@ class OdbObject:
              lines = f.readlines()[:6]
 
         odb_vers, creat_date, modif_date, obs_dttm, npool, ntables =  [l.rstrip() for l in lines]
-         
+        size_unit =" (Bytes)"
         attrs.update({
         "date_creation"     : creat_date,
         "last_modification" : modif_date,
         "observation_date"  : obs_dttm,
         "number_pools"      : npool,
-        "odb_total_size"    : str(self.GetSize()) +" (Bytes)"  ,
-        "Poolmask"          : self.GetPools(),
-        "tables"            : self.GetTables(),
-        "ioassign_file"     : self.HasIoassign(type_),
-        "flags_file"        : self.HasFlags(type_),
-        "iomap_file"        : self.HasIomap(type_),
+        "odb_total_size"    : str(self.get_size()) + size_unit ,
+        "Poolmask"          : self.get_pools(),
+        "tables"            : self.get_tables(),
+        "ioassign_file"     : self.has_ioassign(type_),
+        "flags_file"        : self.has_flag(type_),
+        "iomap_file"        : self.has_iomap(type_),
         "number_of_considered_tables"  : ntables,
         "odb_software_release"  : odb_vers,
             })
         return attrs
 
 
-    def GetAttrib(self):
+    def get_attrib(self):
         self.attrs = self._load_attributes()
         return self.attrs
-
-    #@property
-    #def attrs(self):
-    #    if self._attrs is None:
-    #       self._attrs = self._load_attributes()
-    #    return self._attrs 

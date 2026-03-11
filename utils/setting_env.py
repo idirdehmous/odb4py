@@ -73,7 +73,7 @@ class OdbEnv:
       def __init__(self):
           pass 
 
-      def Init(self ):
+      def init(self ):
           if os.path.isdir (libdir):
              lib=CDLL ("/".join(    (libdir, libname)    ))
 
@@ -96,7 +96,7 @@ class OdbEnv:
           return None 
 
       # Bins 
-      def CheckBin(self):
+      def check_bin(self):
           not_found = []
           for bin_ in binlist:
               if bin_  not in binlist:
@@ -108,7 +108,7 @@ class OdbEnv:
 
    
       # Libs 
-      def CheckLib(self):
+      def check_lib(self):
           not_found = []
           for lib_ in liblist:
               if lib_  not in liblist:
@@ -119,7 +119,7 @@ class OdbEnv:
              return (False, "Library not found ", not_found )
 
       # update a given ODB var  
-      def UpdateVar(self, env_vars):
+      def update_var(self, env_vars):
           """
           Update ODB environment variables.
           Parameters :
@@ -138,14 +138,14 @@ class OdbEnv:
               os.environ[key] = str(value)
 
       # Get a value of a given var  
-      def GetVar (self, key, default=None):
+      def get_var (self, key, default=None):
           """
           Get an ODB environment variable.
           """
           return os.environ.get(key, default)
 
       # List all ODB env vars 
-      def DumpVar(self):
+      def dump_vars(self):
           """
           Return all currently defined ODB_* environment variables.
           """

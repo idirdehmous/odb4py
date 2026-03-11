@@ -5,18 +5,18 @@
 
 # -*- coding: utf-8 -*-
 
-from  .parser        import StringParser
+from  .parser        import SqlParser
 from  .odb_ob        import OdbObject
 from  .odb_glossary  import OdbLexic
 from  .setting_env   import OdbEnv
 
 
-__all__=[ "StringParser", "OdbObject" , "OdbLexic", "OdbEnv" ]
+__all__=[ "SqlParser", "OdbObject" , "OdbLexic", "OdbEnv" ]
 
 
 # Init once
 if not globals().get("_ODB_ENV_INITIALIZED", False):
     _env = OdbEnv()
-    _env.Init()
+    _env.init()
     _ODB_ENV_INITIALIZED = True
 

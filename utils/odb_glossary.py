@@ -18,7 +18,7 @@ class OdbLexic:
         """
         return None
 
-    def odbSqlwords(self):
+    def odb_sqlwords(self):
         keywords=['AND'
                   'AS',
                   'BETWEEN' ,
@@ -42,7 +42,7 @@ class OdbLexic:
                    '$','#','==','<','>', '||']
         return keywords 
                 
-    def odbFuncs(self):
+    def odb_funcs(self):
         """
         THE ODB /SQL Built-in FUNCTIONS 
         USER GUIDE :https://www.ecmwf.int/sites/default/files/elibrary/2004/76278-ifs-documentation-cy36r1-part-i-observation-processing_1.pdf
@@ -99,7 +99,7 @@ class OdbLexic:
 
         return funcs
 
-    def odbTables (self):
+    def odb_tables (self):
         enkf =  [ "enkf_"+str(i)  for i in range( 121 ) ]
         enda =  [ "enda_"+str(i)  for i in range(101  ) ]
         surfb=  [ "surfbody_feedback_"+str(i) for i in range(101)]
@@ -123,7 +123,7 @@ class OdbLexic:
 
 
 
-    def odbCols (self):
+    def odb_cols (self):
         dict_cols={"desc":["expver","class","stream","type",
                            "andate","antime","inidate","initime",
                            "creadate","creatime","creaby","moddate",
@@ -177,7 +177,7 @@ class OdbLexic:
 
 
 
-    def odbPkind (self):
+    def odb_pkind (self):
         list_ckind=["string",
                    "pk1int",
                    "pk9real",
@@ -187,7 +187,7 @@ class OdbLexic:
 
         return list_ckind
    
-    def odbIfsVar (self):
+    def odb_Ifsvar (self):
         ifs_vars={"$NMXUPD"          : 3  ,        # Maximum number of updates supported with this layout (min = 1 & max = 10)
                   "$NUMAUX"          : 9  ,        # No. of auxiliary obsvalue's per body; aux1 ==> aux[$NUMAUX]
                   "$NUMEV"           : 1  ,        # Maximum number of retained eigenvectors of obs. err. corr. matrix
@@ -201,7 +201,7 @@ class OdbLexic:
 
 
 
-    def LinkPkind(  self):
+    def link_pkind(  self):
         kind_dict={"string"  :"TXT"    ,
                    "pk1int"  :"INTEGER",
                    "pk9real" :"REAL"  ,
@@ -212,7 +212,7 @@ class OdbLexic:
 
 
 
-    def sqlPrepInsert( self,  query=None ): 
+    def prep_insert( self,  query=None ): 
         """
         Takes a CMA sql statement and convert it to 
         an sqlite3 statement for value insertion 
@@ -227,7 +227,7 @@ class OdbLexic:
                    " lon"   :"INTEGER"   ,
                    " obsvalue":"REAL" ,
                    " fg_depar":"REAL" }
-    def sqliteEncode (self):
+    def sqlite_encode (self):
         """
         Empty method :  Not  yet available ! 
         """
