@@ -1,8 +1,16 @@
+#ifndef NCDF_H
+#define NCDF_H
+
 #include <libgen.h>
 #include "netcdf.h"
 
 #define PI 3.141592653589793
 #define RAD2DEG (180.0/PI)
+
+/* Handle errors by printing an error message and exiting with a
+* non-zero status. from   https://docs.unidata.ucar.edu/netcdf-c  */
+#define ERRCODE 2
+#define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
 
 
@@ -15,9 +23,8 @@ typedef struct  {
 
 
 void sanitize_name(char *name)
-{
-    for (char *p = name; *p; p++)
-    {
+{    
+for (char *p = name; *p; p++){
         if (*p=='(' || *p==')' ||
             *p=='@' || *p=='.' ||
             *p=='/' )
@@ -138,7 +145,7 @@ while (fgets(line, sizeof(line), fp) && i <= ( nfirst_line -1)) {
     i++  ;
 }
 }
-// Format datetime to    YY-MM-DD HH:MM:SS UTC 
+// Format datetime to  YY-MM-DD HH:MM:SS UTC 
 void format_datetime(int date, int time, char *out){
     int Y = date / 10000;
     int M = (date / 100) % 100;
@@ -160,16 +167,23 @@ size_t nc_var_size_bytes(int ncid, int varid)
     size_t dimlen;
     size_t nelems = 1;
 
-    nc_inq_vartype(ncid, varid, &vartype);
-    nc_inq_varndims(ncid, varid, &ndims);
-    nc_inq_vardimid(ncid, varid, dimids);
+    int chack  ;  
+    chack=nc_inq_vartype(ncid, varid, &vartype);
+       if (check != NC_NOERR) { ERR(check);    return -1;  }
+    check=nc_inq_varndims(ncid, varid, &ndims);
+       if (check != NC_NOERR) { ERR(check);    return -1;  }
+    check=nc_inq_vardimid(ncid, varid, dimids);
+       if (check != NC_NOERR) { ERR(check);    return -1;  }
+    check=nc_inq_type(ncid, vartype, NULL, &typesize);
+       if (check != NC_NOERR) { ERR(check);    return -1;  }
 
-    nc_inq_type(ncid, vartype, NULL, &typesize);
 
     for (int i = 0; i < ndims; i++) {
-        nc_inq_dimlen(ncid, dimids[i], &dimlen);
+        check=nc_inq_dimlen(ncid, dimids[i], &dimlen);
+	   if (check != NC_NOERR) { ERR(check);    return -1;  }
         nelems *= dimlen;
     }
-
     return nelems * typesize;
 }
+
+#endif
