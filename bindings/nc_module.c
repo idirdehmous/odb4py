@@ -255,27 +255,34 @@ format_datetime(creat_date, creat_time, creat_str);
 check = nc_create(outfile, NC_NETCDF4, &ncid);
 if (check != NC_NOERR) { ERR(check);    return -1;  }
 
-// NC conventions     
-check  =  nc_put_att_text(ncid, NC_GLOBAL,"Conventions", strlen("CF-1.10"), "CF-1.10");
-if (check != NC_NOERR) { ERR(check);    return -1;  }
 
 // The title & global attrib 
+const char *conv        = "CF-1.10"
 const char *title       = "ODB data in NetCDF format";
-const char *history     = "created by odb4py";
-const char *institution = "(RMI) Royal Meteorological Institute of Belgium";
+const char *history     = "created by odb4py python package";
+const char *institution = "Royal Meteorological Institute of Belgium (RMI)";
 const char *feature     = "point" ; 
 const char *data_source = "ECMWF ODB";
 const char *encoding    = "ODB (row-major)" ; 
-check  =nc_put_att_text(ncid, NC_GLOBAL, "Title"      ,strlen(title)       , title);
+
+const char *nc_version     = nc_inq_libvers();
+
+// NC conventions
+check  =  nc_put_att_text(ncid, NC_GLOBAL,"Conventions", strlen(conv), conv);
+if (check != NC_NOERR) { ERR(check);    return -1;  }
+
+check  =nc_put_att_text(ncid, NC_GLOBAL, "NetCDF_library_version" ,strlen(nc_version) , nc_version);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_text(ncid, NC_GLOBAL, "History"    ,strlen(history)     , history);
+check  =nc_put_att_text(ncid, NC_GLOBAL, "Title"      ,strlen(title) , title);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_text(ncid, NC_GLOBAL, "History"    ,strlen(history) , history);
    if (check != NC_NOERR) { ERR(check);    return -1;  } 
 check  =nc_put_att_text(ncid, NC_GLOBAL, "Institution",strlen(institution) , institution);
    if (check != NC_NOERR) { ERR(check);    return -1;  } 
 check  =nc_put_att_text(ncid, NC_GLOBAL, "Native_fomrat" ,strlen(data_source) , data_source );
    if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_text(ncid, NC_GLOBAL, "Encoding"   ,strlen(encoding)    , encoding);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
+//check  =nc_put_att_text(ncid, NC_GLOBAL, "Encoding"   ,strlen(encoding)    , encoding);
+//   if (check != NC_NOERR) { ERR(check);    return -1;  }
 check  =nc_put_att_text(ncid, NC_GLOBAL, "sql_query"  ,strlen(sql_query)   , sql_query);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 check  =nc_put_att_text(ncid, NC_GLOBAL, "featureType",strlen(feature )    , feature );
@@ -290,7 +297,7 @@ check  =nc_put_att_text(ncid, NC_GLOBAL, "creation_datetime"       , strlen(crea
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 
 // The current odb attributes 
-check  =nc_put_att_int(ncid, NC_GLOBAL, "version"      , NC_INT, 1, &vers);
+check  =nc_put_att_int(ncid, NC_GLOBAL, "ODB_software_version"      , NC_INT, 1, &vers);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 check  =nc_put_att_int(ncid, NC_GLOBAL, "major_version", NC_INT, 1, &majv);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
