@@ -33,9 +33,9 @@ pip install odb4py
 
 ## Installation test 
 `>>> from odb4py import core      # The extension core ` <br>
-`>>> from odb4py import utils     # The python module helper` 
-`>>> from odb4py import convert   # Conversion module `
-`>>> from odb4py import info      # Get general info on the ODB software`  
+`>>> from odb4py import utils     # The python module helper`   <br>
+`>>> from odb4py import convert   # Conversion module `          <br>
+`>>> from odb4py import info      # Get general info on the ODB software`    <br>
 
 
 ## Requirements
@@ -43,7 +43,7 @@ Python ≥ 3.9 <br>
 NumPy  ≥ 2.0 <br>
 Linux system (manylinux2014 compatible)
 
-###Optional 
+### Optional  <br>
 pyodc  ≥ 1.6.0 <br>
 
 ## Scientific context
