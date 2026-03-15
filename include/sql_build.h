@@ -21,8 +21,7 @@ is_blank_string(const char *s)
     return 1;           // spaces only 
 }
 
-static SQLBuilder *
-sqlbuilder_new(void)
+static SQLBuilder * sqlbuilder_new(void)
 {
     SQLBuilder *b = PyMem_Malloc(sizeof(SQLBuilder));
     if (!b) return NULL;
@@ -33,7 +32,6 @@ sqlbuilder_new(void)
     }
     return b;
 }	
-
 
 static int sqlbuilder_add(SQLBuilder *b, const char *text)
 {
@@ -69,17 +67,14 @@ sqlbuilder_addf(SQLBuilder *b, const char *fmt, ...)
 
     vsnprintf(buffer, needed + 1, fmt, args);
     va_end(args);
-
     PyObject *s = PyUnicode_FromString(buffer);
     PyMem_Free(buffer);
-
     if (!s)
         return -1;
     int rc = PyList_Append(b->parts, s);
     Py_DECREF(s);
     return rc;
 }
-
 
 
 static PyObject *sqlbuilder_build(SQLBuilder *b)
