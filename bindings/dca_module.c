@@ -114,7 +114,7 @@ static PyObject * odb_dca_method(PyObject *Py_UNUSED(self), PyObject *args, PyOb
     PyObject *verbose  = Py_None  ;
 
     static char *kwlist[] = {
-        "odbdir",
+        "database",
         "dbtype",
         "tables",
         "ncpu"  , 
