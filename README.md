@@ -71,8 +71,8 @@ The original source code has been modified to:
 All original copyrights remain with ECMWF.
 
 ## Acknowledgements
-This project incorporates and is derived from the ECMWF ODB software. <br/>
-
+- This project incorporates and is derived from the ECMWF ODB software. <br/>
 ODB was developed at the European Centre for Medium-Range Weather Forecasts (ECMWF)
 by [S. Saarinen et al](https://www.ecmwf.int/sites/default/files/elibrary/2004/76278-ifs-documentation-cy36r1-part-i-observation-processing_1.pdf). All rights to the original ODB software remain with ECMWF and their respective owners.
 
+- The author would like to thank 'Mohand Ouali Ait Meziane' for testing odb4py and providing valuable feedback.
