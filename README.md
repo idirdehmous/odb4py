@@ -33,8 +33,9 @@ pip install odb4py
 
 ## Installation test 
 `>>> from odb4py import core      # The extension core ` <br>
-`>>> from odb4py import utils     # The python module helper`   <br>
-`>>> from odb4py import convert   # Conversion module `          <br>
+`>>> from odb4py import utils     # Pure python modules helpers`   <br>
+`>>> from odb4py import convert   # Conversion module `    <br>
+
 
 
 ## Requirements
@@ -63,9 +64,9 @@ Apache License, Version 2.0. [See LICENSE for details ](https://www.apache.org/l
 odb4py incorporates components derived from the ECMWF ODB software.
 
 The original source code has been modified to:
-- expose functionality through a Python interface
-- reduce the runtime footprint
-- enable portable binary wheel distribution
+- Expose functionality through a Python interface
+- Reduce the runtime footprint
+- Enable portable binary wheel distribution
 
 All original copyrights remain with ECMWF.
 
