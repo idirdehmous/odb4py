@@ -1,4 +1,3 @@
-
 /* The method sp_dists and sp_gcdists are the ones implemented in the R package 'sp'
  * With a slight modifications 
  *  Copyright by Roger Bivand (C) 2005-2009  
@@ -9,6 +8,7 @@
  * odb4py 
  * Idir Dehmous Copyright (C) 2026 Royal Meteorological Institute of Belgium (RMI)
    Licensed under the Apache License, Version 2.0*/
+
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <numpy/arrayobject.h>
@@ -114,41 +114,69 @@ void sp_dists(double *u, double *v, double *uout, double *vout, int *n, double *
 
 static PyObject* odb_gcdist_method( PyObject* Py_UNUSED(self) , PyObject* args)
 {
-    PyObject      *lon1_obj  , *lat1_obj , *lon2_obj, *lat2_obj;
-    PyArrayObject *lon1      , *lat1     , *lon2    , *lat2    ;
+import_array();
+PyObject *lon1_obj=NULL;   
+PyObject *lat1_obj=NULL;  
+PyObject *lon2_obj=NULL; 
+PyObject *lat2_obj=NULL;
 
+PyArrayObject *lon1= NULL;
+PyArrayObject *lat1= NULL;    
+PyArrayObject *lon2= NULL;
+PyArrayObject *lat2= NULL;
 
     if (!PyArg_ParseTuple(args, "OOOO", &lon1_obj,
 			                &lat1_obj,
 					&lon2_obj,
-					&lat2_obj)){ 
-        
-	PyErr_SetString(PyExc_RuntimeError, "--odb4py : Failed to parse odb_gcdist arguments ");
+					&lat2_obj)){         
+	PyErr_SetString(PyExc_RuntimeError, "--odb4py : odb_gcdist failed to parse the arguments");
         return NULL;  
-    }
+      }
 
    
-   if ( !lon1_obj || !lat1_obj || !lon2_obj  || !lat2_obj  ) {
+    // Test the argument s
+    if ( !lon1_obj || !lat1_obj || !lon2_obj  || !lat2_obj  ) {
       PyErr_SetString(PyExc_RuntimeError, "--odb4py : 4 Arguments are required  (lon1, lat1 ,lon2, lat2)");
-      return NULL;    
-   }
+     return NULL;    
+     }
 
 
+    // Type ----> must be numpy   array  
+    if ( !PyArray_Check (lon1_obj)  ) {
+    PyErr_SetString(PyExc_TypeError, "--odb4py : lon1 Expects a NumPy array");
+      return NULL ; 
+     }
 
-    // Parse args and DECREF if it fails 
+    if (!PyArray_Check(lat1_obj)) {
+    PyErr_SetString(PyExc_TypeError, "--odb4py : lat1 Expects a NumPy array");
+    return NULL;
+     }
+
+    if (!PyArray_Check(lon2_obj)) {
+    PyErr_SetString(PyExc_TypeError, "--odb4py : lon2 Expects a NumPy array");
+    return NULL;
+     }
+
+    if (!PyArray_Check(lat2_obj)) {
+    PyErr_SetString(PyExc_TypeError, "--odb4py : lat2 Expects a NumPy array");
+    return NULL;
+     }
+
+
+ // Create C/Numpy arrays   
+ // The created array by PyArray_FROM_OTF , increments the reference by one
+ // We must check one by one and DECREF reference counter  otherwise  segmentation fault !
     lon1 = (PyArrayObject*)PyArray_FROM_OTF( lon1_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (!lon1) {  
 	PyErr_SetString(PyExc_RuntimeError, "--odb4py: Failed to parse lon1");    
 	return NULL;
     }
-
     lat1 = (PyArrayObject*)PyArray_FROM_OTF(lat1_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (!lat1) {
        Py_DECREF(lon1);
        PyErr_SetString(PyExc_RuntimeError, "--odb4py: Failed to parse lat1");
        return NULL;
        }
-
     lon2 = (PyArrayObject*)PyArray_FROM_OTF(lon2_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (!lon2) {
        Py_DECREF(lon1);
@@ -156,8 +184,6 @@ static PyObject* odb_gcdist_method( PyObject* Py_UNUSED(self) , PyObject* args)
        PyErr_SetString(PyExc_RuntimeError, "--odb4py: Failed to parse lon2");
        return NULL;
       }
-
-
     lat2 = (PyArrayObject*)PyArray_FROM_OTF( lat2_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (!lat2) {
     Py_DECREF(lon1);
@@ -171,10 +197,12 @@ static PyObject* odb_gcdist_method( PyObject* Py_UNUSED(self) , PyObject* args)
     // Set dimensions  [n x n ] matrix    
     int n1 = (int)PyArray_DIM(lat1, 0);
     int n2 = (int)PyArray_DIM(lat2, 0);
-    
+ 
+    // Matrix distances dismat   
     npy_intp dims[2] = {n1, n2};
     PyArrayObject *distmat = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
 
+   // DECREF if not created 
     if (!distmat) {
     Py_DECREF(lat1);
     Py_DECREF(lon1);
@@ -184,6 +212,7 @@ static PyObject* odb_gcdist_method( PyObject* Py_UNUSED(self) , PyObject* args)
     return NULL;
     }
     
+    // Cast to C  double 
     double *latdata1 = (double*)PyArray_DATA(lat1);
     double *londata1 = (double*)PyArray_DATA(lon1);
     double *latdata2 = (double*)PyArray_DATA(lat2);
@@ -193,10 +222,11 @@ static PyObject* odb_gcdist_method( PyObject* Py_UNUSED(self) , PyObject* args)
     for (int i = 0; i < n1; ++i)
         for (int j = 0; j < n2; ++j) {
             double d;
+	    // Call sp_dcgist 
             sp_gcdist(&londata1[i], &londata2[j], &latdata1[i], &latdata2[j], &d);
             distdata[i * n2 + j] = d;
-        }
-    
+        }  
+    // Destroy references to used objects 
     Py_DECREF(lat1);
     Py_DECREF(lon1);
     Py_DECREF(lat2);
@@ -331,7 +361,7 @@ if (extent_obj != Py_None) {
 
 
 // If in radians convert the extent values 
-// MEANS THAT THE EXTENT MUST ALWAYS BE GIVEN IN DEGREES !
+// MEANS THAT THE EXTENT MUST ALWAYS BE  IN DEGREES !
 if (unit && strcmp(unit,"radians")==0  )  {     
     double rlon1 = DEG2RAD( lon1 )  ; 
     double rlon2 = DEG2RAD( lon2 )  ;
@@ -340,7 +370,6 @@ if (unit && strcmp(unit,"radians")==0  )  {
     printf( "%s\n" ,"--odb4py : The lat/lon unit is set to `radians`\nThe bounding box converted.");
     printf( "The bounding box in radians: lon1=%f, lon2=%f, lat1=%f, lat2=%f\n" , rlon1, rlon2 , rlat1, rlat2 ) ;
 
-   //printf( "%f  %f  %f  %f \n"  , lon1, lon2 , lat1, lat2) ; 
   // Add SQL boundary box   
     sqlbuilder_addf(sqlb,
     " AND lat BETWEEN %.10g AND %.10g "
@@ -350,7 +379,6 @@ if (unit && strcmp(unit,"radians")==0  )  {
 
 
 
-//printf( "%f  %f  %f  %f \n"  , lon1, lon2 , lat1, lat2) ; 
   // Add SQL boundary box   
    sqlbuilder_addf(sqlb,
     " AND degrees(lat) BETWEEN %.10g AND %.10g "
@@ -409,6 +437,5 @@ if (!rows ) {
     return NULL;
 } else {
  return rows   ;  
-}
-
+  }
 }
