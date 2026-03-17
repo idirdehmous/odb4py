@@ -24,7 +24,7 @@ PyObject  *odb_open_method(PyObject  *Py_UNUSED(self),
 			             kwargs, "s",
                                      kwlist, 
 				     &database))  {	    
-        return -1;
+        return NULL;
      }    
 
     ODBConnection *conn =  PyObject_New(ODBConnection, &ODBConnectionType);
@@ -33,7 +33,7 @@ PyObject  *odb_open_method(PyObject  *Py_UNUSED(self),
         PyErr_SetString(PyExc_RuntimeError,
                         "--odb4py : Failed to open the ODB.");
         Py_DECREF(conn);
-	return -1 ; 
+	return NULL ; 
     }
     // return connection object  !
     return (PyObject* )conn;
