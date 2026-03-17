@@ -95,6 +95,7 @@ static PyObject *odb_dict_method(PyObject *Py_UNUSED(self),
     if (verbose && poolmask_str ) {
         printf("Fetch data from pool(s) #: %s\n", poolmask_str );
     }
+
     
     char  *varvalue = NULL;
     int    maxlines = -1;
