@@ -57,9 +57,6 @@ static  PyTypeObject ODBConnectionType = {
 };
 
 
-
-
-
 // Define the module itself 
 static struct PyModuleDef   odb_core = {
     PyModuleDef_HEAD_INIT,
@@ -74,7 +71,6 @@ static struct PyModuleDef   odb_core = {
 
 // Create the IO module 
 PyMODINIT_FUNC PyInit_core  (void) {
-
 if (PyType_Ready(&ODBConnectionType) < 0) {
     return NULL;
 }
