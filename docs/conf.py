@@ -16,6 +16,11 @@ release   = '1.3.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+# Index on google
+
+html_meta = {
+    "google-site-verification": "u9QxeqDUjTAgUC_D1_hgQenTSHv2FF6MsG120XQeraM",
+}
 
 rst_prolog = """
 .. role:: red
