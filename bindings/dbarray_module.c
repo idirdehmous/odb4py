@@ -43,14 +43,14 @@ static PyObject * odb_array_method(PyObject *Py_UNUSED(self), PyObject *args, Py
     static char *kwlist[] = {"database","sql_query", "fmt_float", "queryfile", "poolmask","pbar" , "verbose","header",  NULL};
 
     // Parse keyword args 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sz|izOOOO", kwlist,   // 2 requiered , 6 optional 
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sz|zOOiOO", kwlist,   // 2 requiered , 6 optional 
                                      &database,
                                      &sql_query,
 //                                     &fcols    ,
-                                     &fmt_float,
                                      &queryfile,
                                      &poolmask_obj,
                                      &pbar,
+				     &fmt_float,
                                      &pverb,
 				     &phead)) {
          return NULL  ;
