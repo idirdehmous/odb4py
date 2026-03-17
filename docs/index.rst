@@ -14,3 +14,4 @@ odb4py documentation
     odb_in_python_ecosystem
     open_odb_loop
     odb_conversion
+    odb_utilities
