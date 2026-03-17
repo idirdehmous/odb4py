@@ -10,12 +10,14 @@ PyDoc_STRVAR(info_doc      ,"A set of C function to get and display the info con
 
 
 
+
 static PyMethodDef info_methods[] = {
-    {"odb_tables",(PyCFunction)(void(*)(void))    odb_tables_method, METH_VARARGS | METH_KEYWORDS, info_tab_doc },
-    {"odb_varno" ,(PyCFunction)(void(*)(void))    odb_varno_method , METH_VARARGS | METH_KEYWORDS, info_var_doc },
-    {"odb_func"  ,(PyCFunction)(void(*)(void))    odb_func_method , METH_VARARGS | METH_KEYWORDS, info_fun_doc },
+    {"odb_tables"     ,(PyCFunction)(void(*)(void))    odb_tables_method, METH_VARARGS | METH_KEYWORDS, info_tab_doc },
+    {"odb_varno"      ,(PyCFunction)(void(*)(void))    odb_varno_method , METH_VARARGS | METH_KEYWORDS, info_var_doc },
+    {"odb_functions"  ,(PyCFunction)(void(*)(void))    odb_func_method , METH_VARARGS | METH_KEYWORDS, info_fun_doc },
     {NULL, NULL, 0, NULL}
 };
+
 
 
 // Define the module itself 
