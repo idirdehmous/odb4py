@@ -93,17 +93,17 @@ The following example
    ODB data have been successfully written to NetCDF file : radar_dow_20230101_000000.nc
    Total written data size = 2506896 bytes
 
-Write data into an ODB2 file format
------------------------------------
+Write data into an ODB2 file 
+-----------------------------
 
 Conversion to the *ODB2* format is not performed directly by odb4py.
 Instead, the retrieved data can be passed to the ODB2 encoder provided by the **pyodc** package.
 
 A typical workflow consists of:
 
-- Querying data from an ODB database using odb_dict.
+- Querying data from an ODB database using ``odb_dict``.
 - Converting the resulting dictionary into a pandas DataFrame.
-- Encoding the DataFrame into an ODB2 file using pyodc.
+- Encoding the DataFrame into an ODB2 file using **pyodc**.
 
 Example
 We use the same code as above, except that the data have to be written into an ODB2 file.
