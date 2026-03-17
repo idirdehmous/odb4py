@@ -123,7 +123,8 @@ The output ODB2 file can be checked using the ECMWF  `odc <https://odc.readthedo
    7. name: an_depar@body, type: DOUBLE, codec: long_real, range=<-5.596840,5.089180>, hasMissing=true, missingValue=-2147483647.000000
    8. name: obsvalue@body, type: DOUBLE, codec: long_real, range=<-39.312660,38.109210>, hasMissing=false
 
-   odc ls  radar_dow_20230101_000000.odb2
+   
+   odc sql -i radar_dow_20230101_000000.odb2 'select statid, lat , lon , varno, date, time ,fg_depar ,an_depar  where  rownumber() < 10'
 
    statid@hdr	degrees(lat)	degrees(lon)	varno@body	date@hdr	time@hdr	fg_depar@body	an_depar@body	obsvalue@body
    '   nosta'	61.881110	6.848510	195	20221231	235500	2.198550	0.927680	-7.535400
