@@ -22,7 +22,7 @@ Let's consider the previous code by selecting all the observation types.
    from   dateime import datetime 
 
    # utils  module 
-   from odb4py.utils  import OdbObject , StringParser  
+   from odb4py.utils  import OdbObject , SqlParser  
 
    # core module 
    from odb4py.core   import odb_dict 
@@ -36,7 +36,8 @@ Let's consider the previous code by selecting all the observation types.
    ...
 
    # SQL request 
-   sql_query ="SELECT statid ,varno, degrees(lat), degrees(lon) , obsvalue FROM  hdr, body"
+   # Let's get the TEMP  data (obstype = 5 ) and the coordinates lat/lon in degrees
+   sql_query="SELECT statid , obstype, varno, degrees(lat) ,  degrees(lon) , obsvalue   FROM  hdr, body WHERE obstype==5"
 
    # Execute SQL query
    data = conn.odb_dict(dbpath, sql_query, fmt_float=6 , pbar=True )
@@ -56,23 +57,34 @@ Output :
 
 .. code-block:: python
    
-   [##################################################] Complete 100%  (Total: 57484 rows)
-   idx     statid@hdr  obstype@hdr  varno@body  degrees(lat)  degrees(lon)  obsvalue@body
-   0          26268            1           1     57.816700     29.950000       0.000000
-   1          26268            1          39     57.816700     29.950000     276.200000
-   2          26268            1          58     57.816700     29.950000       0.940000
-   3          26268            1           7     57.816700     29.950000       0.004482
-   4          26067            1           1     59.433300     29.500000       0.000000
+   ******** New ODB I/O opened with the following environment  
+   *******	  ODB_CONSIDER_TABLES=*
+	   ODB_IO_KEEP_INCORE=1
+	      ODB_IO_FILESIZE=32 MB
+	       ODB_IO_BUFSIZE=4194304 bytes
+	       ODB_IO_GRPSIZE=1 (or max no. of pools)
+	       ODB_IO_PROFILE=0
+	       ODB_IO_VERBOSE=0
+	        ODB_IO_METHOD=5
+   ODB_CONSIDER_TABLES=*
+   ODB_WRITE_TABLES=*
+   [##################################################] Complete 100%  (Total: 15991 rows)
+      statid@hdr  obstype@hdr  varno@body  degrees(lat)  degrees(lon)  obsvalue@body
+   0          01400            5           2      56.54264       3.22379     281.000000
+   1          01400            5          29      56.54264       3.22379       0.690000
+   2          01400            5           7      56.54264       3.22379       0.004615
+   3          01400            5           3      56.54264       3.22379      -3.423517
+   4          01400            5           4      56.54264       3.22379      -0.727691
    ...          ...          ...         ...           ...           ...            ...
-   57479      sekrn           13          29     68.494515     21.575417       1.056382
-   57480      sekrn           13         192     68.494515     21.575417    -327.669993
-   57481      sekrn           13          29     68.494515     21.575417       1.034856
-   57482      sekrn           13         192     68.494515     21.575417    -327.669993
-   57483      sekrn           13          29     68.494515     21.575417       0.922010
+   15986      12120            5           4      54.75000      17.53333       0.000000
+   15987      12120            5           2      54.75000      17.53333     202.500000
+   15988      12120            5           2      54.75000      17.53333     208.700000
+   15989      12120            5           3      54.75000      17.53333      35.863009
+   15990      12120            5           4      54.75000      17.53333      -3.137607
 
-   [57484 rows x 6 columns]
+   [15991 rows x 6 columns]
 
-   Runtime duration : 0:00:01.96
+   Runtime duration: 0:00:01.199248
 
 
 
@@ -101,7 +113,7 @@ by considering the example above, we add the part which plots the retrieved geop
    import pandas as pd 
 
    # odb4py utils and core 
-   from  odb4py.utils  import  OdbObject,  StringParser  
+   from  odb4py.utils  import  OdbObject,  SqlParser  
    from  odb4py.core   import  odb_open , odb_dict  odb_dca 
 
    # Start 
@@ -184,7 +196,9 @@ by considering the example above, we add the part which plots the retrieved geop
    duration = end -  start  
    print("Runtime duration:" , duration  )
 
-Runtime duration: 0:00:04.77
+.. code-block:: bash 
+
+   Runtime duration: 0:00:04.77
 
 
 .. figure:: source/_static/figures/ccma_metcoop.png

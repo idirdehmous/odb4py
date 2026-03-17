@@ -43,6 +43,8 @@ queries from reaching the ODB runtime layer.
 
    #-*- coding: utf-8 -*-  
 
+   from datetime import datetime 
+
    # Utils  
    from odb4py.utils import  OdbObject , SqlParser 
 
@@ -50,7 +52,7 @@ queries from reaching the ODB runtime layer.
    from odb4py.core  import  odb_connect 
    
    # Start 
-   end  = datetime.now()  
+   start  = datetime.now()  
 
    # Path to ODB
    db_path= "/path/to/CCMA"
@@ -78,7 +80,7 @@ queries from reaching the ODB runtime layer.
    
 
    # Send the query and fetch the data as a dictionary
-   data =conn.odb_dict  (dbpath    =db_path,
+   data =conn.odb_dict  (database  =db_path,
                          sql_query =sql    , 
                          nfunc     =nf     ,
                          fmt_float =ndigits,

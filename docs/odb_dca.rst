@@ -34,7 +34,7 @@ Note that in the case of huge ODBs, creating the DCA files might take long time.
    import os 
    
    # From  utils 
-   from   odb4py.utils import odbObject 
+   from   odb4py.utils import OdbObject 
 
    # From  core module
    from   odb4py.core  import odb_dca 

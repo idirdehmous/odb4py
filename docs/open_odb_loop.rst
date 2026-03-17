@@ -49,43 +49,43 @@ Recommended workflow:
    import os, sys
    from datetime import datetime
 
-   # Import odb4py 
-   from  odb4py.utils   import  OdbObject , StringParser
-   from  odb4py.core    import  odb_open  ,odb_dict  , odb_close 
+   # Import odb4py
+   from  odb4py.utils   import  OdbObject , SqlParser
+   from  odb4py.core    import  odb_open  ,odb_dict  , odb_close
 
 
 
    def Connect ( db_path , ncpu ):
        conn = odb_open( database  =db_path   )
-       return conn  
+       return conn
 
-   def CreateDca (conn, db_path ,db_name ,  NCPU=ncpu  ):
+   def CreateDca (conn, db_path ,db_name ):
        # Create DCA if not there
        if not os.path.isdir (db_path+"/dca"):
-          status =conn.odb_dca ( database=db_path, db= db_name , ncpu=NCPU )
-       return status 
+          status =conn.odb_dca ( database=db_path, db= db_name , ncpu= 4)
+       return status
 
 
 
    def FetchData (conn ,  dbpath ,  query  ):
        # Check the  query
-       p      =StringParser()
+       p      =SqlParser()
        nfunc  =p.get_nfunc   ( query )    # Parse sql statement and get the number of functions
        sql    =p.clean_string( query  )   # Check and clean before sending !
        nf  =nfunc
-       pool= None 
+       pool= None
        query_file= None
-       
+
        # If the an error occurs while executing the query a RuntimeError Exception is raised !
        try:
-          rows =conn.odbDict (database  = dbpath ,
-                        sql_query  = sql    ,
-                        nfunc      = nf     ,
-                        fmt_float  = 5      ,
-                        pbar       = True   ,
-                        verbose    = False  ,
-                        queryfile  = None   ,
-                        poolmask   = None  )                     
+          rows =conn.odb_dict (database  = dbpath ,
+                     sql_query  = sql    ,
+                     nfunc      = nf     ,
+                     fmt_float  = 5      ,
+                     pbar       = True   ,
+                     verbose    = False  ,
+                     queryfile  = None   ,
+                     poolmask   = None  )
        except:
           RuntimeError
           print("Failed to get data from the ODB {}".format(dbpath) )
@@ -96,19 +96,19 @@ Recommended workflow:
     start = datetime.now()
 
     # Path to ODB directories
-    # e.g : /path/to/odb/YYYYMMDDHH/CCMA 
+    # e.g : /path/to/odb/YYYYMMDDHH/CCMA
     # Let's use the same ODBs from MetCoOp domain
-    odb_dir_location  = "/home/user/odb"
+    odb_dir_location  = "/home/USER/odb"   # Set to your path 
 
     # The SQL query
     sql_query="select statid,\
-              degrees(lat)  ,\
-              degrees(lon)  ,\
-              varno         ,\
-              obsvalue      ,\
-              fg_depar      ,\
-              an_depar       \
-              FROM  hdr, body WHERE an_depar is not NULL"
+           degrees(lat)  ,\
+           degrees(lon)  ,\
+           varno         ,\
+           obsvalue      ,\
+           fg_depar      ,\
+           an_depar       \
+           FROM  hdr, body WHERE an_depar is not NULL"
 
     # Set date/time period (20240110 00h00 --> 20240112 21h00 )
     yy= 2024
@@ -118,47 +118,68 @@ Recommended workflow:
     h1= 0
     h2= 21
     cycle_inc= 3
-    dbname="CCMA"
-    ncpu_dca= 4
+    dbtype   ="CCMA"
+
+    # Number of processed ODBs 
+    nb = 0 
+    # Total rows (Considering all the ODBs)
+    tot_rows=0
+
+
+
     for d in range(d1,  d2 +1 ):
        for h in  range( h1 , h2 +1 , cycle_inc ):
 
-          # Month , day and hour leading zero
-          mm= "{:02}".format( mm )
-          dd= "{:02}".format( d )
-          hh= "{:02}".format( h )
-          ddt=str(yy)+str(mm)+dd+hh
+       # Month , day and hour leading zero
+       mm= "{:02}".format( mm )
+       dd= "{:02}".format( d )
+       hh= "{:02}".format( h )
+       ddt=str(yy)+str(mm)+dd+hh
 
-          # Set the path
-          dbpath = "/".join( (odb_dir_location  , ddt , dbname)  )
+       # Set the path
+       dbpath = "/".join( (odb_dir_location  , ddt , dbtype)  )
 
-          # Reset the paths and IOASSIGN environnment variables for each iteration
-          os.environ["ODB_SRCPATH_CCMA" ]=dbpath
-          os.environ["ODB_DATAPATH_CCMA"]=dbpath
-          os.environ["ODB_IDXPATH_CCMA" ]=dbpath
-          os.environ["IOASSIGN"  ]       =dbpath+"/"+"IOASSIGN"
+       # Reset the paths and IOASSIGN environnment variables for each iteration
+       os.environ["ODB_SRCPATH_CCMA" ]=dbpath
+       os.environ["ODB_DATAPATH_CCMA"]=dbpath
+       os.environ["ODB_IDXPATH_CCMA" ]=dbpath
+       os.environ["IOASSIGN"  ]       =dbpath+"/"+"IOASSIGN"
 
-          # Connect and return the connection object 
-          conn= Connect  (dbpath ,dbname )
-                    
-          # Create DCA 
-          try:
-             st = CreateDca(conn, dbpath ,dbname , ncpu_dca )
-          except:
-             Exception 
-             print("Failed to create DCA from the ODB {}".format(dbpath))
-             pass 
-         
-          # Get the data
+       # Connect and return the connection object
+       conn= odb_open   (dbpath  )
+
+       # Create DCA
+       try:
+          st = CreateDca(conn, dbpath ,dbtype )
+       except:
+          Exception
+          print("Failed to create DCA from the ODB {}".format(dbpath))
+          pass
+
+       # Get the data
+       if os.path.isdir( dbpath ):
           row_dict = FetchData  (conn, dbpath , sql_query)
+          tot_rows+= len( row_dict["degrees(lat)"] ) 
+          nb_odb  +=1
 
-          # Close the database 
+          # Close the database
           conn.odb_close()
 
-    # End script runtime 
-    end = datetime.now()
-    duration = end - start
-    print( "Runtime duration :" , duration )
 
-Runtime duration : 0:00:24.99
+   # End script runtime
+   end = datetime.now()
+   duration = end - start
+
+   print( "Runtime duration         :" , duration )
+   print( "Total fetched rows       :" , tot_rows )
+   print( "Number of processed ODBs :" , nb_odb   )
+   print( "Average number of rows by iteration :"  , tot_rows// nb_odb )
+
+.. code-block:: bash
+
+   --odb4py : ODB database closed.
+   Runtime duration         : 0:00:23.243894
+   Total fetched rows       : 412427
+   Number of processed ODBs : 24
+   Average number of rows by iteration : 17184
 

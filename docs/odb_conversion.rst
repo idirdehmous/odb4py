@@ -4,95 +4,6 @@ ODB data conversion
 In addition to querying data directly from an ODB database, *odb4py* provides utilities to convert ODB datasets into other data formats.
 These utilities are available in the ``odb4py.convert`` module.
 
-Convert ODB to NetCDF format
-----------------------------
-At present, a single conversion function is available: ``odb2nc``, which converts an ODB database into a NetCDF file.
-
-Unlike the query functions, ``odb2nc`` operates independently of an existing database connection.
-The function internally opens the ODB database, reads the requested data, writes the NetCDF output file, and closes the database automatically.
-The following example 
-
-.. code-block:: python
-
-   #-*- coding : utf-8 -*-
-
-   from datetime import datetime 
-
-   # utils 
-   from odb4py import SqlParser  
-
-   # Import the method 
-   from odb4py.convert import odb2nc
-
-
-   # Start
-   end  = datetime.now()
-
-   # ODB path 
-   dbpath ="/path/to/CCMA"  # or ECMA.<obstype>
-
-   # Get some needed attributes 
-   db        = OdbObject ( dbpath )
-   db_attr   = db.get_attrib()
-   db_date   = db_attr["observation_date"]  # Observation datatime 
-   
-   # For NetCDF filename  
-   dt = db_date.split()[0]  # Date 
-   tm = db_date.split()[1]  # Time 
-
-   # Output filename 
-   ncfile  = "radar_dow_"+dt+"_"+tm+".nc"
-
-   # Set up the sql query :  Get the radial Doppler wind  (varno == 195)
-   sql_query="select  statid ,\
-              degrees(lat)   ,\
-              degrees(lon)   ,\
-              varno          ,\
-              date           ,\
-              time           ,\
-              fg_depar       ,\
-              an_depar       ,\
-              obsvalue       ,\
-              FROM hdr,body WHERE obstype ==13 and varno ==195"
-
-
-   #Parse the query
-   p  =SqlParser()
-   nf =p.get_nfunc    ( sql_query )
-   sql=p.clean_string ( sql_query )
-
-   # Fetch the data and convert to NetCDF
-   odb2nc   (database =dbpath ,      # (dtype -> str  )     ODB path 
-             sql_query=sql    ,      # (dtype -> str  )     The sql query 
-             nfunc    =nf     ,      # (dtype -> integer )  Number of functions found in the sql query 
-             ncfile   =ncfile ,      # (dtype -> str )      The output NetCDF file
-             lalon_deg= True  ,      # (dtype -> boolean)   Encode the corrdinates lat/lon in degrees or radians ( True -> degrees , False -> radians)
-             pbar     = True  ,      # (dtype -> boolean)   Enable the progress bar 
-             verbose  = True  )      # (dtype -> boolean)   verbosity on/off  
-
-   # End           
-   end  = datetime.now()
-   duration = end -  start
-   print("Runtime duration:" , duration  )
-
-
-
-.. code-block:: bash
-
-   Writing ODB data into NetCDF file ...
-   List of written columns :
-   Column   :  statid@hdr
-   Column   :  degrees(lat@hdr)
-   Column   :  degrees(lon@hdr)
-   Column   :  varno@body
-   Column   :  date@hdr
-   Column   :  time@hdr
-   Column   :  fg_depar@body
-   Column   :  an_depar@body
-   Column   :  obsvalue@body
-   ODB data have been successfully written to NetCDF file : radar_dow_20230101_000000.nc
-   Total written data size = 2506896 bytes
-
 Write data into an ODB2 file 
 -----------------------------
 
@@ -222,7 +133,150 @@ The output ODB2 file can be checked using the ECMWF  `odc <https://odc.readthedo
    '   nohgb'	58.095420	8.509010	195	20221231	235501	-1.753610	-0.442650	-26.625160
    ...
 
-   
 
+
+Convert ODB to NetCDF format
+----------------------------
+At present, a single conversion function is available: ``odb2nc``, which converts an ODB database into a NetCDF file.
+
+Unlike the query functions, ``odb2nc`` operates independently of an existing database connection.
+The function internally opens the ODB database, reads the requested data, writes the NetCDF output file, and closes the database automatically.
+The following example 
+
+.. code-block:: python
+
+   #-*- coding : utf-8 -*-
+
+   from datetime import datetime 
+
+   # utils 
+   from odb4py import SqlParser  
+
+   # Import the method 
+   from odb4py.convert import odb2nc
+
+
+   # Start
+   end  = datetime.now()
+
+   # ODB path 
+   dbpath ="/path/to/CCMA"  # or ECMA.<obstype>
+
+   # Get some needed attributes 
+   db        = OdbObject ( dbpath )
+   db_attr   = db.get_attrib()
+   db_date   = db_attr["observation_date"]  # Observation datatime 
+   
+   # For NetCDF filename  
+   dt = db_date.split()[0]  # Date 
+   tm = db_date.split()[1]  # Time 
+
+   # Output filename 
+   ncfile  = "radar_dow_"+dt+"_"+tm+".nc"
+
+   # Set up the sql query :  Get the radial Doppler wind  (varno == 195)
+   sql_query="select  statid ,\
+              degrees(lat)   ,\
+              degrees(lon)   ,\
+              varno          ,\
+              date           ,\
+              time           ,\
+              fg_depar       ,\
+              an_depar       ,\
+              obsvalue       ,\
+              FROM hdr,body WHERE obstype ==13 and varno ==195"
+
+
+   #Parse the query
+   p  =SqlParser()
+   nf =p.get_nfunc    ( sql_query )
+   sql=p.clean_string ( sql_query )
+
+   # Fetch the data and convert to NetCDF
+   odb2nc   (database =dbpath ,      # (dtype -> str  )     ODB path 
+             sql_query=sql    ,      # (dtype -> str  )     The sql query 
+             nfunc    =nf     ,      # (dtype -> integer )  Number of functions found in the sql query 
+             ncfile   =ncfile ,      # (dtype -> str )      The output NetCDF file
+             lalon_deg= True  ,      # (dtype -> boolean)   Encode the corrdinates lat/lon in degrees or radians ( True -> degrees , False -> radians)
+             pbar     = True  ,      # (dtype -> boolean)   Enable the progress bar 
+             verbose  = True  )      # (dtype -> boolean)   verbosity on/off  
+
+   # End           
+   end  = datetime.now()
+   duration = end -  start
+   print("Runtime duration:" , duration  )
+
+
+
+.. code-block:: bash
+
+   Writing ODB data into NetCDF file ...
+   List of written columns :
+   Column   :  statid@hdr
+   Column   :  degrees(lat@hdr)
+   Column   :  degrees(lon@hdr)
+   Column   :  varno@body
+   Column   :  date@hdr
+   Column   :  time@hdr
+   Column   :  fg_depar@body
+   Column   :  an_depar@body
+   Column   :  obsvalue@body
+   ODB data have been successfully written to NetCDF file : radar_dow_20230101_000000.nc
+   Total written data size = 2506896 bytes
+
+
+
+The **ncdump -h**  command show the structure, the data and metadat of encoded data.
+
+.. code-block:: bash
+
+   netcdf radar_dow_2024011000 {
+   dimensions:
+        nobs = 7825 ;
+        strlen = 8 ;
+   variables:
+	char statid_hdr(nobs, strlen) ;
+	double degrees_lat_(nobs) ;
+		degrees_lat_:long_name = "degrees(lat@hdr)" ;
+		degrees_lat_:_FillValue = NaN ;
+	double degrees_lon_(nobs) ;
+		degrees_lon_:long_name = "degrees(lon@hdr)" ;
+		degrees_lon_:_FillValue = NaN ;
+	double varno_body(nobs) ;
+		varno_body:long_name = "varno@body" ;
+		varno_body:_FillValue = NaN ;
+	double date_hdr(nobs) ;
+		date_hdr:long_name = "date@hdr" ;
+		date_hdr:_FillValue = NaN ;
+	double time_hdr(nobs) ;
+		time_hdr:long_name = "time@hdr" ;
+		time_hdr:_FillValue = NaN ;
+	double fg_depar_body(nobs) ;
+		fg_depar_body:long_name = "fg_depar@body" ;
+		fg_depar_body:_FillValue = NaN ;
+	double an_depar_body(nobs) ;
+		an_depar_body:long_name = "an_depar@body" ;
+		an_depar_body:_FillValue = NaN ;
+	double obsvalue_body(nobs) ;
+		obsvalue_body:long_name = "obsvalue@body" ;
+		obsvalue_body:_FillValue = NaN ;
+        // global attributes:
+		:Conventions = "CF-1.10" ;
+		:NetCDF_library_version = "4.3.3.1 of Dec 10 2015 16:44:18 $" ;
+		:Title = "ODB data in NetCDF format" ;
+		:History = "Created by: odb4py python package" ;
+		:odb4py_version = "1.3.1" ;
+		:Institution = "Royal Meteorological Institute of Belgium (RMI)" ;
+		:Native_fomrat = "ECMWF ODB" ;
+		:sql_query = "select statid , degrees(lat) , degrees(lon) , varno , date , time , fg_depar , an_depar , obsvalue , FROM hdr,body WHERE obstype ==13 and varno ==195" ;
+		:featureType = "point" ;
+		:NetCDF_datetime_creation = "2026-03-17 10:14:27 UTC" ;
+		:ODB_analysis_datetime = "2024-01-05 00:00:00 UTC" ;
+		:ODB_creation_datetime = "2024-11-14 08:44:28 UTC" ;
+		:ODB_software_version = 46 ;
+		:major_version = 0 ;
+		:npools = 128 ;
+		:ntables = 393 ;
+          }
 
 
