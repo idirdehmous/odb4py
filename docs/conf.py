@@ -9,7 +9,7 @@
 project   = 'odb4py'
 copyright = '2025, I.Dehmous'
 author    = 'Idir Dehmous'
-release   = '1.1.0'
+release   = '1.3.1'
 
 
 
