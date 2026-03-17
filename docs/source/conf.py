@@ -1,4 +1,3 @@
-
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -7,37 +6,41 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath("../.."))
-
-autodoc_mock_imports = ["odb4py.core"]
+project   = 'odb4py'
+copyright = '2025, I.Dehmous'
+author    = 'Idir Dehmous'
+release   = '1.3.1'
 
 
-project = 'odb4py'
-copyright = '2024, I.Dehmous'
-author = 'I.DEHMOUS'
-release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+# Index on google
+
+html_meta = {
+    "google-site-verification": "u9QxeqDUjTAgUC_D1_hgQenTSHv2FF6MsG120XQeraM",
+}
 
 rst_prolog = """
 .. role:: red
 """
+
 extensions = []
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+
 
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
-html_static_path = ['_static']
+html_theme = "sphinx_rtd_theme"
+html_theme_options = {
+    "navigation_depth": 3,
+    "collapse_navigation": True,
+    "sticky_navigation"  : True,
+}
 
-numfig = True
