@@ -150,6 +150,7 @@ static int printed = 0;
 if (!printed) {
     printf("***INFO: Only the following pools will be accessed : %s\n", perm_pm);
     printed = 1;
+    
 }
 
 	/* (dbname='%s', count=%d, nperm=%d)\n", 
