@@ -1,6 +1,10 @@
-odb4py documentation
-====================
+odb4py 1.3.1 documentation
+===========================
+**odb4py** is a C/Python interface designed to access ECMWF ODB1 databases.
+It provides direct access to ODB tables, columns, data, and metadata
+through SQL queries embedded in Python scripts.
 
+   
 .. toctree::
     :maxdepth: 1
     :caption: Contents
