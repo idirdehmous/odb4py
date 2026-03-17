@@ -35,7 +35,6 @@ pip install odb4py
 `>>> from odb4py import core      # The extension core ` <br>
 `>>> from odb4py import utils     # The python module helper`   <br>
 `>>> from odb4py import convert   # Conversion module `          <br>
-`>>> from odb4py import info      # Get general info on the ODB software`    <br>
 
 
 ## Requirements
