@@ -21,3 +21,4 @@ through SQL queries embedded in Python scripts.
     odb_utilitis
     api
     licence 
+    references 
