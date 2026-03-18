@@ -27,8 +27,9 @@ Example of an RMI ODB database: **ECMA.synop**
 
    # Create a 'db' object 
    db = OdbObject("/path/to/ECMA.synop")
-
-   print(db.get_attrib())
+   
+   for k, v in db_attr.items():
+       print( f"{k:<30}: {v}" )
 
 
 
