@@ -18,6 +18,8 @@ release   = '1.3.1'
 
 # Index on google
 
+# Hide the source  
+html_show_sourcelink = False
 html_meta = {
     "google-site-verification": "u9QxeqDUjTAgUC_D1_hgQenTSHv2FF6MsG120XQeraM",
 }
