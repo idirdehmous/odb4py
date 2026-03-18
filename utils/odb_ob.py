@@ -57,7 +57,7 @@ class OdbObject:
        
         sym = os.path.join(self.path,   f"{type_}.IOASSIGN")
         if not os.path.islink(sym):
-           os.symlink( sym   )
+           os.symlink( sym , self.path  )
            if not os.path.islink( "/".join(   (self.path, f"IOASSIGN.{type_}")  )):
               os.symlink( self.path    ,   f"IOASSIGN.{type_}" )
               return sym
