@@ -17,7 +17,8 @@ release   = '1.3.1'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 # Index on google
-
+# Hide the source 
+html_show_sourcelink = False
 html_meta = {
     "google-site-verification": "u9QxeqDUjTAgUC_D1_hgQenTSHv2FF6MsG120XQeraM",
 }
