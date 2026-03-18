@@ -244,6 +244,8 @@ The ODB object
 odb4py ``core``  module (C API)
 -------------------------------
 
+The ``odb4py.core`` module is implemented in C as an extension module (``core.so``). It provides the main methods to perform high-performance access to ODB databases.
+
 .. c:function:: PyObject *odb_open (PyObject *PyUNSED(self) ,PyObject *PyUNSED(args), PyObject *kwargs )
 
    :parameters:
@@ -348,7 +350,9 @@ odb4py ``core``  module (C API)
 
 odb4py ``convert`` module (C API)
 ---------------------------------
-   
+
+The ``odb4py.convert`` is also written in C. At present,  It provides only one function ``odb2nc`` to write the ODB rows in NetCDF format.
+
 .. c:function:: PyObject *odb2nc (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
 
    Independent method from the PyTypeObject *ODBConnection*. 
