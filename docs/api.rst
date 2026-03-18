@@ -37,17 +37,16 @@ Environment initialization
    - Updates the system ``PATH`` to include ODB binaries.
    - Sets required ODB binary environment variables.
 
-   :returns: None
+   :returns: *None*
 
 
 .. py:method:: check_bin()
 
    Check the availability of required ODB binaries.
 
-   :returns: Tuple ``(status, message)``
-   :rtype: tuple
+   :returns: *Tuple* (status, message)
 
-   Example return values:
+   Example of returned values:
 
    - ``(True, "Found ALL needed binaries")``
    - ``(False, "Binaries", [missing_bins])``
@@ -57,10 +56,9 @@ Environment initialization
 
    Check the availability of required ODB runtime libraries.
 
-   :returns: Tuple ``(status, message)``
-   :rtype: tuple
+   :returns: *Tuple* -- (status, message)
 
-   Example return values:
+   Example of returned value:
 
    - ``(True, "Found ALL needed runtime libraries")``
    - ``(False, "Library not found", [missing_libs])``
@@ -72,13 +70,13 @@ Environment variable management
 .. py:method:: update_var(env_vars)
 
    Update ODB environment variables.
+   
+   :parameters:
 
-   :param dict env_vars: Dictionary of environment variables to set.
+   **env_vars** : Type *dict*  -- dictionary of environment variables to set.
 
-   Only variables starting with ``ODB_`` are allowed by default.
-
-   :raises TypeError: If ``env_vars`` is not a dictionary.
-   :raises ValueError: If keys are not strings or invalid variables are provided.
+   :returns: *None*
+   Only variables starting with ``ODB_`` are allowed.
 
    Example:
 
@@ -92,18 +90,19 @@ Environment variable management
 
    Retrieve the value of an environment variable.
 
-   :param str key: Environment variable name.
-   :param default: Value returned if the variable is not set.
-   :returns: Value of the variable or default.
-   :rtype: str or None
+   :parameters:
+
+   - *key*    : Type *str*  environment variable name.
+
+   :returns:  Type *str* or *None* -- value of the variable.
+
 
 
 .. py:method:: dump_vars()
 
    Return all currently defined ``ODB_*`` environment variables.
 
-   :returns: Dictionary of ODB environment variables.
-   :rtype: dict
+   :returns: Type *dict*  dictionary of ODB environment variables.
 
 
 
@@ -115,7 +114,8 @@ The ODB object
 
    Represents an ODB database and provides access to its structure and metadata.
 
-   *Parameters* : *str 'database'*: Path to the ODB database.
+   *Parameters* : 
+   **database** : Type *str*  path to the ODB database.
 
    The :class:`OdbObject` class provides methods to interact with an ODB database.
    After creating an instance of this class, all operations are performed
@@ -124,12 +124,13 @@ The ODB object
 .. py:function:: get_baseame ()
 
    Instance :  db = OdbObject(database= dbpath)
-   ``db.get_basename()`` returns the size of the database
+   ``db.get_basename()`` returns the basename of the ODB.
    associated with the object ``db``.
 
-   Returns a *tuple*. (**dbtype**, **obstype**) in the case of ECMA and (**dbtype** , **None**) if a CCMA is used. 
+   *Parameters* : *None*
+   :return: Type  *tuple*  (**dbtype**, **obstype**) in the case of ECMA and (**dbtype** , **None**) if a CCMA is used.
 
-   *Parameters* : *None* 
+
 
 .. py:function:: get_size ()
 
@@ -198,7 +199,7 @@ The ODB object
 
 
 odb4py ``core``  module (C API)
-===============================
+-------------------------------
 
 .. c:function:: PyObject *odb_open (PyObject *PyUNSED(self) ,PyObject *PyUNSED(args), PyObject *kwargs )
 
@@ -286,7 +287,7 @@ odb4py ``core``  module (C API)
 
 
 odb4py ``convert`` module (C API)
-=================================
+---------------------------------
    
 .. c:function:: PyObject *odb2nc (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
 
