@@ -36,10 +36,10 @@ static int getMaxrows(const char* database ,
     int dlen = (unsigned int) maxcols;
     ALLOCX(d, maxcols);    
     while ((nd = nextrow(h, d, dlen, &new_dataset)) > 0) {
-        if (new_dataset) {
-            // Ignore  datatype switches
-            new_dataset = 0;
-        }
+        //if (new_dataset) {
+        // Ignore  datatype switches
+        //    new_dataset = 0;
+        //}
         ++nrows;
     }
     odbdump_close(h);
