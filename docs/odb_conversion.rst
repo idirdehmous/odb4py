@@ -142,7 +142,7 @@ At present, a single conversion function is available: ``odb2nc``, which convert
 
 Unlike the query functions, ``odb2nc`` operates independently of an existing database connection.
 The function internally opens the ODB database, reads the requested data, writes the NetCDF output file, and closes the database automatically.
-The following example 
+Example : 
 
 .. code-block:: python
 
