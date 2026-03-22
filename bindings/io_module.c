@@ -51,7 +51,7 @@ PyObject *odb_close_method(ODBConnection *self, PyObject *Py_UNUSED(args))
 {
     if (self->handle > 0)
         ODBc_close(self->handle);
-    printf("--odb4py : ODB database closed.\n");
+    //printf("--odb4py : ODB database closed.\n");
     self->handle = 0;
     Py_RETURN_NONE;
 }
