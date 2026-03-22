@@ -94,8 +94,6 @@ permanent_poolmask(const int *handle,
 
    */
 
-  
-static int printed = 0;	
   int maxval = 0;
   int len;
   char *envname = NULL;
@@ -146,21 +144,18 @@ static int printed = 0;
       WHILE_BLOCK(SETPERM);
 
       if (myproc == 1) {
-	int j;
-if (!printed) {
-    printf("***INFO: Only the following pools will be accessed : %s\n", perm_pm);
-    printed = 1;
-    
-}
-
-	/* (dbname='%s', count=%d, nperm=%d)\n", 
-	dbname, n, pdb->nperm);
-	fprintf(stderr, ODB_PERMAMENT_POOLMASK_%s=%s\n==>",dbname,perm_pm);*/
-	for (j=1; j<=pdb->nperm; j++) {
-	  if (pdb->perm_list[j]) fprintf(stderr,"%d ", j);
-	} /* for (j=0; j<pdb->nperm; j++) */
-	//printf("\n");
-      }
+	     (void)0   ; 
+	//int j;
+	//fprintf(stderr,
+	//"***INFO: Only the following pools will be accessed (dbname='%s', count=%d, nperm=%d)\n", 
+	//dbname, n, pdb->nperm);
+	//fprintf(stderr,
+//		"            ODB_PERMAMENT_POOLMASK_%s=%s\n==>",dbname,perm_pm);
+//	for (j=1; j<=pdb->nperm; j++) {
+//	  if (pdb->perm_list[j]) fprintf(stderr,"%d ", j);
+//	}  for (j=0; j<pdb->nperm; j++) 
+//	fprintf(stderr,"\n");
+      } 
     } /* if (n > 0) */
 
     FREE(tmpstr);
@@ -317,11 +312,9 @@ codb_init_poolmask_(const int *handle,
       int myproc = 0;
       codb_procdata_(&myproc, NULL, NULL, NULL, NULL);
       if (myproc == 1) 
-	/*fprintf(stderr,
-		"***INFO: Poolmasking ignored altogether for database '%s'\n",
-		p_dbname);*/
-	      (void) 0 ; 
-  }
+	//fprintf(stderr,"***INFO: Poolmasking ignored altogether for database '%s'\n",p_dbname);
+	(void)0  ;
+       } 
   else if (maxval > 0) {
     poolmasking = 1;
   }
@@ -520,3 +513,4 @@ codb_alloc_poolmask_(const int *maxhandle)
   CALLOC(db, MaxHandle);
   CALLOC(db_pm, MaxHandle);
 }
+
