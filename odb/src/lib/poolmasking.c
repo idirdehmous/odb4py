@@ -94,6 +94,11 @@ permanent_poolmask(const int *handle,
 
    */
 
+<<<<<<< HEAD
+=======
+  
+  //static int printed = 0;	
+>>>>>>> 7bc39de (Add the conversion to sqlite)
   int maxval = 0;
   int len;
   char *envname = NULL;
@@ -144,6 +149,7 @@ permanent_poolmask(const int *handle,
       WHILE_BLOCK(SETPERM);
 
       if (myproc == 1) {
+<<<<<<< HEAD
 	     (void)0   ; 
 	//int j;
 	//fprintf(stderr,
@@ -156,6 +162,23 @@ permanent_poolmask(const int *handle,
 //	}  for (j=0; j<pdb->nperm; j++) 
 //	fprintf(stderr,"\n");
       } 
+=======
+	int j;
+
+// disabled in odb4py  
+/*if (!printed) {
+    printf("***INFO: Only the following pools will be accessed : %s\n", perm_pm);
+    (dbname='%s', count=%d, nperm=%d)\n", 
+	dbname, n, pdb->nperm);
+fprintf(stderr, ODB_PERMAMENT_POOLMASK_%s=%s\n==>",dbname,perm_pm);*/
+
+
+	for (j=1; j<=pdb->nperm; j++) {
+	  if (pdb->perm_list[j]) fprintf(stderr,"%d ", j);
+	} /* for (j=0; j<pdb->nperm; j++) */
+	//printf("\n");
+      }
+>>>>>>> 7bc39de (Add the conversion to sqlite)
     } /* if (n > 0) */
 
     FREE(tmpstr);

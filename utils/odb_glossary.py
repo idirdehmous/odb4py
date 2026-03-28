@@ -131,6 +131,13 @@ class OdbLexic:
 
 
     def odb_cols (self):
+        """
+        During the query execution, sometimes some columns in the SQL statement doesn't match 
+        the tables contained. The character '@' has to be used to set explicitly the table 
+        where the column is.
+        This method helps to know exactly where the SQL engine has to look for a given 
+        column.
+        """
         dict_cols={"desc":["expver","class","stream","type",
                            "andate","antime","inidate","initime",
                            "creadate","creatime","creaby","moddate",
@@ -180,6 +187,7 @@ class OdbLexic:
                             "altitude2", "azimuth1", "elevation1", "refconst1", "phi1", "azimuth2","elevation2", "refconst2", 
                             "phi2", "azimuth3", "elevation3", "refconst3", "phi3", "azimuth4", "elevation4", "refconst4", "phi4"]
                          } # DICT TABLES 
+        # Not finished yet 
         return dict_cols
 
 

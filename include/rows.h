@@ -22,7 +22,7 @@ static int getMaxrows(const char* database ,
     int maxcols    = 0;
     int nrows      = 0;
 
-    // ouverture ODB
+    // Open ODB
     h = odbdump_open(database, sql_query,queryfile, poolmask,varvalue , &maxcols);
     
     if (!h || maxcols <= 0) {
@@ -36,10 +36,17 @@ static int getMaxrows(const char* database ,
     int dlen = (unsigned int) maxcols;
     ALLOCX(d, maxcols);    
     while ((nd = nextrow(h, d, dlen, &new_dataset)) > 0) {
+<<<<<<< HEAD
         //if (new_dataset) {
         // Ignore  datatype switches
         //    new_dataset = 0;
         //}
+=======
+     /*   if (new_dataset) {
+            // Ignore  datatype switches
+            new_dataset = 0;
+        }*/
+>>>>>>> 7bc39de (Add the conversion to sqlite)
         ++nrows;
     }
     odbdump_close(h);
