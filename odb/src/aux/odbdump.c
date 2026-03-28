@@ -55,7 +55,7 @@ PUBLIC void
 odbdump_reset_stderr(FILE *fp, const char *filename, const char *mode)
 {
 /*  if (!f_stderr) {
-    /* Get rid of unnecessary stderr-output by
+      // Get rid of unnecessary stderr-output by
        redirecting "stderr" to the filename (or /dev/null if cannot open).
        Do only once 
     if (!fp) fp = stderr;

@@ -95,7 +95,7 @@ permanent_poolmask(const int *handle,
    */
 
   
-static int printed = 0;	
+  //static int printed = 0;	
   int maxval = 0;
   int len;
   char *envname = NULL;
@@ -147,15 +147,15 @@ static int printed = 0;
 
       if (myproc == 1) {
 	int j;
-if (!printed) {
-    printf("***INFO: Only the following pools will be accessed : %s\n", perm_pm);
-    printed = 1;
-    
-}
 
-	/* (dbname='%s', count=%d, nperm=%d)\n", 
+// disabled in odb4py  
+/*if (!printed) {
+    printf("***INFO: Only the following pools will be accessed : %s\n", perm_pm);
+    (dbname='%s', count=%d, nperm=%d)\n", 
 	dbname, n, pdb->nperm);
-	fprintf(stderr, ODB_PERMAMENT_POOLMASK_%s=%s\n==>",dbname,perm_pm);*/
+fprintf(stderr, ODB_PERMAMENT_POOLMASK_%s=%s\n==>",dbname,perm_pm);*/
+
+
 	for (j=1; j<=pdb->nperm; j++) {
 	  if (pdb->perm_list[j]) fprintf(stderr,"%d ", j);
 	} /* for (j=0; j<pdb->nperm; j++) */
