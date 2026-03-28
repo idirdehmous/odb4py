@@ -51,3 +51,8 @@ odb4py_0.1.0
 - VERSION 1.3.1
 - v1.3.1 Add the conversion feature. Able to convert to ODB2 and Netcdf for the moment.
 - v1.3.1 split the methods into context submodules  core, info and convert
+
+## [Release]
+- VERSION 1.3.2
+- v1.3.2 Add the conversion feature : conversion to SQLITE database.
+
