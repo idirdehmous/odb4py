@@ -53,6 +53,6 @@ odb4py_0.1.0
 - v1.3.1 split the methods into context submodules  core, info and convert
 
 ## [Release]
-- VERSION 1.3.2
-- v1.3.2 Add the conversion feature : conversion to SQLITE database.
+- VERSION 1.3.1-rc1
+- v1.3.1-rc1 Add the conversion feature : conversion to SQLITE database.
 
