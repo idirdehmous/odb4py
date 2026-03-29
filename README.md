@@ -19,7 +19,7 @@ The package embeds a customized version of the ECMWF ODB software [odb_api_bundl
 - SQL-like query interface
 - Fast data access with [NumPy/C API](https://numpy.org/doc/2.1/reference/c-api/index.html) and pandas integration
 - No runtime dependency on system ODB or ECMWF bundles
-- Conversion to othe formats : ODB2 ,NetcDF and Sqlite
+- Conversion to other formats : ODB2 ,NetcDF and Sqlite
 
 ---
 
