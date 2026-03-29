@@ -364,7 +364,7 @@ The ``odb4py.convert`` is also written in C. At present,  It provides only one f
    - **sql_query** : SQL string query , type **str** (required)
    - **ncfile**    : Output NetCDF file name, type **str** 'fpath' (required).
   
-  :return:          Type *int* : 0 if succeeds or None if it fails.    
+  :return:          Type *int* : 0 if succeeds or -1 if it fails.    
 
 
 .. c:function:: PyObject *odb2sqlite (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
@@ -378,5 +378,5 @@ The ``odb4py.convert`` is also written in C. At present,  It provides only one f
    - **sql_query** : SQL string query , type **str** (required)
    - **sqlite_db** : Output sqlite database name, type **str** 'fpath' (required).
 
-  :return:          Type *int* : 0 if succeeds or None if it fails.
+  :return:          Type *int* : 0 if succeeds or -1 if it fails.
 
