@@ -7,10 +7,10 @@ The following conversion workflows are currently supported:
 
 - Conversion from ODB1 to ODB2
 - Conversion from ODB1 to NetCDF
-- Conversion from ODB to SQLite
+- Conversion from ODB1 to SQLite
 
 It is important to note that conversion to the ODB2 format is not handled internally by odb4py.
-Instead, users can pass the extracted data to the encoder available in the **pyodc** package.
+Instead, users can pass the extracted data to the encoder available in the `pyodc <https://pypi.org/project/pyodc>`_  package.
 
 Write extracted data into an ODB2 file
 --------------------------------------
@@ -132,8 +132,6 @@ The output ODB2 file can be checked using the ECMWF  `odc <https://odc.readthedo
    ...
 
 
-
-
 Convert ODB to Sqlite database
 ------------------------------
 
@@ -181,9 +179,12 @@ Convert ODB to Sqlite database
                        pbar   = True  , 
                        verbose= True  )
 
-   quit() 
      
-The function returns 0 if succeeds and -1 if it fails.
+The function returns 0 if succeeds  and -1 if it fails.
+CREATE TABLE obs (statid_hdr TEXT, degrees_lat_ REAL, degrees_lon_ REAL, varno_body INTEGER, date_hdr INTEGER, time_hdr INTEGER, fg_depar_body REAL, an_depar_body REAL, obsvalue_body REAL);
+/* No STAT tables available */
+
+
 
 
 
