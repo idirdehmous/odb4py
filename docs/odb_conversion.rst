@@ -1,22 +1,19 @@
 ODB data conversion 
 ===================
+odb4py provides a set of utilities to convert ODB datasets into alternative formats, in addition to direct querying capabilities.
+These conversion tools are implemented in the ``odb4py.convert`` module.
 
-In addition to querying data directly from an ODB database, *odb4py* provides utilities to convert ODB datasets into other data formats.
-These utilities are available in the ``odb4py.convert`` module.
+The following conversion workflows are currently supported:
 
-Write data into an ODB2 file 
------------------------------
+- Conversion from ODB1 to ODB2
+- Conversion from ODB1 to NetCDF
+- Conversion from ODB to SQLite
 
-Conversion to the *ODB2* format is not performed directly by odb4py.
-Instead, the retrieved data can be passed to the ODB2 encoder provided by the **pyodc** package.
+It is important to note that conversion to the ODB2 format is not handled internally by odb4py.
+Instead, users can pass the extracted data to the encoder available in the **pyodc** package.
 
-A typical workflow consists of:
-
-- Querying data from an ODB database using ``odb_dict``.
-- Converting the resulting dictionary into a pandas DataFrame.
-- Encoding the DataFrame into an ODB2 file using **pyodc**.
-
-Example
+Write extracted data into an ODB2 file
+--------------------------------------
 We use the same code as above, except that the data have to be written into an ODB2 file.
 
 .. code-block:: python 
@@ -136,6 +133,62 @@ The output ODB2 file can be checked using the ECMWF  `odc <https://odc.readthedo
 
 
 
+
+Convert ODB to Sqlite database
+------------------------------
+
+.. code-block:: python 
+
+   #-*- coding : utf-8 -*-
+
+   from datetime import datetime
+   import pandas as pd
+
+   # from core module
+   from odb4py.core import odb_open
+
+   # Convert module 
+   from odb4py.convert import odb2sqlite 
+
+   # Start
+   start = datetime.now()
+
+   # ODB path
+   dbpath ="/path/to/CCMA"  # or ECMA.<obstype>
+
+   # The sql query  
+   query="select  statid ,\
+           degrees(lat)   ,\
+           degrees(lon)   ,\
+           varno          ,\
+           date           ,\
+           time           ,\
+           fg_depar       ,\
+           an_depar       ,\
+           obsvalue       ,\
+           FROM hdr,body where obstype==13 AND varno ==195"
+
+   # Same as the previous example 
+   # ...
+   
+   
+   # Call odb2sqlite method
+   outfile="radar_dow.sqlite"
+   status =odb2sqlite   (database=dbpath,       
+                       sql_query = sql_query,
+                       sqlite_db = outfile  ,  
+                       nfunc  = nf    , 
+                       pbar   = True  , 
+                       verbose= True  )
+
+   quit() 
+     
+The function returns 0 if succeeds and -1 if it fails.
+
+
+
+
+
 Convert ODB to NetCDF format
 ----------------------------
 At present, a single conversion function is available: ``odb2nc``, which converts an ODB database into a NetCDF file.
@@ -194,13 +247,13 @@ Example :
    sql=p.clean_string ( sql_query )
 
    # Fetch the data and convert to NetCDF
-   odb2nc   (database =dbpath ,      # (dtype -> str  )     ODB path 
-             sql_query=sql    ,      # (dtype -> str  )     The sql query 
-             nfunc    =nf     ,      # (dtype -> integer )  Number of functions found in the sql query 
-             ncfile   =ncfile ,      # (dtype -> str )      The output NetCDF file
-             lalon_deg= True  ,      # (dtype -> boolean)   Encode the corrdinates lat/lon in degrees or radians ( True -> degrees , False -> radians)
-             pbar     = True  ,      # (dtype -> boolean)   Enable the progress bar 
-             verbose  = True  )      # (dtype -> boolean)   verbosity on/off  
+   status =odb2nc   (database =dbpath ,      # (dtype -> str  )     ODB path 
+                     sql_query=sql    ,      # (dtype -> str  )     The sql query 
+                     nfunc    =nf     ,      # (dtype -> integer )  Number of functions found in the sql query 
+                     ncfile   =ncfile ,      # (dtype -> str )      The output NetCDF file
+                     lalon_deg= True  ,      # (dtype -> boolean)   Encode the corrdinates lat/lon in degrees or radians ( True -> degrees , False -> radians)
+                     pbar     = True  ,      # (dtype -> boolean)   Enable the progress bar 
+                     verbose  = True  )      # (dtype -> boolean)   verbosity on/off  
 
    # End           
    end  = datetime.now()
