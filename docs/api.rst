@@ -356,7 +356,7 @@ The ``odb4py.convert`` is also written in C. At present,  It provides only one f
 .. c:function:: PyObject *odb2nc (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
 
    Independent method from the PyTypeObject *ODBConnection*. 
-   Convert the returned ODB rows into NetCDF format 
+   Convert the returned ODB rows into NetCDF format (in backend ) 
 
   :parameter:
 
@@ -365,3 +365,18 @@ The ``odb4py.convert`` is also written in C. At present,  It provides only one f
    - **ncfile**    : Output NetCDF file name, type **str** 'fpath' (required).
   
   :return:          Type *int* : 0 if succeeds or None if it fails.    
+
+
+.. c:function:: PyObject *odb2sqlite (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
+
+   Independent method from the PyTypeObject *ODBConnection*.
+   Convert the requested rows into sqlite database.
+
+  :parameter:
+
+   - **database**  : Path to the ODB  , type **str** (required)
+   - **sql_query** : SQL string query , type **str** (required)
+   - **sqlite_db** : Output sqlite database name, type **str** 'fpath' (required).
+
+  :return:          Type *int* : 0 if succeeds or None if it fails.
+
