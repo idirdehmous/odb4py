@@ -18,7 +18,7 @@ through SQL queries embedded in Python scripts.
     odb_in_python_ecosystem
     open_odb_loop
     odb_conversion
-    odb_utilitis
+    odb_utilities
     api
     licence 
     references 
