@@ -94,11 +94,8 @@ permanent_poolmask(const int *handle,
 
    */
 
-<<<<<<< HEAD
-=======
   
-  //static int printed = 0;	
->>>>>>> 7bc39de (Add the conversion to sqlite)
+static int printed = 0;	
   int maxval = 0;
   int len;
   char *envname = NULL;
@@ -149,37 +146,22 @@ permanent_poolmask(const int *handle,
       WHILE_BLOCK(SETPERM);
 
       if (myproc == 1) {
-<<<<<<< HEAD
-	     (void)0   ; 
-	//int j;
-	//fprintf(stderr,
-	//"***INFO: Only the following pools will be accessed (dbname='%s', count=%d, nperm=%d)\n", 
-	//dbname, n, pdb->nperm);
-	//fprintf(stderr,
-//		"            ODB_PERMAMENT_POOLMASK_%s=%s\n==>",dbname,perm_pm);
-//	for (j=1; j<=pdb->nperm; j++) {
-//	  if (pdb->perm_list[j]) fprintf(stderr,"%d ", j);
-//	}  for (j=0; j<pdb->nperm; j++) 
-//	fprintf(stderr,"\n");
-      } 
-=======
-	int j;
-
-// disabled in odb4py  
-/*if (!printed) {
+  /*	int j;
     printf("***INFO: Only the following pools will be accessed : %s\n", perm_pm);
-    (dbname='%s', count=%d, nperm=%d)\n", 
+    }
+
+	 (dbname='%s', count=%d, nperm=%d)\n", 
 	dbname, n, pdb->nperm);
-fprintf(stderr, ODB_PERMAMENT_POOLMASK_%s=%s\n==>",dbname,perm_pm);*/
-
-
+	fprintf(stderr, ODB_PERMAMENT_POOLMASK_%s=%s\n==>",dbname,perm_pm);
 	for (j=1; j<=pdb->nperm; j++) {
 	  if (pdb->perm_list[j]) fprintf(stderr,"%d ", j);
-	} /* for (j=0; j<pdb->nperm; j++) */
-	//printf("\n");
+	}  for (j=0; j<pdb->nperm; j++) 
+	//printf("\n");*/
+        
+      (void) 0  ; 
+    
       }
->>>>>>> 7bc39de (Add the conversion to sqlite)
-    } /* if (n > 0) */
+    } // if (n > 0) 
 
     FREE(tmpstr);
     FREE(ca);
@@ -335,9 +317,11 @@ codb_init_poolmask_(const int *handle,
       int myproc = 0;
       codb_procdata_(&myproc, NULL, NULL, NULL, NULL);
       if (myproc == 1) 
-	//fprintf(stderr,"***INFO: Poolmasking ignored altogether for database '%s'\n",p_dbname);
-	(void)0  ;
-       } 
+	/*fprintf(stderr,
+		"***INFO: Poolmasking ignored altogether for database '%s'\n",
+		p_dbname);*/
+	      (void) 0 ; 
+  }
   else if (maxval > 0) {
     poolmasking = 1;
   }
@@ -536,4 +520,3 @@ codb_alloc_poolmask_(const int *maxhandle)
   CALLOC(db, MaxHandle);
   CALLOC(db_pm, MaxHandle);
 }
-
