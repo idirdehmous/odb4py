@@ -32,28 +32,6 @@
 
 
 
-
-const char* map_type(int odb_type) {
-    switch (odb_type) {
-        case DATATYPE_INT4:
-        case DATATYPE_INT2:
-            return "INTEGER";
-
-        case DATATYPE_REAL4:
-        case DATATYPE_REAL8:
-            return "REAL";
-
-        case DATATYPE_STRING:
-            return "TEXT";
-
-        case DATATYPE_BITFIELD:
-            return "INTEGER";
-
-        default:
-            return "REAL";  // fallback safe
-    }
-}
-
 // Function  : odb_dict_method
 static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
                                  PyObject *args,
@@ -200,8 +178,8 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
             ci = odbdump_create_colinfo(h, &nci);
 
 	    if (!table_created) {
-                char sql[4096] = "CREATE TABLE IF NOT EXISTS obs (";
-                char insert_sql[4096] = "INSERT INTO obs VALUES (";
+                char sql[4096] = "CREATE TABLE IF NOT EXISTS ODB (";
+                char insert_sql[4096] = "INSERT INTO ODB VALUES (";
                 for (int i = 0; i < ncols; i++) {
                     const char *name = ci[i].nickname ? ci[i].nickname : ci[i].name;
                     char cname [128];    // cleaned 
