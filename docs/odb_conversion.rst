@@ -179,14 +179,48 @@ Convert ODB to Sqlite database
                        pbar   = True  , 
                        verbose= True  )
 
-     
+
 The function returns 0 if succeeds  and -1 if it fails.
-CREATE TABLE obs (statid_hdr TEXT, degrees_lat_ REAL, degrees_lon_ REAL, varno_body INTEGER, date_hdr INTEGER, time_hdr INTEGER, fg_depar_body REAL, an_depar_body REAL, obsvalue_body REAL);
-/* No STAT tables available */
+
+To inspect the database integrity and verify the ingestion of radar radial wind data (varno = 195), use the `sqlite3 <https://sqlite.org/>`_ command-line utility. 
+The following sqlite commands : 
+
+ - Open the sqlite output database and see whether the datatypes have been correctly mapped from ODB1 to SQLITE.
+ - Show the table name and inspect the number of rows.
+ - Fetch the first 10 lat/lon and first guess departures.
 
 
 
+.. code-block:: bash 
 
+   **sqlite3 radar_dow.sqlite** 
+   sqlite>.fullschema 
+   CREATE TABLE obs (statid_hdr TEXT, degrees_lat REAL, degrees_lon REAL, varno_body INTEGER, date_hdr INTEGER, time_hdr INTEGER, fg_depar_body REAL, an_depar_body REAL, obsvalue_body REAL);
+   /* No STAT tables available */
+   sqlite>
+   sqlite>.tables
+   ODB 
+   
+   sqlite> SELECT degrees_lat_, degrees_lon_, obsvalue_body, fg_depar_body  from obs where varno_body ==  195  LIMIT  10 ;
+   61.8811145199616|6.84850959712739|-7.53540399999999|2.19854533076505
+   62.2859749604917|6.79321489645844|-9.04248999999999|1.09386670675939
+   62.6663554590557|7.15033481685942|-10.549576|0.979330563068094
+   57.4221472143021|6.39194178590787|10.549628|0.991517874364257
+   58.0954189786416|8.50900969550826|-26.62516|-1.7536086583933
+   64.4183633340104|11.7318030978241|4.655886|3.95438995017612
+   64.749783887069|11.1360987998073|8.277147|-1.41526700691695
+   64.91741913086|10.5627709642114|13.450377|-0.724219913199695
+   65.0898347853508|10.9459813991416|17.588961|1.93129429946255
+   65.2105945134471|10.319780717788|16.554315|-0.330503079630123
+
+   sqlite> SELECT degrees_lat_, degrees_lon_, obsvalue_body, fg_depar_body, COUNT(*) as c from obs where varno_body ==  195 ;
+   61.8811145199616|6.84850959712739|-7.53540399999999|2.19854533076505|6573
+
+
+.. note:: 
+
+   By default, the ``odb2sqlite`` method generates a table named ``ODB``. To support more dynamic workflows, the table name will be given as an argument (in the future versions).
+   This flexibility allows users to consolidate results from multiple *ODB* queries into separate SQLITE tables within a single output file.
 
 
 
