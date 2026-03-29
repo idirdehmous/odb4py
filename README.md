@@ -18,8 +18,8 @@ The package embeds a customized version of the ECMWF ODB software [odb_api_bundl
 - Support for IFS and ARPEGE ODB databases
 - SQL-like query interface
 - Fast data access with [NumPy/C API](https://numpy.org/doc/2.1/reference/c-api/index.html) and pandas integration
-- Manylinux wheels (portable across Linux distributions)
 - No runtime dependency on system ODB or ECMWF bundles
+- Conversion to othe formats : ODB2 ,NetcDF and Sqlite
 
 ---
 
