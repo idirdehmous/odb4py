@@ -33,8 +33,8 @@ pip install odb4py
 
 ## Installation test 
 `>>> from odb4py import core      # The extension core ` <br>
+`>>> from odb4py import convert   # An extension for format conversion`    <br>
 `>>> from odb4py import utils     # Pure python modules helpers`   <br>
-`>>> from odb4py import convert   # Conversion module `    <br>
 
 
 
