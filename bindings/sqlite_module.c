@@ -32,6 +32,7 @@
 
 
 
+
 // Function  : odb_dict_method
 static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
                                  PyObject *args,
@@ -41,6 +42,7 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     const char *database  = NULL;
     const char *sql_query = NULL;    
     const char *queryfile = NULL;
+
     int   fcols     = 0;
     int   fmt_float = 15  ;
 
@@ -56,16 +58,18 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     Bool lpbar   = false;
     Bool verbose = false;
 
-     //  Start sqlite3 stuff  
+     //  Start sqlite3 stuff      
     sqlite3 *db;
     sqlite3_stmt *stmt;
     const char *sqlite_db  = NULL;
+    const char *table_name = NULL ;  
 
     // Keyword list 
-    static char *kwlist[] = {  "database" , 
-	                       "sql_query", 
-			       "sqlite_db",
-			       "nfunc"    ,
+    static char *kwlist[] = {  "database"  , 
+	                       "sql_query" , 
+			       "nfunc"     ,
+			       "sqlite_db" ,
+			       "table_name",
 			       "fmt_float",
                                "queryfile", 
 			       "poolmask" , 
@@ -75,11 +79,12 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
                              };
 
     // Parse keyword args 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "szsi|izOOO", kwlist,   // 3 requiered , 5 optional 
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sziss|izOOO", kwlist,   // 3 requiered , 5 optional 
                                      &database,
                                      &sql_query,
-				     &sqlite_db,
                                      &fcols    ,
+				     &sqlite_db,
+				     &table_name, 
                                      &fmt_float,
                                      &queryfile,
                                      &poolmask_obj,
@@ -157,11 +162,12 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     }
     
 
-    sqlite3_exec(db, "PRAGMA journal_mode=OFF;", 0, 0, 0);
-    sqlite3_exec(db, "PRAGMA synchronous=OFF;", 0, 0, 0);
+    sqlite3_exec(db, "PRAGMA journal_mode=OFF;" , 0, 0, 0);
+    sqlite3_exec(db, "PRAGMA synchronous=OFF;"  , 0, 0, 0);
     rc  =  sqlite3_exec(db, "BEGIN TRANSACTION;", 0, 0, 0);
-    CHECK_RC(rc, db, "Begin SQLITE transaction failed");
+    CHECK_RC(rc, db, "Begin SQLITE transaction failed"   );
 
+    // sqlite table 
     int table_created = 0;
 
     // Rows 
@@ -169,6 +175,9 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     int (*nextrow)(void *, void *, int, int *) = odbdump_nextrow;
     int new_dataset=0; 
 
+
+    // Bytes counter (for the extract & written ONLY without the file structure )
+    int total_bytes =0   ; 
     while (nextrow(h, d, maxcols, &new_dataset) > 0) {
         if (lpbar) {  ++ip;            print_progress(ip, prog_max); }   // useful for  large ODBs
 
@@ -179,32 +188,37 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
 
 	    if (!table_created) {
                 char sql[4096] = "CREATE TABLE IF NOT EXISTS ODB (";
+	        char cleaned_table[128];
+                strcpy(cleaned_table, table_name);
+                sanitize_name(cleaned_table);
+                snprintf(sql, sizeof(sql), "CREATE TABLE IF NOT EXISTS %s (", cleaned_table);    // remove blank characters 
+                snprintf(sql, sizeof(sql), "CREATE TABLE IF NOT EXISTS \"%s\" (", table_name);
+
+
                 char insert_sql[4096] = "INSERT INTO ODB VALUES (";
+                snprintf(insert_sql, sizeof(insert_sql), "INSERT INTO \"%s\" VALUES (", table_name);
+
                 for (int i = 0; i < ncols; i++) {
                     const char *name = ci[i].nickname ? ci[i].nickname : ci[i].name;
                     char cname [128];    // cleaned 
 
                     strcpy(cname , name);
                     sanitize_name (cname ) ; 
-                    int type = ci[i].dtnum;
+                    int odb_dtype = ci[i].dtnum;
 
                     strcat(sql, cname);
                     strcat(sql, " ");
-                    switch (type) {
-                        case DATATYPE_INT1:
-                        case DATATYPE_INT2:
-                        case DATATYPE_INT4:
-                        case DATATYPE_YYYYMMDD:
-                        case DATATYPE_HHMMSS:
-                            strcat(sql, "INTEGER");
-                            break;
-                        case DATATYPE_STRING:
-                            strcat(sql, "TEXT");
-                            break;
-                        default:
-                            strcat(sql, "REAL");
-                    }
-                    strcat(insert_sql, "?");
+		    char *dtype = map_type  ( odb_dtype )  ; 
+
+		    if (  strcmp(dtype ,"INTEGER") ) {
+                           strcat(sql, "INTEGER");
+		    } else if ( strcmp(dtype,"TEXT") ) {
+                          strcat(sql, "TEXT");
+		    }
+		     else {
+                          strcat(sql, "REAL");
+		     }                    
+		    strcat(insert_sql, "?");
                     if (i < ncols - 1) {
                         strcat(sql, ", ");
                         strcat(insert_sql, ",");
@@ -212,6 +226,7 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
                 }  // for 
                 strcat(sql, ");");
                 strcat(insert_sql, ");");
+
 		// Create table 
                 rc = sqlite3_exec(db, sql, 0, 0, 0);
                 CHECK_RC(rc, db, "CREATE TABLE failed");
@@ -242,6 +257,8 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
 			*scc++ = isprint(c) ? c : '8' ; 
 		       }
                      *scc = '\0';
+		      total_bytes+= sizeof(  cc) ; 
+
                       rc = sqlite3_bind_text(stmt, i+1,  cc   , -1, SQLITE_TRANSIENT) ;
                    } 
 		break  ; 			
@@ -249,12 +266,14 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
                 case DATATYPE_INT2:
                 case DATATYPE_INT4:
                 case DATATYPE_YYYYMMDD:
-                case DATATYPE_HHMMSS:
+                case DATATYPE_HHMMSS:		 
            	 rc=sqlite3_bind_int( stmt, i+1 , (int) d[i]);
+		 total_bytes+= sizeof( (int) d[i])  ; 
                 break  ;
 		default :
                  rc=sqlite3_bind_double(stmt, i+1, d[i]);
-                break  ; 
+                 total_bytes+= sizeof( d[i])  ;		 
+ 		 break  ; 
 	          }  // switch 		 
 
 	       if (rc != SQLITE_OK) {
@@ -275,7 +294,6 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
 rc = sqlite3_exec(db, "COMMIT;", 0, 0, 0);
 CHECK_RC(rc, db, "Final COMMIT failed for the SQLITE database !");
 
-
 sqlite_error:
     if (stmt) sqlite3_finalize(stmt);
     if (db)   sqlite3_close(db);
@@ -286,6 +304,7 @@ sqlite_error:
 
 if (  verbose )  {
    printf( "%s : %s\n" , "--odb4py : Rows have been successfully written into the SQLITE db" , sqlite_db ) ;
+   printf( "%s = %d Bytes\n" , "--odb4py : Number of written bytes ",  total_bytes  ) ; 
 }
 return PyLong_FromLong(0);
 }
