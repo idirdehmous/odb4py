@@ -62,7 +62,7 @@ The odb_geopoints function provides several optional arguments to refine the ext
    data=conn.odb_geopoints (database  = dbpath   ,
                             condition ="vertco_reference_1@body >  100  AND vertco_reference_1@body<= 500 AND obsvalue is not NULL" ,
                             unit      = "degrees",
-                            extent    = [-60, 80, 0., 80.],    # Extent is given ALWAYS in degrees even the unit is radians  [lon1, lon2, lat1, lat2 ]
+                            extent    = [-60, 80, 0., 30.],    # Extent is given ALWAYS in degrees even the unit is radians  [lon1, lon2, lat1, lat2 ]
                             pbar      = True  ,
                             verbose   = True )
 
