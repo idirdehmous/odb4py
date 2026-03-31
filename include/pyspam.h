@@ -3,7 +3,7 @@
 
 
 // Version
-#define ODB4PY_VERSION "1.3.2rc1"
+#define ODB4PY_VERSION "1.3.3"
 
 
 

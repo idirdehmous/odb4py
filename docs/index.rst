@@ -1,4 +1,4 @@
-odb4py_1.3.2rc1 documentation 
+odb4py_1.3.3 documentation 
 =============================
 
 .. toctree::

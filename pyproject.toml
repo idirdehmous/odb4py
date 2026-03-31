@@ -1,6 +1,6 @@
 [project]
 name = "odb4py"
-version = "1.3.2rc2"
+version = "1.3.3"
 
 description = "Python extension to access the ECMWF observation database (ODB1) format"
 readme = "README.md"
