@@ -62,7 +62,7 @@ wheel.install-dir = "odb4py"
 
 
 [tool.cibuildwheel.linux]
-before-all = " sudo yum install sqlite-devel && yum install -y netcdf-devel && yum install -y flex flex-devel bison &&  source /opt/rh/devtoolset-10/enable"
+before-all = " yum install -y netcdf-devel && yum install -y sqlite-devel &&  yum install -y flex flex-devel bison &&  source /opt/rh/devtoolset-10/enable"
 
 
 [tool.cibuildwheel]
