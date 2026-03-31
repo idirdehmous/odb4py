@@ -6,7 +6,7 @@
 
 ## Description
 
-**odb4py** is a C/Python interface to read and query ECMWF ODB1 databases.<br>
+**odb4py** (*Observation DataBase FOR PYthon*) is a C/Python interface to read and query ECMWF ODB1 databases.<br>
 It provides high-performance access to ODB data through a native C backend, with seamless integration into the Python scientific ecosystem.<br>
 The package embeds a customized version of the ECMWF ODB software [odb_api_bundle-0.18.1-Source](https://confluence.ecmwf.int) and is distributed as **manylinux wheels**, requiring no external ODB installation.
 
