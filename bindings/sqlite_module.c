@@ -33,7 +33,7 @@
 
 
 
-// Function  : odb_dict_method
+// Function  : odb2sqlite_method
 static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
                                  PyObject *args,
                                  PyObject *kwargs) {
@@ -61,8 +61,8 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
      //  Start sqlite3 stuff      
     sqlite3 *db;
     sqlite3_stmt *stmt;
-    const char *sqlite_db  = NULL;
-    const char *table_name = NULL ;  
+    const char *sqlite_db  = NULL ;
+    const char *table_name = NULL ; 
 
     // Keyword list 
     static char *kwlist[] = {  "database"  , 
@@ -75,11 +75,11 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
 			       "poolmask" , 
 			       "pbar"     , 
 			       "verbose"  ,  
-			       NULL
+			        NULL
                              };
 
     // Parse keyword args 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sziss|izOOO", kwlist,   // 3 requiered , 5 optional 
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "szis|sizOOO", kwlist,   // 3 requiered , 5 optional 
                                      &database,
                                      &sql_query,
                                      &fcols    ,
@@ -186,17 +186,41 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
             ci = odbdump_destroy_colinfo(ci, nci);
             ci = odbdump_create_colinfo(h, &nci);
 
-	    if (!table_created) {
-                char sql[4096] = "CREATE TABLE IF NOT EXISTS ODB (";
+            const char *default_table = "ODB";
+            const char *final_table = default_table;
+
+           if (table_name && table_name[0] != '\0') {
+                 final_table = table_name;  // override default
+             }
+
+            if (!table_created) {
+                 char sql[4096];
+                 char insert_sql[4096];
+                 char cleaned_table[128];
+
+                 // Copy before sanitizing
+                 strncpy(cleaned_table, final_table, sizeof(cleaned_table) - 1);
+                 cleaned_table[sizeof(cleaned_table) - 1] = '\0';
+                 sanitize_name(cleaned_table);
+                 snprintf(sql, sizeof(sql),
+                 "CREATE TABLE IF NOT EXISTS \"%s\" (", cleaned_table);
+
+                 snprintf(insert_sql, sizeof(insert_sql),
+                 "INSERT INTO \"%s\" VALUES (", cleaned_table);
+                
+                /*char sql[4096] = "CREATE TABLE IF NOT EXISTS ODB (";
 	        char cleaned_table[128];
+		if (!table_table) {  
+		table_name = "ODB" ;  
+		} else {
                 strcpy(cleaned_table, table_name);
                 sanitize_name(cleaned_table);
                 snprintf(sql, sizeof(sql), "CREATE TABLE IF NOT EXISTS %s (", cleaned_table);    // remove blank characters 
                 snprintf(sql, sizeof(sql), "CREATE TABLE IF NOT EXISTS \"%s\" (", table_name);
-
-
                 char insert_sql[4096] = "INSERT INTO ODB VALUES (";
                 snprintf(insert_sql, sizeof(insert_sql), "INSERT INTO \"%s\" VALUES (", table_name);
+		}*/
+
 
                 for (int i = 0; i < ncols; i++) {
                     const char *name = ci[i].nickname ? ci[i].nickname : ci[i].name;
@@ -304,7 +328,7 @@ sqlite_error:
 
 if (  verbose )  {
    printf( "%s : %s\n" , "--odb4py : Rows have been successfully written into the SQLITE db" , sqlite_db ) ;
-   printf( "%s = %d Bytes\n" , "--odb4py : Number of written bytes ",  total_bytes  ) ; 
+   printf( "%s : %d Bytes\n" , "--odb4py : Total written data size ",  total_bytes  ) ;
 }
 return PyLong_FromLong(0);
 }
