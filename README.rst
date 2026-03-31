@@ -1,125 +1,78 @@
-## pyodb_1.1.0  pre-release 
+[![PyPI version](https://img.shields.io/pypi/v/odb4py.svg)](https://pypi.org/project/odb4py/)
+[![Documentation Status](https://readthedocs.org/projects/odb4py/badge/?version=latest)](https://odb4py.readthedocs.io)
+![Python](https://img.shields.io/pypi/pyversions/odb4py)
 
+# odb4py 1.3.2rc1 release
 
-## Description & prologue 
-This is the BETA release 1.1.0 of pyodb.<br />
-An interface written in C/Python API to access the ECMWF ODB1 databases.<br />
+## Description
 
-Its aim is to access the ODB tables/columns data and meta data using a direct SQL request
-embadded in python scripts.<br />
+**odb4py** (*Observation DataBase FOR PYthon*) is a C/Python interface to read and query ECMWF ODB1 databases.<br>
+It provides high-performance access to ODB data through a native C backend, with seamless integration into the Python scientific ecosystem.<br>
+The package embeds a customized version of the ECMWF ODB software [odb_api_bundle-0.18.1-Source](https://confluence.ecmwf.int) and is distributed as **manylinux wheels**, requiring no external ODB installation.
 
-The main source code is written in pure C and the routines handling the ODB1
-format has been 'pruned' from ECMWF ODB_API bundle-0.18.1 to build only the
-needed libraries <br />
+---
 
-Reference:
-The original C code has been developed by "Sami Saarinen et al" at ECMWF from 1998 --> 2008.  <br />
-Some modifictions have been done to make it compatible with C/Python API ( 3.8 ---> 3.10 ).
+## Features
 
-## How it works ?
+- Native C backend based on ECMWF ODB1
+- Support for IFS and ARPEGE ODB databases
+- SQL-like query interface
+- Fast data access with [NumPy/C API](https://numpy.org/doc/2.1/reference/c-api/index.html) and pandas integration
+- No runtime dependency on system ODB or ECMWF bundles
+- Conversion to other formats : ODB2 ,NetcDF and SQLITE
 
-## Dependencies :
-        gcc compiler  = 13.2.0    
-        cmake        >= 3.15.0   
-        3.8.0  <=   python   <= 3.10  (NEEDS SOME READAPTATION FOR python3.11.x, 3.12.x,3.13.x )
+---
 
-==> It has been widely developed and tested on ATOS. <br />
-So on ATOS  : <br />
-   module load   gcc/13.2.0           <br />
-   module load   python3/3.10.10-01   <br />
-   module load   cmake/3.25.2         <br />
+## Installation
 
+The **odb4py** package can be installed from PyPI using `pip`:
 
-## installation :  
-
-   ```  
-        STEP 0 - download the source  code:
-        wget   https://github.com/idirdehmous/pyodb_0.1.0/releases/download/1.1.0/pyodb_1.1.0.tar.gz 
-        OR 
-        git clone  https://github.com/idirdehmous/pyodb_0.1.0 
-        tar -xvf  pyodb_1.1.0.tar.gz
- 
-        STEP 1 - FIRST, CREATE A BUILD DIRECORY TO INSTALL THE ODB LIBRARIES.
-               mkdir -p  build_odb  
-               cd build_odb 
-               cmake    -DCMAKE_INSTALL_PREFIX=/path/to/../../odb/install/dir         /path/to/../../pyodb_1.1.0 
-               make -j ncpu    ( has been tested with a maximum of 4  cpus  ) 
-               make install  
-```
-REMARK:  <br />
--By the end the ODB installation, a file called 'odb_install_dir' will be created by cmake in the directory 'pyodb_1.1.0'. The latter will be used by setup.py <br />
-
--Once the odb binaries , include and libs are installed, the second step consist on building and installing the python module itself<br />
-
-```
-        STEP 2 - cd  /path/to/source/of/.../pyodb_1.1.0  
-              python  setup.py   build 
-!!Mandatory!: Remove the build directory if any build command is needed ! 
-              ** FOR STANDARD INSTALLATION : 
-                sudo  python  setup.py   install  
-
-              ** FOR CUSTOM DIRECTORY INSTALLATION  
-                 python setup.py   install  --user 
-        python will install the module uder   /home/$user/.local/lib  
+```bash
+pip install odb4py  
 ```
 
-## Testing 
--When a C/Python API extension is imported, the python statement 'import' initialises some functions involved during the compilation (headers,  libraries etc ). One has then, firstly to load the shared objects using 'ctypes' module. <br /> 
--The pyodb installation is tested as follow : 
-```
-from ctypes import  cdll  
-cdll.LoadLibrary(  "/path/to/odb/install dir/../../libodb.so"  )
-
-#-If the shared library ( libodb.so) is loaded successfully then !
-
-import pyodb
-print( pyodb.__doc__) 
-```
--For a complete import test script, please see 'tests/test_import.py'  
-
-## Epilogue 
--If everything went well,one can use the example scripts under 'pyodb_1.1.0/tests' and reading the ODB(s) samples included in 'pyodb_1.1.0/odb_samples'. <br />
-
-===> REMARK :
-It's recommanded to run dcagen and dcagen.x just before archiving your ODB(s). <br /> 
-This will allows pyodb to don't create them on the fly( even any odb apps like odbsql ,odbdump.x etc). Having DCA in ODB directory  make fatching the data a bit faster.(Advice from S.Saarinen himself!).  <br />
-In the BATOR ,canari , screening , minimisation  scripts, the bash lines hereafter have to be added :  <br />
-```
-
-Example for screening :
-# NEEDS SCRIPTS  : dcagen, create_ioassign
-# BINARY         : dcagen.x 
-# SCRIPTS AND BINARIES ARE AVAILABLE IN ARPEGE/IFS CODE (to be compiled )
-# OR FROM odb_api_bundle ( ECMWF version=0.18.0)
-
-export PATH=${PATH}:${WORKDIR}
-export ODB_FEBINPATH=${WORKDIR}
-${MPICMD}  ./dcagen  -l CCMA   -d -n -N ${NPROC} -q  -P -e dca.log -i  ${WORKDIR}/var_db/CCMA
-
-Now CCMA contains DCA files 
-cp -rf   ${WORKDIR}/var_db/CCMA     /somewhere/in/archive../../
-
-
-```
+## Installation test 
+`>>> from odb4py import core      # The extension core ` <br>
+`>>> from odb4py import convert   # An extension for format conversion`    <br>
+`>>> from odb4py import utils     # Pure python modules helpers`   <br>
 
 
 
+## Requirements
+Python ≥ 3.9 <br>
+NumPy  ≥ 2.0 <br>
+Linux system (manylinux2014 compatible)
 
-General info        <br />
-Used languages      : C / python /Fortran  <br />
-Needs installation  : YES                  <br />
-Needs compilation   : YES                  <br />
-Tested with ODB(s)  : RMI ,CHMZ , MetCoOp and CHMI and ARPEGE  <br />
-Handled observations: Conventional, GNSS , Radar , Satallite observations ( IASI, MHS AMSUA/B etc ) <br />
+### Optional  <br>
+pyodc  ≥ 1.6.0 <br>
 
-Some limitations    <br />
-	  OpenMP                     : NOT YET    <br />
-	  Read/Write to ECMA,CCMA    : READ ONLY  <br />
-	  conversion to ODB2         : NOT YET   ( On going  ) <br />
-	  conversion to SQLite : NOT YET   ( On going  ) <br />
+## Scientific context
+ODB (Observation DataBase) is a column-oriented database format developed at ECMWF
+and widely used in numerical weather prediction systems such as IFS,ARPEGE and NWP limited are models<br>
+
+**odb4py** is primarily designed for:<br>
+- Meteorologists and atmospheric scientists (especially within the ACCORD consortium)<br>
+- Operational and research environments
+- Post-processing and diagnostic workflows
+- The current package version focuses on read-only access and data extraction for scientific analysis.
 
 
-@__DATE              :  2024.07.23    <br />
-@__INSTITUTE         :  RMI ( Royale Meteorological Institute )   <br />
-@__AUTHOR            :  Idir DEHMOUS    <br />
-@__LAST_MODIFICATION :  2024.11.18      <br />
+## License
+Apache License, Version 2.0. [See LICENSE for details ](https://www.apache.org/licenses/LICENSE-2.0).
+
+
+odb4py incorporates components derived from the ECMWF ODB software.
+
+The original source code has been modified to:
+- Expose functionality through a Python interface
+- Reduce the runtime footprint
+- Enable portable binary wheel distribution
+
+All original copyrights remain with ECMWF.
+
+## Acknowledgements
+- This project incorporates and is derived from the ECMWF ODB software. <br/>
+ODB was developed at the European Centre for Medium-Range Weather Forecasts (ECMWF)
+by [S. Saarinen et al](https://www.ecmwf.int/sites/default/files/elibrary/2004/76278-ifs-documentation-cy36r1-part-i-observation-processing_1.pdf). All rights to the original ODB software remain with ECMWF and their respective owners.
+- The author would like to thank the other colleagues from ACCORD consortium (MetCOop , SHMI , AEMET & Meteo France ) for providing different samples of ODBs.
+- The author would also like to thank 'Mohand Ouali Ait Meziane' for testing odb4py and providing valuable feedback.
