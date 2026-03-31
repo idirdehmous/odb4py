@@ -452,7 +452,7 @@ check=nc_close(ncid);
 //  if is here without issue so ...
    if (verbose ) {
    printf("ODB data have been successfully written to : %s\n", outfile)  ; 
-   printf("Total written data size = %zu bytes\n", total); 
+   printf("Total written data size : %zu Bytes\n", total); 
    }
     return 0;
 }
