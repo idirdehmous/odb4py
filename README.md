@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/odb4py/badge/?version=latest)](https://odb4py.readthedocs.io)
 ![Python](https://img.shields.io/pypi/pyversions/odb4py)
 
-# odb4py 1.3.2rc1 release
+# odb4py 1.3.2rc2 release
 
 ## Description
 
@@ -11,7 +11,6 @@ It provides high-performance access to ODB data through a native C backend, with
 The package embeds a customized version of the ECMWF ODB software [odb_api_bundle-0.18.1-Source](https://confluence.ecmwf.int) and is distributed as **manylinux wheels**, requiring no external ODB installation.
 
 ---
-
 
 ## Features
 
