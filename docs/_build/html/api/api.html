@@ -1,0 +1,675 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API documentation &mdash; odb4py 1.3.2rc1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=28fb06b7"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="References" href="../references/references.html" />
+    <link rel="prev" title="Utility functions" href="../usage/odb_utilities.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            odb4py
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/inspect_odb.html">Inspect the ODB metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/odb_dca.html">Creating Column Direct Access files (DCA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/odb_io.html">Open and close an ODB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/data_retrieval.html">SQL query and data retrieval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/odb_in_python_ecosystem.html">Integration with the python ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/open_odb_loop.html">Using odb4py inside loops</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ODB conversion and utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/odb_conversion.html">ODB data conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/odb_utilities.html">Utility functions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#odb4py-utils-module">odb4py <code class="docutils literal notranslate"><span class="pre">utils</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#OdbEnv"><code class="docutils literal notranslate"><span class="pre">OdbEnv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-initialization">Environment initialization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#init"><code class="docutils literal notranslate"><span class="pre">init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check_bin"><code class="docutils literal notranslate"><span class="pre">check_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check_lib"><code class="docutils literal notranslate"><span class="pre">check_lib()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-variable-management">Environment variable management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#update_var"><code class="docutils literal notranslate"><span class="pre">update_var()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get_var"><code class="docutils literal notranslate"><span class="pre">get_var()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dump_vars"><code class="docutils literal notranslate"><span class="pre">dump_vars()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-odb-object">The ODB object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#OdbObject"><code class="docutils literal notranslate"><span class="pre">OdbObject</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get_baseame"><code class="docutils literal notranslate"><span class="pre">get_baseame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get_size"><code class="docutils literal notranslate"><span class="pre">get_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#has_flag"><code class="docutils literal notranslate"><span class="pre">has_flag()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#has_ioassign"><code class="docutils literal notranslate"><span class="pre">has_ioassign()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#has_iomap"><code class="docutils literal notranslate"><span class="pre">has_iomap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get_pools"><code class="docutils literal notranslate"><span class="pre">get_pools()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get_tables"><code class="docutils literal notranslate"><span class="pre">get_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get_attrib"><code class="docutils literal notranslate"><span class="pre">get_attrib()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#SqlParser"><code class="docutils literal notranslate"><span class="pre">SqlParser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get_nfunc"><code class="docutils literal notranslate"><span class="pre">get_nfunc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clean_string"><code class="docutils literal notranslate"><span class="pre">clean_string()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#odb4py-core-module-c-api">odb4py <code class="docutils literal notranslate"><span class="pre">core</span></code>  module (C API)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#odb4py-convert-module-c-api">odb4py <code class="docutils literal notranslate"><span class="pre">convert</span></code> module (C API)</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence.html">Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">odb4py</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API documentation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-documentation">
+<h1>API documentation<a class="headerlink" href="#api-documentation" title="Link to this heading"></a></h1>
+<section id="odb4py-utils-module">
+<h2>odb4py <code class="docutils literal notranslate"><span class="pre">utils</span></code> module<a class="headerlink" href="#odb4py-utils-module" title="Link to this heading"></a></h2>
+<p>Contains a pure python modules with the following classes:</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="OdbEnv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OdbEnv</span></span><a class="headerlink" href="#OdbEnv" title="Link to this definition"></a></dt>
+<dd><p>Manage ODB runtime environment variables, binaries, and libraries.</p>
+<p>This class provides utilities to initialize the ODB environment,
+check required dependencies, and manipulate ODB-related environment variables.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a class="reference internal" href="#OdbEnv" title="OdbEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">OdbEnv</span></code></a> class is automatically initialized using the method <code class="docutils literal notranslate"><span class="pre">init()</span></code> below upon importing
+<code class="docutils literal notranslate"><span class="pre">odb4py</span></code> or any of its modules. This ensures that the required ODB
+environment variables and paths are configured before any operation is performed.
+This behavior is implemented in the package’s <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file and
+does not require any user intervention.</p>
+</div>
+</section>
+<section id="environment-initialization">
+<h2>Environment initialization<a class="headerlink" href="#environment-initialization" title="Link to this heading"></a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="init">
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#init" title="Link to this definition"></a></dt>
+<dd><p>Initialize the ODB runtime environment.</p>
+<p>This method:</p>
+<ul class="simple">
+<li><p>Loads the ODB shared library if available.</p></li>
+<li><p>Updates the system <code class="docutils literal notranslate"><span class="pre">PATH</span></code> to include ODB binaries.</p></li>
+<li><p>Sets required ODB binary environment variables.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>None</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="check_bin">
+<span class="sig-name descname"><span class="pre">check_bin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#check_bin" title="Link to this definition"></a></dt>
+<dd><p>Check the availability of required ODB binaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type <em>Tuple</em> (status, message)</p>
+</dd>
+</dl>
+<p>Example of returned values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(True,</span> <span class="pre">&quot;Found</span> <span class="pre">ALL</span> <span class="pre">needed</span> <span class="pre">binaries&quot;)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(False,</span> <span class="pre">&quot;Binaries&quot;,</span> <span class="pre">[missing_bins])</span></code></p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="check_lib">
+<span class="sig-name descname"><span class="pre">check_lib</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#check_lib" title="Link to this definition"></a></dt>
+<dd><p>Check the availability of required ODB runtime libraries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type <em>Tuple</em> – (status, message)</p>
+</dd>
+</dl>
+<p>Example of returned value:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(True,</span> <span class="pre">&quot;Found</span> <span class="pre">ALL</span> <span class="pre">needed</span> <span class="pre">runtime</span> <span class="pre">libraries&quot;)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(False,</span> <span class="pre">&quot;Library</span> <span class="pre">not</span> <span class="pre">found&quot;,</span> <span class="pre">[missing_libs])</span></code></p></li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="environment-variable-management">
+<h2>Environment variable management<a class="headerlink" href="#environment-variable-management" title="Link to this heading"></a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="update_var">
+<span class="sig-name descname"><span class="pre">update_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_vars</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#update_var" title="Link to this definition"></a></dt>
+<dd><p>Update ODB environment variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<ul class="simple">
+<li><p><strong>env_vars</strong> : Type <em>dict</em>  – dictionary of environment variables to set.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>None</em>
+Only variables starting with <code class="docutils literal notranslate"><span class="pre">ODB_</span></code> are allowed.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="o">=</span> <span class="n">OdbEnv</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">update_var</span><span class="p">({</span><span class="s2">&quot;ODB_IO_METHOD&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="get_var">
+<span class="sig-name descname"><span class="pre">get_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#get_var" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the value of an environment variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<ul class="simple">
+<li><p><strong>var_name</strong>   : Type <em>str</em>  – an ODB environment variable name.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type <em>str</em> or <em>None</em> – value of the variable.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dump_vars">
+<span class="sig-name descname"><span class="pre">dump_vars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dump_vars" title="Link to this definition"></a></dt>
+<dd><p>Returns all currently defined <code class="docutils literal notranslate"><span class="pre">ODB_*</span></code> environment variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type <em>dict</em> – dictionary of ODB environment variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="the-odb-object">
+<h2>The ODB object<a class="headerlink" href="#the-odb-object" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="OdbObject">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OdbObject</span></span><a class="headerlink" href="#OdbObject" title="Link to this definition"></a></dt>
+<dd><p>Represents an ODB database and provides access to its structure and metadata.</p>
+<p><em>Parameters</em> :</p>
+<ul class="simple">
+<li><p><strong>database</strong> : Type <em>str</em>  – path to the ODB database.</p></li>
+</ul>
+<p>The <a class="reference internal" href="#OdbObject" title="OdbObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">OdbObject</span></code></a> class provides methods to interact with an ODB database.
+After creating an instance of this class, all operations are performed
+through its methods.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="get_baseame">
+<span class="sig-name descname"><span class="pre">get_baseame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#get_baseame" title="Link to this definition"></a></dt>
+<dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Instance</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">OdbObject</span><span class="p">(</span><span class="n">database</span><span class="o">=</span> <span class="n">dbpath</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">get_basename</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>None</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type  <em>tuple</em>  (<strong>dbtype</strong>, <strong>obstype</strong>) in the case of ECMA and (<strong>dbtype</strong> , <strong>None</strong>) if a CCMA is used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="get_size">
+<span class="sig-name descname"><span class="pre">get_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#get_size" title="Link to this definition"></a></dt>
+<dd><p>Parameters :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>None</strong></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type <em>int</em>  the total size of the ODB in <strong>Bytes</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="has_flag">
+<span class="sig-name descname"><span class="pre">has_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbtype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#has_flag" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dbtype</strong>   : <em>str</em>  ODB type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>Boolean</em> – <strong>True</strong> if the ODB has ‘dbtype.flags’ file <strong>False</strong> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="has_ioassign">
+<span class="sig-name descname"><span class="pre">has_ioassign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbtype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#has_ioassign" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dbtype</strong> :  <em>str</em>  ODB type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>Boolean</em> – <strong>True</strong> if the ODB has <code class="docutils literal notranslate"><span class="pre">IOASSIGN</span></code> file <strong>False</strong> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="has_iomap">
+<span class="sig-name descname"><span class="pre">has_iomap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbtype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#has_iomap" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dbtype</strong> : <em>str</em>  ODB type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>Boolean</em> – <strong>True</strong> if the ODB has ‘dbtype.iomap’ file <strong>False</strong> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="get_pools">
+<span class="sig-name descname"><span class="pre">get_pools</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#get_pools" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>None</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>list</em> – List of the pools found in the ODB.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="get_tables">
+<span class="sig-name descname"><span class="pre">get_tables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#get_tables" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>None</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>list</em> – List of the tables found inside each pool.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="get_attrib">
+<span class="sig-name descname"><span class="pre">get_attrib</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#get_attrib" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>None</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>dict</em> – dictionary grouping all of the attributes found in the opened ODB.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="SqlParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SqlParser</span></span><a class="headerlink" href="#SqlParser" title="Link to this definition"></a></dt>
+<dd><p>Contains some functions to parse the SQL query string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="get_nfunc">
+<span class="sig-name descname"><span class="pre">get_nfunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*str*</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#get_nfunc" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Counts the number of arithmetic,trigonometric ,conversion  or/and aggregation functions in an SQL string.
+The resulting count is intended to be subtracted before filling data
+buffers. Without this adjustment, the resulting value lists may include
+additional empty items represented as &lt;NULL&gt; C pointer.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><em>arg</em> <em>str</em>  : The SQL query statement</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>int</em> – number of functions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clean_string">
+<span class="sig-name descname"><span class="pre">clean_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*str*</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#clean_string" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><em>arg</em> <em>str</em>   : The SQL query statement.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>str</em> – cleaned SQL query by filtering out tokens that are not part of the ODB SQL lexicon and unprintable characters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="odb4py-core-module-c-api">
+<h2>odb4py <code class="docutils literal notranslate"><span class="pre">core</span></code>  module (C API)<a class="headerlink" href="#odb4py-core-module-c-api" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">odb4py.core</span></code> module is implemented in C as an extension module (<code class="docutils literal notranslate"><span class="pre">core.so</span></code>). It provides the main methods to perform high-performance access to ODB databases.</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb_open">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb_open</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">PyUNSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">PyUNSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">kwargs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb_open" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<p><strong>database</strong>  - Path to the ODB (ECMA.&lt;obstype&gt; or CCMA).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PyTypeObject  <em>ODBConnection</em> or <em>None</em> if failed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb_close">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb_close</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">PyUNSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb_close" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<p><strong>None</strong></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type <em>int</em> 0 if succeded or <em>None</em> if failed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb_array">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb_array</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">Py_UNUSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">kwargs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb_array" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database</strong>  : Path to the ODB  , type <strong>str</strong> (required).</p></li>
+<li><p><strong>sql_query</strong> : SQL string query , type <strong>str</strong> (required).</p></li>
+<li><p><strong>header</strong>    : If the colnames is returned , type <strong>boolean</strong> (optional).   Default: False</p></li>
+<li><p><strong>queryfile</strong> : SQL statement from file , type <strong>str</strong> ‘fpath’ (optional).   Default: None</p></li>
+<li><p><strong>poolmask</strong>  : A mask for the pools in the ODB , type <strong>PyObject</strong> list (optional). Default: None</p></li>
+<li><p><strong>pbar</strong>      : Enable progress bar , type <strong>boolean</strong>  (optional). Default: False</p></li>
+<li><p><strong>fmt_float</strong> : Number of the decimal digits for floats , type <strong>int</strong> (optional). Default: 15</p></li>
+<li><p><strong>verbose</strong>   : Enable more verbosity , type <strong>boolean</strong> (optional).  Default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>tuple</em>  – (<em>None</em> , numpy.ndarray) if header = <em>False</em> or (<em>list</em> , numpy.ndarray) if header = <em>True</em>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb_dict">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb_dict</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">Py_UNUSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">kwargs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb_dict" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database</strong>  : Path to the ODB  , type <strong>str</strong> (required)</p></li>
+<li><p><strong>sql_query</strong> : SQL string query , type <strong>str</strong> (required)</p></li>
+<li><p><strong>nfunc</strong>     : Number of functions in the SQL statement, type <strong>int</strong> (required).</p></li>
+<li><p><strong>queryfile</strong> : SQL statement from file , type <strong>str</strong> ‘fpath’ (optional).   Default: None</p></li>
+<li><p><strong>poolmask</strong>  : A mask for the pools in the ODB , type <strong>PyObject</strong> list (optional). Default: None</p></li>
+<li><p><strong>pbar</strong>      : Enable progress bar , type <strong>boolean</strong>  (optional). Default: False</p></li>
+<li><p><strong>fmt_float</strong> : Number of the decimal digits for floats , type <strong>int</strong> (optional). Default: 15</p></li>
+<li><p><strong>verbose</strong>   : Enable more verbosity , type <strong>boolean</strong> (optional).  Default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>dict</em>  – a python dictionary with column names as keys and row values as list.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb_dca">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb_dca</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">Py_UNUSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">kwargs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb_dca" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database</strong>  : Path to the ODB  , type <strong>str</strong> (required).</p></li>
+<li><p><strong>dbtype</strong>    : Database type ECMA or CCMA , type <strong>str</strong> (required).</p></li>
+<li><p><strong>tables</strong>    : List of the tables found in the pools, type <strong>str</strong> (optional).  Default “ “.</p></li>
+<li><p><strong>ncpu</strong>      : Number of used CPUs when the DCA files(direct column access ) are created, type <strong>int</strong> (optional). Default 4.</p></li>
+<li><p><strong>extra_args</strong>: Add additional arguments to the <code class="docutils literal notranslate"><span class="pre">dcagen</span></code>. <em>See the documentation of dcagen script</em> , type <strong>str</strong>  (optional). Default “-u”</p></li>
+<li><p><strong>verbose</strong>   : Enable more verbosity , type <strong>boolean</strong> (optional).  Default (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>int</em> – 0 if succeeds or <em>None</em> if it fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb_geopoints">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb_geopoints</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">Py_UNUSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">kwargs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb_geopoints" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database</strong>  : Path to the ODB  , type <strong>str</strong> (required).</p></li>
+<li><p><strong>condition</strong> : Additional SQL <strong>WHERE</strong> clause, type <strong>str</strong> (optional). Default: None</p></li>
+<li><p><strong>unit</strong>      : Returns coordinates lat/lon in <em>degrees</em> or <em>radians</em>, type <strong>str</strong> (optional). Default: “degrees”.</p></li>
+<li><p><strong>extent</strong>    : Restricte the query to a given sub-domain delimited by extent=[lon1,lon2,lat1,lat2], type <strong>PyObject</strong> list (optional). Default: None</p></li>
+<li><p><strong>poolmask</strong>  : Get the data from defined mask,  type <strong>str</strong> (optional). Default: None (All pools)</p></li>
+<li><p><strong>fmt_float</strong> : Number of the decimal digits for floats , type <strong>int</strong> (optional). Default: 15</p></li>
+<li><p><strong>pbar</strong>      : Enable progress bar , type <strong>boolean</strong>  (optional). Default: False</p></li>
+<li><p><strong>verbose</strong>   : Enable more verbosity , type <strong>boolean</strong> (optional).  Default (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>dict</em> – python dictionary with <em>lat,lon,vertco_reference_1,vertco_reference_2,date,time,obsvalue</em> as keys and lists of their repective values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb_gcdist">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb_gcdist</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">Py_UNUSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb_gcdist" title="Link to this definition"></a><br /></dt>
+<dd><p>Independent method from the PyTypeObject <em>ODBConnection</em>. Performs the computation of the great circle distances between given lat/lon pairs.
+Note that the distances are given in <strong>meter</strong></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lon1</strong>   : longitude of the first  array.  (required)</p></li>
+<li><p><strong>lat1</strong>   : latitude  of the first  array.  (required)</p></li>
+<li><p><strong>lon2</strong>   : longitude of the second array. (required)</p></li>
+<li><p><strong>lat2</strong>   : latitude  of the second array.  (required)</p></li>
+</ul>
+<p><em>lon1,lat1,lon2 and lat2</em>  are  <strong>numpy.ndarray</strong>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <strong>numpy.ndarray</strong>, a square matrix with a shape of len(lon1) x len(lat1) distances computed  between all the lat/lon pairs (distances are in <strong>meter</strong>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="odb4py-convert-module-c-api">
+<h2>odb4py <code class="docutils literal notranslate"><span class="pre">convert</span></code> module (C API)<a class="headerlink" href="#odb4py-convert-module-c-api" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">odb4py.convert</span></code> is also written in C. At present,  It provides only one function <code class="docutils literal notranslate"><span class="pre">odb2nc</span></code> to write the ODB rows in NetCDF format.</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb2nc">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb2nc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">Py_UNUSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">kwargs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb2nc" title="Link to this definition"></a><br /></dt>
+<dd><blockquote>
+<div><p>Independent method from the PyTypeObject <em>ODBConnection</em>.
+Convert the returned ODB rows into NetCDF format (in backend )</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database</strong>  : Path to the ODB  , type <strong>str</strong> (required)</p></li>
+<li><p><strong>sql_query</strong> : SQL string query , type <strong>str</strong> (required)</p></li>
+<li><p><strong>ncfile</strong>    : Output NetCDF file name, type <strong>str</strong> ‘fpath’ (required).</p></li>
+<li><p><strong>poolmask</strong>  : Get the data from defined pools, type str (optional). Default: None (All pools)</p></li>
+<li><p><strong>fmt_float</strong> : Number of the decimal digits for floats , type int (optional). Default: 15</p></li>
+<li><p><strong>pbar</strong>      : Show the progress bar , type boolean (optional). Default: False</p></li>
+<li><p><strong>verbose</strong>   : Enable more verbosity , type boolean (optional). Default (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>int</em> : 0 if succeeds or -1 if it fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.odb2sqlite">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">odb2sqlite</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">Py_UNUSED</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">)</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span>, <span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">kwargs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.odb2sqlite" title="Link to this definition"></a><br /></dt>
+<dd><blockquote>
+<div><p>Independent method from the PyTypeObject <em>ODBConnection</em>.
+Convert the requested rows into sqlite database.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database</strong>  : Path to the ODB  , type <strong>str</strong> (required)</p></li>
+<li><p><strong>sql_query</strong> : SQL string query , type <strong>str</strong> (required)</p></li>
+<li><p><strong>sqlite_db</strong> : Output sqlite database name, type <strong>str</strong> ‘fpath’ (required).</p></li>
+<li><p><strong>table_name</strong>: The SQLite table which has to be created,  type <strong>str</strong> (optional).  default : “ODB”.</p></li>
+<li><p><strong>poolmask</strong>  : Get the data from defined pools, type str (optional). Default: None (All pools)</p></li>
+<li><p><strong>fmt_float</strong> : Number of the decimal digits for floats , type int (optional). Default: 15</p></li>
+<li><p><strong>pbar</strong>      : Show the progress bar , type boolean (optional). Default: False</p></li>
+<li><p><strong>verbose</strong>   : Enable more verbosity , type boolean (optional). Default (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Type <em>int</em> : 0 if succeeds or -1 if it fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../usage/odb_utilities.html" class="btn btn-neutral float-left" title="Utility functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../references/references.html" class="btn btn-neutral float-right" title="References" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Idir Dehmous, (RMI) 2026.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

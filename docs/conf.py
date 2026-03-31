@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project   = 'odb4py'
-copyright = '2025, I.Dehmous'
+copyright = 'Idir Dehmous, (RMI) 2026'
 author    = 'Idir Dehmous'
-release   = '1.3.1'
+release   = '1.3.2rc1'
 
 
 
