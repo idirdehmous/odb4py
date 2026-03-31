@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project   = 'odb4py'
-copyright = 'Idir Dehmous, (RMI) 2026'
+copyright = 'Idir Dehmous, Royal Meteorological Institute of Belgium -(RMI). March 2026'
 author    = 'Idir Dehmous'
 release   = '1.3.3'
 
