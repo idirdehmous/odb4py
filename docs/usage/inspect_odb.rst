@@ -23,8 +23,13 @@ Example: An ODB database from RMI,  **ECMA.synop**
 
    # Create a 'db' object 
    db = OdbObject("/path/to/ECMA.synop")
-   
+
+   # The  attributes are returned as a dict
+   db_attr  =db.get_attrib()
+
+   # print 
    for k, v in db_attr.items():
+       # Doesn't align by default 
        print( f"{k:<30}: {v}" )
 
 
