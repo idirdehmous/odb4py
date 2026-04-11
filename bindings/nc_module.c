@@ -1,8 +1,10 @@
+
 #define PY_SSIZE_T_CLEAN
 
+//NUMPY API
 #include <numpy/arrayobject.h>
 #include <numpy/ndarraytypes.h>
-
+// C
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
@@ -10,222 +12,43 @@
 #include <unistd.h>
 #include <time.h>
 #include <Python.h>
+
+#include "netcdf.h"
+
+
+// Custom
 #include "pyspam.h"
 #include "progress.h"
 #include "rows.h"
 #include "ncdf.h"
 
 
-// Length of strings in ODB
 #define ODB_STRLEN 8  // 8 chars + '\0'
- 
+#define CHUNK 10000
 
 
-// Get the returned rows and encode into NetCDF 
-static int rows4nc(const char *database,
-                   const char *sql_query,
-//                   int   fcols,
-                   const char *poolmask,
-		   const char *queryfile,
-                   double **buffer,   // no copy  
-                   char ***strbufs,   // no copy  
-                   int *nrows,
-                   int *ncols,
-                   nc_column_t **cols,
-                   colinfo_t   **ci , 
-		   Bool lpbar , 
-	           int fmt_float,
-	           Bool verbose 	)
+
+
+static int DefineNcfile       (  const char *database,
+                                  char *filename     ,
+                                  char *sql_query    ,
+                            //    const char *queryfile,
+                                  char *poolmask_str ,
+                                  int *ncid         )
+
 {
-//    int fmt_float = 15;
-    int maxcols   = 0;
-    void *h       = NULL;
-    int new_dataset = 0;
-    int nci = 0;
-    int nd;
-    int ncols_all = 0;
-    int row_idx   = 0;
-    size_t ip       = 0 ;
-    size_t prog_max = 0 ;
-
-    if (verbose) {
-        if (sql_query)
-            printf("Executing query from string: %s\n", sql_query);
-    }        else if (queryfile) {
-            printf("Executing query from file   : %s\n", queryfile);
-            printf("%s\n", "--odb4py : WARNING --> Executing the queries from SQL file is DEPRECATED. Not completly stable");
-    }
-
-
-    int total_rows = getMaxrows(database, sql_query, queryfile,poolmask);
-
-    if (total_rows <= 0) {
-        printf("--odb4py : ODB query returned zero rows\n");
-        return -1;
-    }
-
-
-    if (total_rows <= 0) total_rows = 4096;   // Fallback
-    prog_max = (size_t)total_rows;
-
-    // Open ODB  
-    h = odbdump_open(database, sql_query, queryfile, poolmask ,NULL , &maxcols);
-    //h = odbdump_open(database, sql_query, NULL, NULL, NULL, &maxcols);
-    if (!h || maxcols <= 0) {  printf("--odb4py : Failed to open ODB\n");
-        return -1;
-    }
-
-    double *d = malloc(sizeof(double) * maxcols);
-    if (!d) {
-        odbdump_close(h);
-        return -1;
-    }
-    while ((nd = odbdump_nextrow(h, d, maxcols, &new_dataset)) > 0) {
-        if (lpbar) {  
-	    ++ip;            
-	    print_progress(ip, prog_max); 
-	}   // useful for huge ODBs 
-									 
-        if (new_dataset) {
-            *ci = odbdump_destroy_colinfo(*ci, nci);
-            *ci = odbdump_create_colinfo(h, &nci);
-
-            *cols    = malloc(sizeof(nc_column_t) * nci);
-            *strbufs = calloc(nci, sizeof(char*));
-            if (!*cols || !*strbufs)
-                goto mem_error;
-
-// Realloc if necessary   ( row_idx greater than tot_rows. Worth doing it  ?? )
-if (row_idx >= total_rows) {
-         total_rows *= 2;	
-	 size_t size = (size_t)total_rows * (*ncols);
-         *buffer     = realloc(*buffer, sizeof(double)*  size  );
-        for (int j=0;j<*ncols;j++) {
-           if ((*cols)[j].meta->dtnum == DATATYPE_STRING) {
-              (*strbufs)[j] = realloc((*strbufs)[j],total_rows*(ODB_STRLEN+1));
-        }
-    }
-}              
-            // depends if a column is numeric or str 
-            ncols_all = 0;
-            for (int i = 0; i < nci; i++) {
-                (*cols)[ncols_all].odb_col = i;
-                (*cols)[ncols_all].meta    = &(*ci)[i];
-
-                if ((*ci)[i].dtnum == DATATYPE_STRING) {
-                    (*strbufs)[ ncols_all ] = calloc(total_rows, ODB_STRLEN + 1);
-                    if (!(*strbufs)[ncols_all])
-                        goto mem_error;
-                      }
-                ncols_all++;
-            }
-            *buffer = malloc(sizeof(double) * total_rows * ncols_all);
-            if (!*buffer)
-                goto mem_error;
-            new_dataset = 0;
-        }
-        for (int j = 0; j < ncols_all; j++) {
-            int i = (*cols)[j].odb_col;
-            colinfo_t *pci = (*cols)[j].meta;
-            double val = d[i];
-            if (pci->dtnum == DATATYPE_STRING) {
-                char *dst =
-                    &(*strbufs)[j][row_idx * (ODB_STRLEN + 1)];
-                if (fabs(val) == mdi) {
-                    memset(dst, 0, ODB_STRLEN + 1);
-                    strncpy(dst, "NULL", ODB_STRLEN);
-                }
-                else {
-                    union {
-                        char s[sizeof(double)];
-                        double d;
-                    } u;
-                    u.d = d[i];
-                    memcpy(dst, u.s, ODB_STRLEN);
-                    dst[ODB_STRLEN] = '\0';
-                    make_printable(dst, ODB_STRLEN);
-                }
-            }
-            else {
-                if (!val || fabs(val) == mdi) {
-                    (*buffer)[row_idx*ncols_all + j] = NAN;
-                }
-                else {
-                    switch (pci->dtnum) {
-                        case DATATYPE_INT1:
-                        case DATATYPE_INT2:
-                        case DATATYPE_INT4:
-                        case DATATYPE_YYYYMMDD:
-                        case DATATYPE_HHMMSS:
-                            (*buffer)[row_idx*ncols_all + j] =(double)(int)d[i];
-                            break;
-                        default:
-                            (*buffer)[row_idx*ncols_all + j] =format_float(d[i], fmt_float);
-                    }
-                }
-            }
-        }
-
-        row_idx++;
-    }// while 
-    *nrows = total_rows;
-    *ncols = ncols_all;
-    free(d);
-    odbdump_close(h);
-    return 0;
-
-// errors Label 
-mem_error:
-    if (*buffer) free(*buffer);
-    if (*strbufs) {
-        for (int i = 0; i < ncols_all; i++)
-            free((*strbufs)[i]);
-           free(*strbufs);
-    }
-    if (*cols) free(*cols);
-    if (*ci) odbdump_destroy_colinfo(*ci, nci);
-    if (h) odbdump_close(h);
-    if (d) free(d);
-    return -1;
-}
-
-
-
-
-
-// Write into  NetCDF file                                    
-static int writeNetcdf(const char *database   ,
-		       const char *outfile    ,
-		       char *sql_query  ,  
-		       char *queryfile  , 
-                       double     *buffer     ,
-		       char       *strbufs , 
-                       int         nrows   ,
-                       int         ncols   ,
-                       nc_column_t *col, 
-		       Bool verbose )
-{
-
-
-//  Just quick  Debug  
-/*printf("---- STRING BUFFER ----\n");
-for (int r = 0; r < nrows; r++)
-{    char (*s)[ODB_STRLEN] = (char (*)[ODB_STRLEN])strbufs;
-    printf("%.*s\n", ODB_STRLEN, s[r]);
-//    printf("%.*s\n", ODB_STRLEN, strbufs + r*ODB_STRLEN);
-}*/
-
-
 // Local date & Time 
 char datetime[64];
 time_t now = time(NULL);
-struct tm *tm_info = gmtime(&now);   // localtime()
-strftime(datetime, sizeof(datetime), "%Y-%m-%d %H:%M:%S UTC", tm_info);
+struct tm tm_info;
+gmtime_r(&now, &tm_info);
+
+strftime(datetime, sizeof(datetime), "%Y-%m-%d %H:%M:%S UTC", &tm_info);
 
 // Analysis & creation datetime  (From .dd file )
 int  size = 512       ; 
 char ddfile [ size ]  ;
-build_dd_path (database ,  ddfile  , size  ) ; 
+build_dd_path (database ,  ddfile  , size  ) ;    // Look for the path 
 
 int vers  =0, majv =0 ;   // ODB version  realease  
 int ana_date  =0 ;        // analysis datetime
@@ -242,33 +65,14 @@ scan_dd_file ( database  , &vers , &majv ,
 			   &creat_time ,
 			   &npools     ,
 			   &ntabs    )  ;
-/*printf( "Path to dd file %s , ODB version %d.%d ,   analysis date-time %6.6d-%6.6d  ,  create date-time  %6.6d-%6.6d  npools=%d, ntables=%d\n" , 
-		                                             ddfile ,  
-							     vers , majv,
-							     ana_date , 
-							      ana_time ,
-                                                              creat_date,
-                                                              creat_time,
-                                                              npools, 
-                                                              ntabs    )  ;  */
 
+// nc check  ID 
+int check  ;  
 // Prepare datetime for writing  
 char ana_str  [32];
 char creat_str[32];
 format_datetime(ana_date, ana_time, ana_str);
 format_datetime(creat_date, creat_time, creat_str);
-
-
-// dims and vars 
-    int ncid, dimid;
-    int *varids = NULL;
-    int check ;
-    double fill = 0.0 / 0.0;   // fill missing values 
-
-// create the file 
-check = nc_create(outfile, NC_NETCDF4, &ncid);
-if (check != NC_NOERR) { ERR(check);    return -1;  }
-
 
 // The title & global attrib 
 const char *conv        = "CF-1.10" ;
@@ -281,379 +85,403 @@ const char *data_source = "ECMWF ODB";
 // Get nc version  
 const char *nc_version     = nc_inq_libvers();
 
-// NC conventions
-check  =  nc_put_att_text(ncid, NC_GLOBAL,"Conventions", strlen(conv), conv);
-if (check != NC_NOERR) { ERR(check);    return -1;  }
+// Normalize strings  .. remove blanks 
+char sql_stmt [4096] ; 
+char version  [4096] ; 
+// Operate on local string  
+strcpy(sql_stmt , sql_query  );
+strcpy(version  ,nc_version  ); 
+normalize_spaces ( sql_stmt  );
+normalize_spaces ( version   );
 
-check  =nc_put_att_text(ncid, NC_GLOBAL, "NetCDF_library_version" ,strlen(nc_version),nc_version);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_text(ncid, NC_GLOBAL, "Title"      ,strlen(title) , title);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_text(ncid, NC_GLOBAL, "History"    ,strlen(history) , history);
-   if (check != NC_NOERR) { ERR(check);    return -1;  } 
-check  =nc_put_att_text(ncid, NC_GLOBAL, "odb4py_version"    ,strlen(ODB4PY_VERSION) , ODB4PY_VERSION);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-check  =nc_put_att_text(ncid, NC_GLOBAL, "Institution",strlen(institution) , institution);
-   if (check != NC_NOERR) { ERR(check);    return -1;  } 
-check  =nc_put_att_text(ncid, NC_GLOBAL, "Native_fomrat" ,strlen(data_source) , data_source );
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "NetCDF_filename" ,strlen(filename),filename );
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 
-if (queryfile) {
-check  =nc_put_att_text(ncid, NC_GLOBAL, "Used_SQL_filename"  ,strlen(queryfile)   , queryfile);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-} 
+check = nc_put_att_text(*ncid, NC_GLOBAL, "Conventions", strlen(conv), conv);
+    if (check != NC_NOERR) { ERR(check); return -1; }
 
-check  =nc_put_att_text(ncid, NC_GLOBAL, "sql_query"  ,strlen(sql_query)   , sql_query);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check = nc_put_att_text(*ncid, NC_GLOBAL, "NetCDF_datetime_creation", strlen(datetime), datetime);
+  if (check != NC_NOERR) { ERR(check); return -1; }
 
-check  =nc_put_att_text(ncid, NC_GLOBAL, "featureType",strlen(feature )    , feature );
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-// Date and time  
-check  =nc_put_att_text(ncid, NC_GLOBAL, "NetCDF_datetime_creation",strlen(datetime) , datetime );
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_text(ncid, NC_GLOBAL, "ODB_analysis_datetime"       , strlen(ana_str)  , ana_str  );
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_text(ncid, NC_GLOBAL, "ODB_creation_datetime"       , strlen(creat_str), creat_str);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-// The current odb attributes 
-check  =nc_put_att_int(ncid, NC_GLOBAL, "ODB_software_version"      , NC_INT, 1, &vers);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_int(ncid, NC_GLOBAL, "major_version", NC_INT, 1, &majv);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_int(ncid, NC_GLOBAL, "npools"       , NC_INT, 1, &npools);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_int(ncid, NC_GLOBAL, "ntables"      , NC_INT, 1, &ntabs);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-
-
-// dims :  1D dimension whith length = nobs 
-check  =nc_def_dim(ncid, "nobs", nrows, &dimid);  
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-// strings  a 2d   ( str_length , nobs  )
-int strlen_dimid;
-size_t str_len = ODB_STRLEN;
-check = nc_def_dim(ncid, "strlen", str_len, &strlen_dimid);
-if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-// Vars allocation 
-varids = malloc(sizeof(int) * ncols);
-if (!varids) return -1;
-
-// Whether to write strings or numeric values 
-// the nc_colname_t  structure is here  !
-for (int i = 0; i < ncols; i++) {
-        const char *name = col[i].meta->nickname ? col[i].meta->nickname: col[i].meta->name;
-        char varname[128];
-        strncpy(varname, name , sizeof(varname)-1);
-        varname[sizeof(varname)-1] = '\0';
-        sanitize_name(varname);
-	// define vars & attributes 	
-	if (strcmp(varname,"lat")==0 || strcmp(varname,"latitude")==0) {
-         check = nc_put_att_text(ncid, varids[i], "units", strlen("degrees_north"),"degrees_north");
-	 if (check != NC_NOERR) { ERR(check);    return -1;  }
-         check =nc_put_att_text(ncid, varids[i],"standard_name",strlen("latitude"),"latitude");           
-	 if (check != NC_NOERR) { ERR(check);    return -1;  }
-	} // lat  
-
-        if (strcmp(varname,"lon")==0 || strcmp(varname,"longitude")==0) {
-         check=nc_put_att_text(ncid, varids[i], "units", strlen("degrees_east"), "degrees_east");
-	 if (check != NC_NOERR) { ERR(check);    return -1;  }
-         check=nc_put_att_text(ncid, varids[i], "standard_name", strlen("longitude"), "longitude");           
-         if (check != NC_NOERR) { ERR(check);    return -1;  }
-	} // lon 
-
-if (col[i].meta->dtnum == DATATYPE_STRING) {
-    int dimids[2] = {dimid, strlen_dimid};
-    check = nc_def_var(ncid, varname, NC_CHAR, 2, dimids, &varids[i]);
-    if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-} else {
-    // Other variables
-    int dimids[1] = {dimid};
-    check = nc_def_var(ncid, varname, NC_DOUBLE, 1, dimids, &varids[i]);
-    if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-    // long variable names ( @table   is not ommitted ) 
-    check = nc_put_att_text(ncid, varids[i],"long_name",strlen(col[i].meta->name), col[i].meta->name);
-    if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-
-// Missing values 
-check =nc_put_att_double(ncid, varids[i],"_FillValue", NC_DOUBLE, 1, &fill);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-} //   column type test
-}  // for i loop
- 
-// End definition 
-check=nc_enddef(ncid);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
-
-
-//write strings 
-for (int c = 0; c < ncols; c++) {
-    if (col[c].meta->dtnum == DATATYPE_STRING) {
-        char *src = strbufs;
-        size_t start[2] = {0,0};
-        size_t count[2] = {nrows, ODB_STRLEN};
-        check=nc_put_vara_text(ncid, varids[c], start, count, src);
-	if (check != NC_NOERR) { ERR(check);    return -1;  }
-    }
+if (sql_query) {
+    check = nc_put_att_text(*ncid, NC_GLOBAL, "Data_SQL_statement", strlen(sql_stmt),sql_stmt);
+    if (check != NC_NOERR) { ERR(check); return -1; }
+}
+    
+if (poolmask_str) {
+    check = nc_put_att_text(*ncid, NC_GLOBAL, "pool#", strlen(poolmask_str), poolmask_str);
+    if (check != NC_NOERR) { ERR(check); return -1; }
 }
 
-// Buffer numeric  
-size_t start[1] = {0};
-size_t count[1] = {nrows};
-for (int c = 0; c < ncols; c++) {
-    if (col[c].meta->dtnum == DATATYPE_STRING)
-        continue;
-    double *colbuf = malloc(sizeof(double) * nrows);
-    if (!colbuf) {  return -1 ; }
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "NetCDF_library_version" ,strlen(nc_version),nc_version);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "Title"      ,strlen(title) , title);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "History"    ,strlen(history) , history);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "odb4py_version"    ,strlen(ODB4PY_VERSION) , ODB4PY_VERSION);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
 
-    for (int r = 0; r < nrows; r++) {
-        colbuf[r] = buffer[r*ncols + c];
-       //  to netcdf  
-       check=nc_put_vara_double(ncid, varids[c], start, count, colbuf);
-      if (check != NC_NOERR) { ERR(check);    return -1;  }
-  }
-    free(colbuf);
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "Institution",strlen(institution) , institution);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "Native_fomrat" ,strlen(data_source) , data_source );
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
 
-}
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "featureType",strlen(feature )    , feature );
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
 
-// get the number of written bytes 
-int nvars;
-nc_inq_nvars(ncid, &nvars);
-size_t total = 0;
-for (int v = 0; v < nvars; v++)
-    total += nc_var_size_bytes(ncid, varids[v] );
+// Date and time
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "NetCDF_datetime_creation",strlen(datetime) , datetime );
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "ODB_analysis_datetime"       , strlen(ana_str)  , ana_str  );
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "ODB_creation_datetime"       , strlen(creat_str), creat_str);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
 
-// 
-if (verbose  ) {
-printf( "%s\n" ,  "List of written columns :"  ) ;  
-      for ( int c =0; c< ncols ; c++ ){
-      printf  ( "%s  :  %s \n" , "Column " ,	 col[c].meta->name )  ; 
-      }
-}
+// The current odb attributes
+check  =nc_put_att_int(  *ncid, NC_GLOBAL, "ODB_software_version"      , NC_INT, 1, &vers);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_int(  *ncid, NC_GLOBAL, "ODB_major_version", NC_INT, 1, &majv);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_int(  *ncid, NC_GLOBAL, "Number_of_ODB_pools"       , NC_INT, 1, &npools);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+check  =nc_put_att_int(  *ncid, NC_GLOBAL, "Number_of_ODB_tables"      , NC_INT, 1, &ntabs);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }  
 
-// Close ncfile 
-check=nc_close(ncid);
-      if (check != NC_NOERR) { 
-	      ERR(check);    
-	      printf("--odb4py : Failed to write data into the NetCDF file")   ; 
-	      return -1;  
-      }          
-    free(varids);
-
-//  if is here without issue so ...
-   if (verbose ) {
-   printf("ODB data have been successfully written to : %s\n", outfile)  ; 
-   printf("Total written data size : %zu Bytes\n", total); 
-   }
-    return 0;
+   return 0;
 }
 
 
 
+// Function  : odb2nc_method
+static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
+                                 PyObject *args,
+                                 PyObject *kwargs) {
 
-
-// Main function wrapper to perform conversion ODB--> NetCDF
-static PyObject *odb2nc_method(PyObject *Py_UNUSED(self), PyObject *args, PyObject *kwargs){
+    // Arguments keywords
     const char *database  = NULL;
-     char *sql_query = NULL;
-     char *queryfile = NULL; 
-    const char *ncfile    = NULL;
+    char *sql_query = NULL;
+    char *queryfile = NULL;
+    char *ncfile    = NULL ;
 
-//    int   fcols     = 0;
-    int  fmt_float  =15  ;    //default  
-    Bool ldegree = true;
+    int   fcols     = 0;
+    int   fmt_float = 15  ;
+
+    // Objects
+    PyObject *poolmask_obj = Py_None;
+
+    // Options (Boolean args )
+    PyObject *pbar  = Py_None;
+    PyObject *pverb = Py_None;
+    Py_INCREF(pbar  );
+    Py_INCREF(pverb );
+
     Bool lpbar   = false;
     Bool verbose = false;
 
-    PyObject *poolmask_obj =Py_None ;   // given as a list  (object )
-
-    static char *kwlist[] = {
-        "database" ,
-        "sql_query",
-//        "nfunc"    ,
-        "ncfile"   ,
-	"poolmask" ,
-	"queryfile",
-        "lalon_deg",
-	"fmt_float",
-        "pbar"     ,
-        "verbose"  ,
-        NULL
-    };
-    PyObject *degree_obj = Py_True;
-    PyObject *pbar  = Py_None;
-    PyObject *pverb = Py_None;
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "szs|OzOiOO",
-                                     kwlist,
+    // Keyword list
+    static char *kwlist[] = {  "database"  ,
+	                       "sql_query" ,
+			       "nfunc"     ,
+			       "outfile"   ,
+			       "fmt_float",
+                               "queryfile",
+			       "poolmask" ,
+			       "pbar"     ,
+			       "verbose"  ,
+			        NULL
+                             };
+    // Parse keyword args
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "szis|izOOO", kwlist,   // 3 requiered , 5 optional
                                      &database,
                                      &sql_query,
-                                    // &fcols,
-                                     &ncfile,
-				     &poolmask_obj,
-				     &queryfile ,
-                                     &degree_obj,
-				     &fmt_float , 
+                                     &fcols    ,
+				     &ncfile   ,
+                                     &fmt_float,
+                                     &queryfile,
+                                     &poolmask_obj,
                                      &pbar,
-                                     &pverb))
-        return PyLong_FromLong(-1);
-
-    ldegree = PyObj_ToBool(degree_obj, ldegree);
-    lpbar   = PyObj_ToBool(pbar      , lpbar);
-    verbose = PyObj_ToBool(pverb     , verbose);
-
-
-// One is required 
+                                     &pverb)) {
+          return PyLong_FromLong(-1);
+    }
+    // Required
     if (!sql_query && !queryfile) {
        PyErr_SetString(PyExc_TypeError,
         "--odb4py : Either 'sql_query' or 'queryfile' must be provided");
-     return PyLong_FromLong(-1)  ;
+     return PyLong_FromLong(-1);
     }
 
-
-    // Convert from object to C string 
-    const  char *poolmask_str =NULL ; 
+    // Convert to string
+     char *poolmask_str = NULL;
     if (poolmask_obj != Py_None) {
         if (!PyUnicode_Check(poolmask_obj)) {
          PyErr_SetString(PyExc_TypeError, "--odb4py : poolmask must be a string.  ex: '1 2 3 N' or '1:N' N=Number of pools'  \n") ;
-          return PyLong_FromLong(-1)  ;
+         return PyLong_FromLong(-1);
          }
      poolmask_str  = PyUnicode_AsUTF8(poolmask_obj);
     }
-
-
-    double *buffer  = NULL;
-    char   **strbufs = NULL;
-    int nrows = 0;
-    int ncols = 0;
-    nc_column_t *cols = NULL;
-    colinfo_t   *ci   = NULL;
-
-    // Get rows 
-    if (rows4nc(database    , 
-                sql_query, 
-                //fcols, 
-	       	poolmask_str,
-		queryfile,
-                &buffer , &strbufs ,
-                &nrows  , &ncols   ,
-                &cols   , &ci      ,
-                lpbar, fmt_float , verbose ) != 0)
-
-
-    {
-        PyErr_SetString(PyExc_RuntimeError, "--odb4py : Failed to get rows from ODB for NetCDF encoding");
-        return PyLong_FromLong(-1);
+    // Conversion to boolean C variable
+    lpbar   = PyObj_ToBool ( pbar , lpbar      ) ;
+    verbose = PyObj_ToBool ( pverb , verbose   ) ;
+    if (verbose && poolmask_str ) {
+        printf("Fetch data from pool(s) #: %s\n", poolmask_str );
     }
+    char  *varvalue = NULL;
+    int    maxlines = -1;
+    void  *h        = NULL;
+    int    maxcols  = 0 ;
+    int    rc       = 0 ;
+    size_t ip       = 0 ;
+    size_t prog_max = 0 ;
+    int   nci       = 0;
+    colinfo_t *ci = NULL;
 
+    // Get maximum number of rows
+    int total_rows = getMaxrows(database, sql_query , queryfile , poolmask_str );
 
-    //   Convert coordinates        
-    //   If it's not in degrees , force conversion  
-    //   ldegree is infered from  the sql query  
-    if (!ldegree) {
-        if (verbose)
-            printf("--odb4py : Coordinates converted radians to degrees\n\n");
-        convert_rad_to_deg(buffer, nrows, ncols, cols);
+    // Check number of rows --> check the query answer
+    if ( total_rows ==0 ) {
+      PyErr_SetString(PyExc_RuntimeError, "--odb4py : The SQL request returned zero rows.");
+      return PyLong_FromLong(-1) ;
     }
+    if (total_rows <= 0) total_rows = 4096;   // Fallback
+    prog_max = (size_t)total_rows;
+    if (maxlines == 0) return PyLong_FromLong(rc);
+    if (verbose) {
+        if (sql_query)
+            printf("--odb4py : Executing query from string: %s\n", sql_query);
+    }   else if (queryfile) {
+            printf("--odb4py : Executing query from file   : %s\n", queryfile);
+	    printf("%s\n", "--odb4py : WARNING --> Executing the queries from SQL file is DEPRECATED. Not completly stable");
+    }
+    //  OPEN ODB
+    h = odbdump_open(database, sql_query, queryfile, poolmask_str , varvalue, &maxcols);
+    if (!h || maxcols <= 0) {
+        PyErr_SetString(PyExc_RuntimeError, "--odb4py : Failed to open ODB or invalid number of columns");
+        return PyLong_FromLong(-1)  ;
+    }
+    // Number of columns taking into account the number of functions in the query  (col pure - n columns function)
+    int ncols = maxcols - fcols;
+    if (verbose)   printf("--odb4py : Number of requested columns : %d\n", ncols);
 
-    // Allocate buffer for string 
-    size_t str_len = ODB_STRLEN;
-    char *buffer_str  = malloc(nrows * str_len);
-    if (!buffer_str) {
-        PyErr_SetString(PyExc_RuntimeError,
-            "--odb4py : Failed to allocate string buffer string for NetCDF encoding");
+
+
+
+// Init nc vars 
+int ncid, dimid, strlen_dimid;
+int *varid     = malloc(ncols * sizeof(int));
+int *is_string = malloc(ncols * sizeof(int));
+int check = 0 ; 
+
+// create ncetcdf   file 
+check = nc_create(ncfile  , NC_NETCDF4, &ncid);
+     if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+
+
+
+// Encode the metadata  
+if ( DefineNcfile  (database    ,
+                    ncfile      ,
+	            sql_query   , 
+		  poolmask_str  ,  
+		  &ncid   ) != 0 ) {
+      printf("%s\n" ,   "--odb4py : Failed to write meta data" )   ; 
+      return PyLong_FromLong(-1)   ; 
+} 
+
+//  Add the ODB data according to sql query and columns/rows 
+//  dimensions
+check = nc_def_dim(ncid, "obs", NC_UNLIMITED, &dimid);
+if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+check = nc_def_dim(ncid, "strlen", ODB_STRLEN, &strlen_dimid);
+if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+
+//  ODB data are returned here !
+double *d = malloc(maxcols * sizeof(double));
+
+// Temporary data buffers 
+double **buffers     = malloc(ncols * sizeof(double*));
+char   **str_buffers = malloc(ncols * sizeof(char*));
+
+// Exit if not allocated 
+if ( !buffers || !str_buffers )  {
+      printf("%s\n", "--odb4py : Failed to allocate buffer for NetCDF encoding.") ; 
+      return PyLong_FromLong(-1) ;
+}
+for (int i = 0; i < ncols; i++) {
+    buffers[i]     = malloc(CHUNK * sizeof(double));
+    str_buffers[i] = malloc(CHUNK * ODB_STRLEN * sizeof(char));
+    is_string  [i] = 0;
+    if ( !buffers[i] || !str_buffers[i]  ) {
+         
+	    // Free 
+        for (int j = 0; j <= i; j++) {
+            if (buffers[j])     free(buffers[j]);
+            if (str_buffers[j]) free(str_buffers[j]);
+        }
+	    if (verbose) {
+                 printf(  "--odb4py : Memory allocation failed for column %d\n", i);
+                  }
         return PyLong_FromLong(-1) ;
     }
-
-    //  Get string values 
-    for (int c = 0; c < ncols; c++) {
-        if (cols[c].meta->dtnum == DATATYPE_STRING) {
-            char *src = strbufs[c];
-            char *dst = buffer_str;
-            for (int r = 0; r < nrows; r++) {
-                memcpy(dst, src, str_len);
-                dst += str_len;
-                src += str_len + 1;
-            }
-
-	    // Better to send the both types at once 
-            /*writeNetcdf_string_column(
-                ncfile,
-                sql_query,
-                c,
-                col_buf,
-                nrows,
-                str_len,
-                cols
-            );*/
-        }
-    }
-
-
-// Start writing data 
-printf("Writing ODB data into NetCDF file ...\n" )  ;
-
-// Before writing  !!
-char *sql_text = NULL;
-// Check if a file is used or just an SQL statement
-if (queryfile) {
-    sql_text = read_sql_file(queryfile);
-    char *select_query = extract_select(sql_text);
-    trim(select_query);
-    sql_text = select_query;
-    
-} else {	
-    // The query is a string statement -->  Clean blank spaces in the query
-    normalize_spaces(sql_query);
-    trim(sql_query);
-    sql_text = sql_query;
 }
 
-// Remove the path to the query file   .. User account will be shown !
-char *sql_file =NULL ; 
-if (queryfile) {	
-char *sql_file = queryfile;
-char *base     = strrchr(queryfile, '/');
-   if (base)
-        sql_file = base + 1;
-}  
 
-// Write !
-int status = writeNetcdf(          database, 
-		                   ncfile, 
-		                   sql_text,
-				   sql_file,
-                                   buffer, 
-				   buffer_str,
-                                   nrows, 
-				   ncols, 
-				   cols, 
-				   verbose);
 
-if (status != 0 ) {
-        PyErr_SetString(PyExc_RuntimeError,
-            "--odb4py : Failed to write data into the NetCDF file" );
-       return  PyLong_FromLong( -1 );
-       }
+// Indices 
+size_t k = 0;
+size_t global_index = 0;
 
-    // Free  allocations 
-    free(buffer_str);
-    free(buffer);
-    free(cols);
+int first_dataset = 1;
+int new_dataset   = 0;
 
-    // Free the columpn struct 
-    if (ci)   { 
-       odbdump_destroy_colinfo(ci, 0); 
-      }
-    
-  return PyLong_FromLong(0)  ; 
+// Loop over ODB  rows 
+int (*nextrow)(void *, void *, int, int *) = odbdump_nextrow;
+while (nextrow(h, d, maxcols, &new_dataset) > 0) {
+    if (lpbar) {  ++ip;            print_progress(ip, prog_max); }   // useful for huge ODBs 
+        if (new_dataset) {
+            ci = odbdump_destroy_colinfo(ci, nci);
+            ci = odbdump_create_colinfo(h, &nci);
+            new_dataset = 0;
+        }
+    // Define nc variables only once 
+    if (first_dataset) {
+        for (int i = 0; i < ncols; i++) {
+            const char *name = ci[i].nickname ? ci[i].nickname : ci[i].name;
+            char  cname[128];
+            strcpy(cname, name);
+            sanitize_name(cname);
+	
+            //printf("%s   %s\n", "column :"  ,  cname )      ; 
+            //if ( strcmp(cname,"lat_hdr")== 0  || strcmp(cname,"lon_hdr")== 0 ) {
+	    //    is_coord[]	    
+	    //}
+
+            int odb_dtype = ci[i].dtnum;
+            if (odb_dtype == DATATYPE_STRING) {
+                is_string[i] = 1;   // ---> this col  is  string  dtype 
+                int dimids[2] = {dimid, strlen_dimid};
+           // column name
+           check = nc_def_var(ncid, cname, NC_CHAR, 2, dimids, &varid[i]);		
+	      if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+            } else {
+                is_string[i] = 0;
+                int nc_type;
+                switch (odb_dtype) {
+                    case DATATYPE_INT1:
+                    case DATATYPE_INT2:
+                    case DATATYPE_INT4:
+                    case DATATYPE_YYYYMMDD:
+                    case DATATYPE_HHMMSS:  nc_type = NC_INT   ; break;
+                    default:               nc_type = NC_DOUBLE; break;
+                }
+		// def vars according to  datatype 
+                check = nc_def_var(ncid, cname, nc_type, 1, &dimid, &varid[i]);
+                   if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+
+        if (strcmp(cname,"degrees_lat")==0 || strcmp(cname,"lat_hdr")==0) {
+         check = nc_put_att_text(ncid, varid[i], "units", strlen("degrees_north"),"degrees_north");
+            if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+         check =nc_put_att_text(ncid, varid[i],"standard_name",strlen("latitude"),"latitude");
+	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+        } // lat
+        if (strcmp(cname,"degrees_lon")==0 || strcmp(cname,"lon_hdr")==0) {
+         check=nc_put_att_text(ncid, varid[i], "units", strlen("degrees_east"), "degrees_east");
+	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+         check=nc_put_att_text(ncid, varid[i], "standard_name", strlen("longitude"), "longitude");
+	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+        } // lon
+
+        // Missing values 
+        double ffill = -999999.0 ;  //NC_FILL_DOUBLE;
+	int    nfill = -999999 ; 
+        check= nc_put_att_double(ncid, varid[i], "_FillValue", NC_DOUBLE, 1, &ffill);
+	check= nc_put_att_int   (ncid, varid[i], "_FillValue", NC_DOUBLE, 1, &nfill);
+        
+	size_t chunk[1] = {CHUNK};
+        check  = nc_def_var_chunking(ncid, varid[i], NC_CHUNKED, chunk);
+             if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+            }
+        } // for ncols 1  -->  var definition 
+        check = nc_enddef(ncid);
+	   if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+        first_dataset = 0;
+    }   // first dataset 
+
+
+    //  FILL BUFFERS 
+    for (int i = 0; i < ncols; i++) {        	    
+        ci = odbdump_create_colinfo(h, &nci);
+        const char *name = ci[i].nickname ? ci[i].nickname : ci[i].name;
+        char  cname[128];
+        strcpy(cname, name);
+        sanitize_name(cname); 
+        if (is_string[i]) {
+            char *dst = &str_buffers[i][k * ODB_STRLEN];
+            union { char s[sizeof(double)]; double d; } u;
+            u.d = d[i];
+            for (size_t j = 0; j < sizeof(double); j++) {
+                char c = u.s[j];
+                dst[j] = isprint(c) ? c : ' ';            }
+            for (int j = sizeof(double); j < ODB_STRLEN; j++) {
+                dst[j] = ' ';
+            }
+        } else {		    
+	// In netcdf lat/lon are in degrees 
+	// the function 'sanitize_name'  removes '@' character and replace with '_'.
+ 	if (strcmp(cname,"lon_hdr")==0  || strcmp(cname,"lat_hdr")==0 ) {
+             buffers[i][k] = d[i] *RAD2DEG;            
+        }else {	
+	     buffers[i][k] = d[i];
+	      }
+	}
+    }  // for ncols  2 -- > fill buffers 
+    k++;
+    // write  data by CHUNKS 
+    if (k == CHUNK) {
+        for (int i = 0; i < ncols; i++) {
+            if (is_string[i]) {
+                size_t start[2] = {global_index, 0};
+                size_t count[2] = {k, ODB_STRLEN};
+                check = nc_put_vara_text(ncid, varid[i], start, count, str_buffers[i]);
+         	   if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+            } else {
+                size_t start[1] = {global_index};
+                size_t count[1] = {k};
+                check = nc_put_vara_double(ncid, varid[i], start, count, buffers[i]);
+	            if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+            }
+        }
+        global_index += k;   // Update global index 
+        k = 0;
+      }  // k == CHUNK 
+}
+
+// Final bloc 
+if (k > 0) {
+    for (int i = 0; i < ncols; i++) {
+        if (is_string[i]) {
+            size_t start[2] = {global_index, 0};
+            size_t count[2] = {k, ODB_STRLEN};
+            check = nc_put_vara_text(ncid, varid[i], start, count, str_buffers[i]);
+	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+        } else {
+            size_t start[1] = {global_index};
+            size_t count[1] = {k};
+            check = nc_put_vara_double(ncid, varid[i], start, count, buffers[i]);
+	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+        }
+    }
+}
+
+//  Close the NETCDF file  
+check = nc_close(ncid);
+if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+// Free buffers 
+if (buffers)     free(buffers);
+if (str_buffers) free(str_buffers);
+// free structures 
+if (ci)   odbdump_destroy_colinfo(ci, nci);
+if (h)    odbdump_close(h);
+return PyLong_FromLong(0);
 }
