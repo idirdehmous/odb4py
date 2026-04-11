@@ -1,6 +1,10 @@
 #ifndef NCDF_H
 #define NCDF_H
 
+
+#include <unistd.h>
+#include <sys/stat.h>
+
 #include <ctype.h>
 #include <string.h>
 #include <libgen.h>
@@ -25,36 +29,60 @@ typedef struct  {
 } nc_column_t;
 
 
-void sanitize_name(char *name)
-{    
-for (char *p = name; *p; p++){
-        if (*p=='(' || *p==')' ||
-            *p=='@' || *p=='.' ||
-            *p=='/' )
-        {
-            *p = '_';
-        }
+
+/*static int   check_scratch  (const char *varname) {   
+ * Check whether the *TMPDIR , SCRATCH or SCRATCHDIR  exist and have rw access
+    char *val = getenv(varname);
+    struct stat info;
+    if ( val    == NULL) {
+        printf("%s Not defined path  .\n",   val   );
+        return -1 ;
+     } 
+    // W_OK -->>  write access OK
+    // R_OK -->>  read access OK
+    // X_OK -->>  execute access OK
+        if (stat(val , &info) == 0) {
+             if (S_ISDIR(info.st_mode)) {
+            		 if  (access( val  , W_OK) == 0 ) {        // Exists + dir +  write 
+	          	   return 0  ;
+		           } else { printf( "The directory %s has no WRITE access\n" ,  val ) ; return -1  ; }			 
+		         if ( access( val  , R_OK) == 0 ) {        // Exists + dir +  read 
+	                   return 0 ; 
+                            } else {printf( "The directory %s has no  READ access\n" ,  val ) ; return -1  ;   } 		
+			    } else {	       
+                  		 printf( " NOT FOUND directory %s\n", val  ) ;  return -1  ; }
+		 } else {printf( " NOT FOUND  directory :%s\n", val  ) ;  return -1  ;  }		 
+return 0; 
+}*/
+
+
+
+void poolfile(char *outfile, 
+	      size_t size,
+	      char *filename , 
+              char *index_str )
+{
+    const char *dot = strrchr(filename, '.');
+
+    if (dot) {
+        size_t base_len = dot - filename;
+        snprintf(outfile, size, "%.*s_%s%s", (int)base_len, filename,index_str, dot);
+          printf( "From ncdf.h %s\n", outfile  ) ; 
+    } else {
+        snprintf(outfile, size, "%s_%s",filename, index_str);
+	printf( "From ncdf.h %s\n", outfile  ) ;
+
     }
 }
 
 
-static void make_printable(char *s, int slen)
-{
-    for (int j = 0; j < slen; j++) {
-        unsigned char c = s[j];
-        if (!isprint(c))
-            s[j] = ' ';
-    }
-}
-
-static int is_coord(const char *name)
-{
-    if (!name) return 0;
-    return (!strcmp(name,"lat")  || !strcmp(name,"lon")  || !strcmp(name,"latitude") || !strcmp(name,"longitude"));
-}
 
 
-static void convert_rad_to_deg(double *buffer,
+
+/*static int is_coord(const char *name){
+if (!name) return 0;
+return (!strcmp(name,"lat")  || !strcmp(name,"lon")  || !strcmp(name,"latitude") || !strcmp(name,"longitude"));}*/
+/*static void convert_rad_to_deg(double *buffer,
                                    int nrows,
                                    int ncols,
                                nc_column_t *cols)
@@ -76,7 +104,7 @@ static void convert_rad_to_deg(double *buffer,
             buffer[idx] *= RAD2DEG;
         }
     }
-}
+}*/
 
 
 void build_dd_path(const char *path, char *ddfile, size_t size)
