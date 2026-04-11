@@ -19,6 +19,7 @@
 #include "pyspam.h"
 #include "progress.h" 
 #include "rows.h" 
+#include "map_dtype.h"
 
 #define ODB_STRLEN 8  // 8 chars + '\0'
 
@@ -34,7 +35,7 @@
 
 
 // Function  : odb2sqlite_method
-static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
+static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
                                  PyObject *args,
                                  PyObject *kwargs) {
 
@@ -68,7 +69,7 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     static char *kwlist[] = {  "database"  , 
 	                       "sql_query" , 
 			       "nfunc"     ,
-			       "sqlite_db" ,
+			       "outfile" ,
 			       "table_name",
 			       "fmt_float",
                                "queryfile", 
@@ -94,19 +95,20 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     }
     // Required  
     if (!sql_query && !queryfile) {
-       PyErr_SetString(PyExc_TypeError,
-        "--odb4py : Either 'sql_query' or 'queryfile' must be provided");
-     return PyLong_FromLong(-1);
+      printf( "%s\n" ,  "--odb4py : Either 'sql_query' or 'queryfile' must be provided"  ); 
+       return PyLong_FromLong(-1);
     }
     // Convert to string  
     const char *poolmask_str = NULL;
     if (poolmask_obj != Py_None) {
         if (!PyUnicode_Check(poolmask_obj)) {
-         PyErr_SetString(PyExc_TypeError, "--odb4py : poolmask must be a string.  ex: '1 2 3 N' or '1:N' N=Number of pools'  \n") ;  
+	  printf( "%s\n", "--odb4py : poolmask must be a string.  ex: '1 2 3 N' or '1:N' N=Number of pools'  \n") ;
          return PyLong_FromLong(-1);
          }
      poolmask_str  = PyUnicode_AsUTF8(poolmask_obj);
     }   
+
+
     // Conversion to boolean C variable
     lpbar   = PyObj_ToBool ( pbar , lpbar      ) ; 
     verbose = PyObj_ToBool ( pverb , verbose   ) ; 
@@ -128,7 +130,7 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
 
     // Check number of rows --> check the query answer 
     if ( total_rows ==0 ) {
-      PyErr_SetString(PyExc_RuntimeError, "--odb4py : The SQL request returned zero rows.");  
+      printf( "%s\n",  "--odb4py : The SQL request returned zero rows." )  ; 
       return PyLong_FromLong(-1) ;  
     }
     if (total_rows <= 0) total_rows = 4096;   // Fallback  
@@ -145,7 +147,7 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     h = odbdump_open(database, sql_query, queryfile, poolmask_str , varvalue, &maxcols);
     
     if (!h || maxcols <= 0) {
-        PyErr_SetString(PyExc_RuntimeError, "--odb4py : Failed to open ODB or invalid number of columns");
+        printf( "%s\n", "--odb4py : Failed to open ODB or invalid number of columns" )  ; 
         return PyLong_FromLong(-1)  ; 
     }
 
@@ -157,8 +159,8 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     // Start transaction 
     rc  = sqlite3_open(sqlite_db , &db);
     if ( rc  ){
-        PyErr_SetString(PyExc_RuntimeError, "--odb4py : Can't open destination database for SQLITE conversion ");
-      return  PyLong_FromLong(-1) ;  
+	printf( "%s\n", "--odb4py : Can't open destination database for SQLITE conversion ");
+        return  PyLong_FromLong(-1) ;  
     }
     
 
@@ -167,7 +169,7 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
     rc  =  sqlite3_exec(db, "BEGIN TRANSACTION;", 0, 0, 0);
     CHECK_RC(rc, db, "Begin SQLITE transaction failed"   );
 
-    // sqlite table 
+    // = 1 if created 
     int table_created = 0;
 
     // Rows 
@@ -177,7 +179,7 @@ static PyObject *odb2sqlite_method(PyObject *Py_UNUSED(self),
 
 
     // Bytes counter (for the extract & written ONLY without the file structure )
-    int total_bytes =0   ; 
+    size_t  total_bytes =0   ; 
     while (nextrow(h, d, maxcols, &new_dataset) > 0) {
         if (lpbar) {  ++ip;            print_progress(ip, prog_max); }   // useful for  large ODBs
 
@@ -326,9 +328,9 @@ sqlite_error:
     if (ci)   odbdump_destroy_colinfo(ci, nci);
     if (h)    odbdump_close(h);
 
-if (  verbose )  {
-   printf( "%s : %s\n" , "--odb4py : Rows have been successfully written into the SQLITE db" , sqlite_db ) ;
-   printf( "%s : %d Bytes\n" , "--odb4py : Total written data size ",  total_bytes  ) ;
+if ( verbose )  {
+   printf( "%s : %s\n" , "--odb4py : ODB successfully written into the SQLite file" , sqlite_db ) ;
+   printf( "%s : %ld Bytes\n" , "--odb4py : Total written data size ",  total_bytes  ) ;
 }
 return PyLong_FromLong(0);
 }
