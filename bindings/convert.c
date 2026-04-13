@@ -3,16 +3,13 @@
 #include <Python.h>
 
 #include "nc_module.c"
+#include "odc_module.c"
 #include "sqlite_module.c"
 
-/*PyDoc_STRVAR(ncdf_doc,"Extract the data from the ODB and writes into NetCDF file" )
-PyDoc_STRVAR(sql_doc,"Extract the data from the ODB and writes into SQLITE database" )
-PyDoc_STRVAR(conv_doc,"Set of C/Python functions to perform ODB to other formats conversion. The original source code has been developed by S.Saarinen et al\n***Copyright (c) 1997-98, 2000 ECMWF. All Rights Reserved !***");*/
-
-
 static PyMethodDef  convert_methods[] = {
-    {"odb2nc"  ,     (PyCFunction) (void(*)(void)) odb2nc_method  , METH_VARARGS | METH_KEYWORDS,     "" },
-    {"odb2sqlite"  , (PyCFunction) (void(*)(void)) odb2sqlite_method  , METH_VARARGS | METH_KEYWORDS,  ""  },
+    {"odb_to_nc"      , (PyCFunction) (void(*)(void)) odb_to_nc_method      , METH_VARARGS | METH_KEYWORDS,  "" },
+    {"odb_to_sqlite"  , (PyCFunction) (void(*)(void)) odb_to_sqlite_method  , METH_VARARGS | METH_KEYWORDS,  "" },
+    {"odb_to_odb2"    , (PyCFunction) (void(*)(void)) odb_to_odb2_method    , METH_VARARGS | METH_KEYWORDS,  "" },
     {NULL, NULL, 0, NULL}  
 
 };
@@ -23,7 +20,7 @@ static PyMethodDef  convert_methods[] = {
 static struct PyModuleDef   odb_convert = {
     PyModuleDef_HEAD_INIT,
     "convert"         ,
-      ""              , 
+     ""               , 
     -1                ,
     convert_methods   ,
     .m_slots =NULL
