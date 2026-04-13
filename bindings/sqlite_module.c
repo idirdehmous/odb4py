@@ -210,19 +210,6 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
                  snprintf(insert_sql, sizeof(insert_sql),
                  "INSERT INTO \"%s\" VALUES (", cleaned_table);
                 
-                /*char sql[4096] = "CREATE TABLE IF NOT EXISTS ODB (";
-	        char cleaned_table[128];
-		if (!table_table) {  
-		table_name = "ODB" ;  
-		} else {
-                strcpy(cleaned_table, table_name);
-                sanitize_name(cleaned_table);
-                snprintf(sql, sizeof(sql), "CREATE TABLE IF NOT EXISTS %s (", cleaned_table);    // remove blank characters 
-                snprintf(sql, sizeof(sql), "CREATE TABLE IF NOT EXISTS \"%s\" (", table_name);
-                char insert_sql[4096] = "INSERT INTO ODB VALUES (";
-                snprintf(insert_sql, sizeof(insert_sql), "INSERT INTO \"%s\" VALUES (", table_name);
-		}*/
-
 
                 for (int i = 0; i < ncols; i++) {
                     const char *name = ci[i].nickname ? ci[i].nickname : ci[i].name;
@@ -280,7 +267,7 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
                    union {  char s[sizeof(double)] ;double d;} u ;  u.d = d[i];
                    for (long unsigned int js=0; js<sizeof(double); js++) { 
 			char c = u.s[js]; 
-			*scc++ = isprint(c) ? c : '8' ; 
+			*scc++ = isprint(c) ? c : ' ' ; 
 		       }
                      *scc = '\0';
 		      total_bytes+= sizeof(  cc) ; 
