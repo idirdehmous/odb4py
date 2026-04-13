@@ -15,18 +15,14 @@ PyObject  *odb_open_method(PyObject  *Py_UNUSED(self),
 {
 
     const  char *database  = NULL  ;
-
-
     static char *kwlist[] = {"database", 
 	                      NULL};
-
     if (!PyArg_ParseTupleAndKeywords(args, 
 			             kwargs, "s",
                                      kwlist, 
 				     &database))  {	    
         return NULL;
      }    
-
     ODBConnection *conn =  PyObject_New(ODBConnection, &ODBConnectionType);
     conn->handle = ODBc_open(database, "r",  &conn->npools,  &conn->ntables,  NULL);
     if (conn->handle <= 0) {
@@ -38,7 +34,6 @@ PyObject  *odb_open_method(PyObject  *Py_UNUSED(self),
     // return connection object  !
     return (PyObject* )conn;
 }
-
 
 
 
