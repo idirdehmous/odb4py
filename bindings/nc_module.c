@@ -94,6 +94,10 @@ strcpy(version  ,nc_version  );
 normalize_spaces ( sql_stmt  );
 normalize_spaces ( version   );
 
+check  =nc_put_att_text(  *ncid, NC_GLOBAL, "Title"      ,strlen(title) , title);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }
+
+
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "NetCDF_filename" ,strlen(filename),filename );
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 
@@ -115,8 +119,8 @@ if (poolmask_str) {
 
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "NetCDF_library_version" ,strlen(nc_version),nc_version);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_text(  *ncid, NC_GLOBAL, "Title"      ,strlen(title) , title);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }
+/*check  =nc_put_att_text(  *ncid, NC_GLOBAL, "Title"      ,strlen(title) , title);
+   if (check != NC_NOERR) { ERR(check);    return -1;  }*/
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "History"    ,strlen(history) , history);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "odb4py_version"    ,strlen(ODB4PY_VERSION) , ODB4PY_VERSION);
@@ -145,7 +149,7 @@ check  =nc_put_att_int(  *ncid, NC_GLOBAL, "ODB_major_version", NC_INT, 1, &majv
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 check  =nc_put_att_int(  *ncid, NC_GLOBAL, "Number_of_ODB_pools"       , NC_INT, 1, &npools);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
-check  =nc_put_att_int(  *ncid, NC_GLOBAL, "Number_of_ODB_tables"      , NC_INT, 1, &ntabs);
+check  =nc_put_att_int(  *ncid, NC_GLOBAL, "Number_of_considered_ODB_tables"      , NC_INT, 1, &ntabs);
    if (check != NC_NOERR) { ERR(check);    return -1;  }  
 
    return 0;
@@ -351,11 +355,6 @@ while (nextrow(h, d, maxcols, &new_dataset) > 0) {
             char  cname[128];
             strcpy(cname, name);
             sanitize_name(cname);
-	
-            //printf("%s   %s\n", "column :"  ,  cname )      ; 
-            //if ( strcmp(cname,"lat_hdr")== 0  || strcmp(cname,"lon_hdr")== 0 ) {
-	    //    is_coord[]	    
-	    //}
 
             int odb_dtype = ci[i].dtnum;
             if (odb_dtype == DATATYPE_STRING) {
@@ -372,31 +371,41 @@ while (nextrow(h, d, maxcols, &new_dataset) > 0) {
                     case DATATYPE_INT2:
                     case DATATYPE_INT4:
                     case DATATYPE_YYYYMMDD:
-                    case DATATYPE_HHMMSS:  nc_type = NC_INT   ; break;
-                    default:               nc_type = NC_DOUBLE; break;
+                    case DATATYPE_HHMMSS:  
+			    nc_type = NC_INT64   ; break;
+                    default:               
+			    nc_type = NC_DOUBLE  ; break;
                 }
 		// def vars according to  datatype 
                 check = nc_def_var(ncid, cname, nc_type, 1, &dimid, &varid[i]);
                    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
 
-        if (strcmp(cname,"degrees_lat")==0 || strcmp(cname,"lat_hdr")==0) {
-         check = nc_put_att_text(ncid, varid[i], "units", strlen("degrees_north"),"degrees_north");
-            if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
-         check =nc_put_att_text(ncid, varid[i],"standard_name",strlen("latitude"),"latitude");
-	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
-        } // lat
-        if (strcmp(cname,"degrees_lon")==0 || strcmp(cname,"lon_hdr")==0) {
-         check=nc_put_att_text(ncid, varid[i], "units", strlen("degrees_east"), "degrees_east");
-	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
-         check=nc_put_att_text(ncid, varid[i], "standard_name", strlen("longitude"), "longitude");
-	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
-        } // lon
+		// Set standard names and units for coordinates 
+                if (strcmp(cname,"degrees_lat")==0 || strcmp(cname,"lat_hdr")==0) {
+                   check = nc_put_att_text(ncid, varid[i], "units", strlen("degrees_north"),"degrees_north");
+                      if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+                   check =nc_put_att_text(ncid, varid[i],"standard_name",strlen("latitude"),"latitude");
+	              if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+                 } // lat
+                if (strcmp(cname,"degrees_lon")==0 || strcmp(cname,"lon_hdr")==0) {
+                   check=nc_put_att_text(ncid, varid[i], "units", strlen("degrees_east"), "degrees_east");
+	              if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+                  check=nc_put_att_text(ncid, varid[i], "standard_name", strlen("longitude"), "longitude");
+	              if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+                 } // lon
 
         // Missing values 
-        double ffill = -999999.0 ;  //NC_FILL_DOUBLE;
-	int    nfill = -999999 ; 
-        check= nc_put_att_double(ncid, varid[i], "_FillValue", NC_DOUBLE, 1, &ffill);
-	check= nc_put_att_int   (ncid, varid[i], "_FillValue", NC_DOUBLE, 1, &nfill);
+if (nc_type == NC_DOUBLE) {
+    double ffill = -999999.0;
+    check = nc_put_att_double(ncid, varid[i], "_FillValue", NC_DOUBLE, 1, &ffill);
+    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1); }
+}
+// Encode integer on 64bits integer 
+else if (nc_type == NC_INT64) {
+    long long nfill = -999999;
+    check = nc_put_att_longlong(ncid, varid[i], "_FillValue", NC_INT64, 1, &nfill);
+    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1); }
+}
         
 	size_t chunk[1] = {CHUNK};
         check  = nc_def_var_chunking(ncid, varid[i], NC_CHUNKED, chunk);
