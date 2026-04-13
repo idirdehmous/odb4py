@@ -1,6 +1,7 @@
 /*
  * These lines have been taken from  :   include/privpub.h  
  * 
+ * Shows the different datatypes and their size ! 
 #define DATATYPE_UNDEF                0x0           (0 dec)   undef 
 #define DATATYPE_BIT                  0x100         (256 dec) bit   : 1 bits, 0 bytes 
 #define DATATYPE_INT1                 0x10f         (271 dec) char  : 8 bits, 1 bytes 
