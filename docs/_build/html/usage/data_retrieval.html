@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SQL query and data retrieval &mdash; odb4py 1.3.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=28d163b9"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Integration with the python ecosystem" href="odb_in_python_ecosystem.html" />
+    <link rel="prev" title="Open and close an ODB" href="odb_io.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            odb4py
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="inspect_odb.html">Inspect the ODB metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_dca.html">Creating Column Direct Access files (DCA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_io.html">Open and close an ODB</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SQL query and data retrieval</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-sql-query-check">The sql query check</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odb_in_python_ecosystem.html">Integration with the python ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="open_odb_loop.html">Using odb4py inside loops</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ODB conversion and utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="odb_conversion.html">ODB data conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_utilities.html">Utility functions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence.html">Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">odb4py</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SQL query and data retrieval</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sql-query-and-data-retrieval">
+<h1>SQL query and data retrieval<a class="headerlink" href="#sql-query-and-data-retrieval" title="Link to this heading"></a></h1>
+<p>The SQL syntax used in <strong>odb4py</strong> follows the same conventions as the
+official ODB API.</p>
+<p>To perform a data query, one of the functions <code class="docutils literal notranslate"><span class="pre">odb_dict</span></code> or <code class="docutils literal notranslate"><span class="pre">odb_array</span></code> must be used.
+The <code class="docutils literal notranslate"><span class="pre">odb_dict</span></code> function returns both the column names and the corresponding row
+values organized as a Python dictionary. In this dictionary, column
+names are used as keys, and the associated values correspond to the
+retrieved ODB data rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">odb_array</span></code> function returns a <strong>NumPy</strong> array containing only numeric data.
+The columns of type string are automatically excluded from the result.</p>
+<p>Therefore, if the user knows that the query contains only integer or floating-point
+columns, using <code class="docutils literal notranslate"><span class="pre">odb_array</span></code> may be slightly faster than <code class="docutils literal notranslate"><span class="pre">odb_dict</span></code>.</p>
+<p>As an optional argument, this method provides the <em>header</em> option. When enabled,
+this option returns the names of the selected columns together with the NumPy array.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The keys of the dictionary returned by <code class="docutils literal notranslate"><span class="pre">odb_dict</span></code> include both the column name and the originating table seperated by ‘&#64;’ character. If a function is used in the SQL query, it will also be reflected in the returned column name.</p>
+</div>
+<section id="the-sql-query-check">
+<h2>The sql query check<a class="headerlink" href="#the-sql-query-check" title="Link to this heading"></a></h2>
+<p>Before executing the query, a preliminary syntax validation step is
+performed using the <code class="docutils literal notranslate"><span class="pre">get_func</span></code> and <code class="docutils literal notranslate"><span class="pre">clean_string</span></code> methods inside the <code class="docutils literal notranslate"><span class="pre">utils.SqlParser</span></code> class. This includes:</p>
+<ul class="simple">
+<li><p>Removing non-printable characters if present.</p></li>
+<li><p>Filtering out tokens that are not part of the ODB SQL lexicon.</p></li>
+<li><p>Parsing SQL tokens to determine the number of ODB SQL functions used within the request.</p></li>
+</ul>
+<p>At the low level, the total number of columns to be retrieved is equal
+to the number of explicit column names plus the number of computed
+columns resulting from SQL functions.
+Consequently, the C backend must internally distinguish between
+pure column references and function-based expressions in order to
+correctly process and return the requested data.</p>
+<p>This preprocessing stage ensures robustness and prevents malformed SQL
+queries from reaching the ODB runtime layer.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># Utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.utils</span><span class="w"> </span><span class="kn">import</span>  <span class="n">OdbObject</span> <span class="p">,</span> <span class="n">SqlParser</span>
+
+<span class="c1"># odb4py  core module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.core</span><span class="w">  </span><span class="kn">import</span>  <span class="n">odb_connect</span>
+
+<span class="c1"># Start</span>
+<span class="n">start</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+<span class="c1"># Path to ODB</span>
+<span class="n">db_path</span><span class="o">=</span> <span class="s2">&quot;/path/to/CCMA&quot;</span>
+
+<span class="c1"># Let&#39;s get the AMDAR data (obstype =2 ) and the coordinates lat/lon in degrees</span>
+<span class="c1"># The SQL query</span>
+<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;SELECT statid , obstype, varno, degrees(lat) ,  degrees(lon) , obsvalue   FROM  hdr, body WHERE obstype==2&quot;</span>
+
+<span class="c1"># Check &amp; clean the query</span>
+<span class="n">p</span> <span class="o">=</span><span class="n">SqlParser</span><span class="p">()</span>
+
+<span class="c1"># The number of functions in the SQL statement</span>
+<span class="n">nf</span> <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">get_nfunc</span>   <span class="p">(</span> <span class="n">sql_query</span> <span class="p">)</span>
+
+<span class="c1"># Check and clean before sending !</span>
+<span class="n">sql</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">clean_string</span> <span class="p">(</span> <span class="n">sql_query</span> <span class="p">)</span>
+
+<span class="c1"># Arguments</span>
+<span class="n">sql_file</span><span class="o">=</span> <span class="kc">None</span>     <span class="c1"># (type -&gt; str     ) The sql file if used instead of and SQL request string</span>
+<span class="n">mask</span>    <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># (type -&gt; str     ) The ODB pools to consider ( must be a string  &quot;1&quot; , &quot;2&quot;, &quot;33&quot; ...  , etc )</span>
+<span class="n">progress</span><span class="o">=</span> <span class="kc">True</span>     <span class="c1"># (type -&gt; bool    ) Progress bar (very useful in the case of large ODBs )</span>
+<span class="n">ndigits</span> <span class="o">=</span> <span class="mi">8</span>        <span class="c1"># (type -&gt; int     ) Number of decimal digits for floats  (default is 15)</span>
+<span class="n">lverb</span>   <span class="o">=</span> <span class="kc">False</span>    <span class="c1"># (type -&gt; bool    ) Verbosity  on/off</span>
+<span class="n">nf</span>      <span class="o">=</span> <span class="n">nfunc</span>    <span class="c1"># (type -&gt; integer ) Number of columns considring the functions in the sql statement (degrees, rad, avg etc ...)</span>
+
+
+<span class="c1"># Send the query and fetch the data as a dictionary</span>
+<span class="n">data</span> <span class="o">=</span><span class="n">conn</span><span class="o">.</span><span class="n">odb_dict</span>  <span class="p">(</span><span class="n">database</span>  <span class="o">=</span><span class="n">db_path</span><span class="p">,</span>
+                      <span class="n">sql_query</span> <span class="o">=</span><span class="n">sql</span>    <span class="p">,</span>
+                      <span class="n">nfunc</span>     <span class="o">=</span><span class="n">nf</span>     <span class="p">,</span>
+                      <span class="n">fmt_float</span> <span class="o">=</span><span class="n">ndigits</span><span class="p">,</span>
+                      <span class="n">query_file</span><span class="o">=</span><span class="n">sql_file</span><span class="p">,</span>
+                      <span class="n">poolmask</span>  <span class="o">=</span><span class="n">mask</span>    <span class="p">,</span>
+                      <span class="n">pbar</span>      <span class="o">=</span><span class="n">progress</span><span class="p">,</span>
+                      <span class="n">verbose</span>   <span class="o">=</span><span class="n">lverb</span>  <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span> <span class="n">data</span> <span class="p">)</span>
+
+<span class="c1"># End</span>
+<span class="n">end</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span>  <span class="n">start</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Runtime duration:&quot;</span> <span class="p">,</span> <span class="n">duration</span>  <span class="p">)</span>
+</pre></div>
+</div>
+<p>Output :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">********</span> <span class="n">New</span> <span class="n">ODB</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">opened</span> <span class="k">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">environment</span>
+<span class="o">*******</span> <span class="n">ODB_WRITE_EMPTY_FILES</span><span class="o">=</span><span class="mi">0</span>
+       <span class="n">ODB_CONSIDER_TABLES</span><span class="o">=*</span>
+        <span class="n">ODB_IO_KEEP_INCORE</span><span class="o">=</span><span class="mi">1</span>
+           <span class="n">ODB_IO_FILESIZE</span><span class="o">=</span><span class="mi">32</span> <span class="n">MB</span>
+            <span class="n">ODB_IO_BUFSIZE</span><span class="o">=</span><span class="mi">4194304</span> <span class="nb">bytes</span>
+            <span class="n">ODB_IO_GRPSIZE</span><span class="o">=</span><span class="mi">1</span> <span class="p">(</span><span class="ow">or</span> <span class="nb">max</span> <span class="n">no</span><span class="o">.</span> <span class="n">of</span> <span class="n">pools</span><span class="p">)</span>
+            <span class="n">ODB_IO_PROFILE</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">ODB_IO_VERBOSE</span><span class="o">=</span><span class="mi">0</span>
+             <span class="n">ODB_IO_METHOD</span><span class="o">=</span><span class="mi">5</span>
+<span class="n">ODB_CONSIDER_TABLES</span><span class="o">=*</span>
+<span class="n">ODB_WRITE_TABLES</span><span class="o">=*</span>
+<span class="o">***</span><span class="n">INFO</span><span class="p">:</span> <span class="n">Poolmasking</span> <span class="n">ignored</span> <span class="n">altogether</span> <span class="k">for</span> <span class="n">database</span> <span class="s1">&#39;CCMA&#39;</span>
+<span class="o">--</span><span class="n">odb4py</span> <span class="p">:</span> <span class="n">Creating</span> <span class="n">DCA</span> <span class="n">files</span> <span class="o">...</span><span class="n">done</span> <span class="err">!</span>
+
+<span class="p">[</span><span class="c1">##################################################] Complete 100%  (Total: 5102 rows)</span>
+<span class="p">{</span><span class="s1">&#39;statid@hdr&#39;</span><span class="p">:[</span><span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;2YIQTRJA&#39;</span><span class="o">...</span><span class="p">,</span> <span class="p">],</span>
+ <span class="s1">&#39;obstype@hdr&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;varno@body&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span> <span class="p">,</span><span class="o">...</span><span class="p">],</span>
+ <span class="s1">&#39;degrees(lat)&#39;</span><span class="p">:[</span><span class="mf">62.38014</span><span class="p">,</span> <span class="mf">62.38078</span><span class="p">,</span> <span class="mf">62.38124</span><span class="p">,</span><span class="o">...</span><span class="p">],</span>
+ <span class="s1">&#39;degrees(lon)&#39;</span><span class="p">:[</span><span class="mf">1.15</span><span class="p">,</span> <span class="mf">1.12</span><span class="p">,</span> <span class="mf">1.14</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;obsvalue@body&#39;</span><span class="p">:[</span><span class="mf">216.00144</span><span class="p">,</span> <span class="mf">28.72984</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.00899</span><span class="p">,</span> <span class="o">...</span> <span class="p">]}</span>
+
+<span class="n">Runtime</span> <span class="n">duration</span> <span class="p">:</span> <span class="mi">0</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">01.02</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odb_io.html" class="btn btn-neutral float-left" title="Open and close an ODB" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odb_in_python_ecosystem.html" class="btn btn-neutral float-right" title="Integration with the python ecosystem" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Idir Dehmous, Royal Meteorological Institute of Belgium -(RMI). March 2026.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

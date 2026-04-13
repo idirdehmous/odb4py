@@ -1,0 +1,650 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ODB data conversion &mdash; odb4py 1.3.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=28d163b9"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Utility functions" href="odb_utilities.html" />
+    <link rel="prev" title="Using odb4py inside loops" href="open_odb_loop.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            odb4py
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="inspect_odb.html">Inspect the ODB metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_dca.html">Creating Column Direct Access files (DCA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_io.html">Open and close an ODB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_retrieval.html">SQL query and data retrieval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_in_python_ecosystem.html">Integration with the python ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="open_odb_loop.html">Using odb4py inside loops</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ODB conversion and utilities</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ODB data conversion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#conversion-to-odb2">Conversion to ODB2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#check-the-output-odb2-file">Check the output ODB2 file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#convert-odb-to-sqlite-database">Convert ODB to Sqlite database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-tables-in-one-sqlite-file">Multiple tables in one sqlite file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#convert-odb-to-netcdf-format">Convert ODB to NetCDF format</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odb_utilities.html">Utility functions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence.html">Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">odb4py</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ODB data conversion</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="odb-data-conversion">
+<h1>ODB data conversion<a class="headerlink" href="#odb-data-conversion" title="Link to this heading"></a></h1>
+<p>At present, odb4py provides two functions to convert ODB datasets into alternative formats, in addition to direct querying capabilities.
+These conversion tools are implemented in the <code class="docutils literal notranslate"><span class="pre">odb4py.convert</span></code> module.</p>
+<p>The following conversion workflows are currently supported:</p>
+<p>Conersion from  :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ODB to ODB2</p></li>
+<li><p>ODB to NetCDF</p></li>
+<li><p>ODB to SQLite</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is important to note that conversion to the ODB2 format is not handled internally by odb4py.
+Instead, users can pass the extracted data to the encoder available in the <a class="reference external" href="https://pypi.org/project/pyodc">pyodc</a>  package.</p>
+</div>
+<p>Because data conversion inherently entails both read and write operations, an ODB dataset generated by the global model <a class="reference external" href="https://fr.wikipedia.org/wiki/Arp%C3%A8ge_(m%C3%A9t%C3%A9orologie)">ARPEGE</a>  is used as a benchmark. This provides a representative framework for evaluating the input/output performance of the odb4py.convert module.</p>
+<section id="conversion-to-odb2">
+<h2>Conversion to ODB2<a class="headerlink" href="#conversion-to-odb2" title="Link to this heading"></a></h2>
+<p>The example below extracts the ASCAT <em>ambiguous v and u component of wind</em> from an <code class="docutils literal notranslate"><span class="pre">ECMA</span></code> ODB (<code class="docutils literal notranslate"><span class="pre">varno==124</span> <span class="pre">,</span> <span class="pre">varno==125</span></code>) and writes the rows into an ODB2 file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding : utf-8 -*-</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">odb_open</span> <span class="p">,</span> <span class="n">odb_dca</span> <span class="p">,</span> <span class="n">odb_close</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyodc</span><span class="w">       </span><span class="kn">import</span> <span class="n">codc</span>
+
+<span class="c1"># Start</span>
+<span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+<span class="c1"># ODB path</span>
+<span class="n">dbpath</span> <span class="o">=</span><span class="s2">&quot;/path/to/ECMA.ascat&quot;</span>
+
+   <span class="c1"># Get some needed attributes</span>
+<span class="n">db</span>        <span class="o">=</span> <span class="n">OdbObject</span> <span class="p">(</span> <span class="n">dbpath</span> <span class="p">)</span>
+<span class="n">db_attr</span>   <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">get_attrib</span><span class="p">()</span>
+<span class="n">db_date</span>   <span class="o">=</span> <span class="n">db_attr</span><span class="p">[</span><span class="s2">&quot;observation_date&quot;</span><span class="p">]</span>  <span class="c1"># Observation datetime</span>
+
+<span class="n">dt</span> <span class="o">=</span> <span class="n">db_date</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Date</span>
+<span class="n">tm</span> <span class="o">=</span> <span class="n">db_date</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Time</span>
+
+<span class="c1"># ODB2 output filename</span>
+<span class="n">odb2file</span><span class="o">=</span><span class="s2">&quot;arpege_ascat_&quot;</span><span class="o">+</span><span class="n">dt</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">tm</span><span class="o">+</span><span class="s2">&quot;.odb2&quot;</span>
+
+<span class="c1"># Set up the sql query :  Get the ambigous U wind component  (obstype =9, codetype=139, varno=124)</span>
+<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;select  statid ,   </span><span class="se">\</span>
+<span class="s2">           degrees(lat)   ,</span><span class="se">\</span>
+<span class="s2">           degrees(lon)   ,</span><span class="se">\</span>
+<span class="s2">           varno          ,</span><span class="se">\</span>
+<span class="s2">           obstype        ,</span><span class="se">\</span>
+<span class="s2">           codetype       ,</span><span class="se">\</span>
+<span class="s2">           date           ,</span><span class="se">\</span>
+<span class="s2">           time           ,</span><span class="se">\</span>
+<span class="s2">           obsvalue       ,</span><span class="se">\</span>
+<span class="s2">           vertco_reference_1,</span><span class="se">\</span>
+<span class="s2">           vertco_reference_2,</span><span class="se">\</span>
+<span class="s2">           datum_status.active@body , </span><span class="se">\</span>
+<span class="s2">           datum_status.blacklisted@body,   </span><span class="se">\</span>
+<span class="s2">           datum_status.passive@body, </span><span class="se">\</span>
+<span class="s2">           datum_status.rejected@body,</span><span class="se">\</span>
+<span class="s2">           FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno ==124  ORDER BY   date,time&quot;</span>
+
+
+<span class="c1">#Parse the query</span>
+<span class="n">p</span>  <span class="o">=</span><span class="n">SqlParser</span><span class="p">()</span>
+<span class="n">nf</span> <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">get_nfunc</span>    <span class="p">(</span> <span class="n">sql_query</span> <span class="p">)</span>
+<span class="n">sql</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">clean_string</span> <span class="p">(</span> <span class="n">sql_query</span> <span class="p">)</span>
+
+<span class="c1"># Create a connection object</span>
+<span class="n">conn</span> <span class="o">=</span> <span class="n">odb_open</span><span class="p">(</span> <span class="n">dbpath</span> <span class="p">)</span>
+
+<span class="c1"># Fetch the rows as a dictionary</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">odb_dict</span> <span class="p">(</span> <span class="n">database</span> <span class="o">=</span>  <span class="n">dbpath</span> <span class="p">,</span>
+                <span class="n">sql_query</span><span class="o">=</span> <span class="n">sql</span>     <span class="p">,</span>
+                <span class="n">nfunc</span>    <span class="o">=</span> <span class="n">nf</span>      <span class="p">,</span>
+                <span class="n">fmt_float</span><span class="o">=</span> <span class="mi">10</span>      <span class="p">,</span>
+                <span class="n">queryfile</span><span class="o">=</span> <span class="kc">None</span>    <span class="p">,</span>
+                <span class="n">poolmask</span> <span class="o">=</span> <span class="kc">None</span>    <span class="p">,</span>
+                <span class="n">pbar</span>     <span class="o">=</span> <span class="kc">True</span>    <span class="p">)</span>
+
+
+<span class="c1"># Build the dataframe</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">dataFrame</span><span class="p">(</span>  <span class="n">rows</span> <span class="p">)</span>
+
+<span class="c1"># Encode into the ODB2 file</span>
+<span class="n">encode_odb</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">odb2file</span> <span class="p">,</span>  <span class="n">rows_per_frame</span><span class="o">=</span> <span class="mi">1000</span> <span class="p">)</span>
+
+<span class="c1"># Close the odb</span>
+<span class="n">conn</span><span class="o">.</span><span class="n">odb_close</span><span class="p">()</span>
+
+<span class="c1"># End</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="n">total_duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span>  <span class="n">start</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Runtime duration:&quot;</span> <span class="p">,</span> <span class="n">duration</span>  <span class="p">)</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span><span class="c1">##################################################] Complete 100%  (Total: 684451 rows)</span>
+--odb4py<span class="w"> </span>:<span class="w"> </span>ODB<span class="w"> </span>database<span class="w"> </span>closed.
+Runtime<span class="w"> </span>duration:<span class="w"> </span><span class="m">0</span>:00:12.325594
+</pre></div>
+</div>
+</section>
+<section id="check-the-output-odb2-file">
+<h2>Check the output ODB2 file<a class="headerlink" href="#check-the-output-odb2-file" title="Link to this heading"></a></h2>
+<p>The output ODB2 file can be checked using the ECMWF  <a class="reference external" href="https://odc.readthedocs.io">odc</a> tool and visualied with <a class="reference external" href="https://metview.readthedocs.io/en/latest/">metview</a> or Python directly.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>odc<span class="w">  </span>count<span class="w">  </span>ascat_arpege_20240623_000000.odb2
+<span class="m">684451</span>
+
+odc<span class="w"> </span>sql<span class="w"> </span>-i<span class="w"> </span>ascat_arpege_20240623_000000.odb2<span class="w"> </span><span class="s1">&#39;select *  WHERE  rownumber() &lt; 10&#39;</span>
+
+obstype@hdr<span class="w">  </span>date@hdr<span class="w"> </span>datum_status.passive@body<span class="w">  </span>codetype@hdr<span class="w">  </span>time@hdr<span class="w"> </span>datum_status.blacklisted@body<span class="w"> </span>statid@hdr<span class="w"> </span>datum_status.active@body<span class="w"> </span>datum_status.rejected@body<span class="w">  </span>degrees<span class="o">(</span>lat<span class="o">)</span><span class="w">    </span>degrees<span class="o">(</span>lon<span class="o">)</span><span class="w">   </span>obsvalue@body<span class="w">     </span>varno@body
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">1</span><span class="w">                                 </span><span class="m">0</span><span class="w">           </span><span class="m">15</span>.649060<span class="w">     </span>-173.493550<span class="w">       </span>-8.012632<span class="w">             </span><span class="m">125</span>
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">1</span><span class="w">                                 </span><span class="m">0</span><span class="w">           </span><span class="m">15</span>.649060<span class="w">     </span>-173.493550<span class="w">       </span>-2.087134<span class="w">             </span><span class="m">124</span>
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">1</span><span class="w">                                 </span><span class="m">0</span><span class="w">           </span><span class="m">15</span>.649060<span class="w">     </span>-173.493550<span class="w">        </span><span class="m">7</span>.754457<span class="w">             </span><span class="m">125</span>
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">1</span><span class="w">                                 </span><span class="m">0</span><span class="w">           </span><span class="m">15</span>.649060<span class="w">     </span>-173.493550<span class="w">        </span><span class="m">1</span>.283742<span class="w">             </span><span class="m">124</span>
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">0</span><span class="w">                                 </span><span class="m">1</span><span class="w">           </span><span class="m">15</span>.695730<span class="w">     </span>-173.721710<span class="w">       </span>-7.765099<span class="w">             </span><span class="m">125</span>
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">0</span><span class="w">                                 </span><span class="m">1</span><span class="w">           </span><span class="m">15</span>.695730<span class="w">     </span>-173.721710<span class="w">       </span>-2.197302<span class="w">             </span><span class="m">124</span>
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">0</span><span class="w">                                 </span><span class="m">1</span><span class="w">           </span><span class="m">15</span>.695730<span class="w">     </span>-173.721710<span class="w">        </span><span class="m">7</span>.429603<span class="w">             </span><span class="m">125</span>
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">0</span><span class="w">                                 </span><span class="m">1</span><span class="w">           </span><span class="m">15</span>.695730<span class="w">     </span>-173.721710<span class="w">        </span><span class="m">1</span>.552125<span class="w">             </span><span class="m">124</span>
+<span class="w">          </span><span class="m">9</span><span class="w">        </span><span class="m">20240622</span><span class="w">                          </span><span class="m">0</span><span class="w">                  </span><span class="m">139</span><span class="w">          </span><span class="m">210000</span><span class="w">                              </span><span class="m">0</span><span class="w">   </span><span class="s1">&#39;     005&#39;</span><span class="w">                             </span><span class="m">0</span><span class="w">                                 </span><span class="m">1</span><span class="w">           </span><span class="m">15</span>.742160<span class="w">     </span>-173.949980<span class="w">       </span>-7.635057<span class="w">             </span><span class="m">125</span>
+</pre></div>
+</div>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="../_images/arpege_ascat_u.png"><img alt="ODB observervation" src="../_images/arpege_ascat_u.png" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Example : ASCAT satellite from an ARPEGE ECMA ODB converted to ODB2.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<section id="convert-odb-to-sqlite-database">
+<h3>Convert ODB to Sqlite database<a class="headerlink" href="#convert-odb-to-sqlite-database" title="Link to this heading"></a></h3>
+<p>To perform such a conversion, the <code class="docutils literal notranslate"><span class="pre">odb_to_sqlite</span></code> has to be used. The data encoding is handled in the backend, ensuring compatibility with the ODB internal format. SQLite tables are automatically created by mapping the data types returned by the ODB query to the corresponding types supported by SQLite.</p>
+<div class="line-block">
+<div class="line">The function returns <strong>0</strong> on success and <strong>-1</strong> on failure.</div>
+</div>
+<div class="line-block">
+<div class="line">Example</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding : utf-8 -*-</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># Convert module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.convert</span><span class="w"> </span><span class="kn">import</span> <span class="n">odb_to_sqlite</span>
+
+<span class="c1"># Start</span>
+<span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+<span class="c1"># ODB path</span>
+<span class="n">dbpath</span> <span class="o">=</span><span class="s2">&quot;/path/to/ECMA.ascat&quot;</span>
+
+<span class="c1"># Set up the sql query :  Get the ambigous U wind component  (obstype =9, codetype=139, varno=124)</span>
+<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;select  statid ,   </span><span class="se">\</span>
+<span class="s2">           degrees(lat)   ,</span><span class="se">\</span>
+<span class="s2">           degrees(lon)   ,</span><span class="se">\</span>
+<span class="s2">           varno          ,</span><span class="se">\</span>
+<span class="s2">           obstype        ,</span><span class="se">\</span>
+<span class="s2">           codetype       ,</span><span class="se">\</span>
+<span class="s2">           date           ,</span><span class="se">\</span>
+<span class="s2">           time           ,</span><span class="se">\</span>
+<span class="s2">           obsvalue       ,</span><span class="se">\</span>
+<span class="s2">           vertco_reference_1,</span><span class="se">\</span>
+<span class="s2">           vertco_reference_2,</span><span class="se">\</span>
+<span class="s2">           datum_status.active@body , </span><span class="se">\</span>
+<span class="s2">           datum_status.blacklisted@body,   </span><span class="se">\</span>
+<span class="s2">           datum_status.passive@body, </span><span class="se">\</span>
+<span class="s2">           datum_status.rejected@body,</span><span class="se">\</span>
+<span class="s2">           FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno ==124  ORDER BY   date,time&quot;</span>
+
+<span class="c1"># Same as the previous example</span>
+<span class="c1"># ...</span>
+
+
+
+<span class="c1"># ODB2 output filename</span>
+<span class="n">odb2file</span><span class="o">=</span><span class="s2">&quot;arpege_ascat_&quot;</span><span class="o">+</span><span class="n">dt</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">tm</span><span class="o">+</span><span class="s2">&quot;.sqlite&quot;</span>
+
+<span class="c1"># Call odb2sqlite method</span>
+<span class="n">status</span> <span class="o">=</span><span class="n">odb_to_sqlite</span> <span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">dbpath</span><span class="p">,</span>
+                       <span class="n">sql_query</span> <span class="o">=</span> <span class="n">sql_query</span><span class="p">,</span>
+                       <span class="n">sqlite_db</span> <span class="o">=</span> <span class="n">outfile</span>  <span class="p">,</span>
+                       <span class="n">nfunc</span>     <span class="o">=</span> <span class="n">nf</span>    <span class="p">,</span>
+                       <span class="n">pbar</span>      <span class="o">=</span> <span class="kc">True</span>  <span class="p">,</span>
+                       <span class="n">verbose</span>   <span class="o">=</span> <span class="kc">True</span>  <span class="p">)</span>
+
+<span class="c1"># End</span>
+<span class="n">end</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span>  <span class="n">start</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Runtime duration:&quot;</span> <span class="p">,</span> <span class="n">duration</span>  <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Runtime<span class="w"> </span>duration:<span class="w"> </span><span class="m">0</span>:00:01.988741
+</pre></div>
+</div>
+<p>To inspect the SQLite database integrity and the extracted data ingestion, the <a class="reference external" href="https://sqlite.org/">sqlite3</a> command-line utility has to be used.
+The following sqlite commands :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Open the sqlite output database and see whether the datatypes have been correctly mapped from ODB1 to SQLite.</p></li>
+<li><p>Fetch the first 10 rows from all available columns.</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqlite3<span class="w"> </span>arpege_ascat_2024062300.sqlite
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqlite&gt;.fullschema
+CREATE<span class="w"> </span>TABLE<span class="w"> </span>IF<span class="w"> </span>NOT<span class="w"> </span>EXISTS<span class="w"> </span><span class="s2">&quot;ASCAT&quot;</span><span class="w"> </span><span class="o">(</span>statid_hdr<span class="w"> </span>INTEGER,<span class="w"> </span>degrees_lat<span class="w"> </span>INTEGER,<span class="w"> </span>degrees_lon<span class="w"> </span>INTEGER,<span class="w"> </span>varno_body<span class="w"> </span>TEXT,<span class="w"> </span>obstype_hdr<span class="w"> </span>TEXT,<span class="w"> </span>codetype_hdr<span class="w"> </span>TEXT,<span class="w"> </span>date_hdr<span class="w"> </span>TEXT,<span class="w"> </span>time_hdr<span class="w"> </span>TEXT,<span class="w"> </span>obsvalue_body<span class="w"> </span>INTEGER,<span class="w"> </span>vertco_reference_1_body<span class="w"> </span>INTEGER,<span class="w"> </span>vertco_reference_2_body<span class="w"> </span>INTEGER,<span class="w"> </span>datum_status_active_body<span class="w"> </span>TEXT,<span class="w"> </span>datum_status_blacklisted_body<span class="w"> </span>TEXT,<span class="w"> </span>datum_status_passive_body<span class="w"> </span>TEXT,<span class="w"> </span>datum_status_rejected_body<span class="w"> </span>TEXT<span class="o">)</span><span class="p">;</span>
+
+sqlite&gt;.tables
+ASCAT
+
+sqlite&gt;<span class="w"> </span><span class="k">select</span><span class="w">   </span>*<span class="w">   </span>FROM<span class="w">  </span>ASCAT<span class="w"> </span>WHERE<span class="w">  </span>degrees_lat<span class="w"> </span>BETWEEN<span class="w"> </span><span class="m">34</span><span class="w"> </span>AND<span class="w"> </span><span class="m">60</span><span class="w">  </span>AND<span class="w">  </span>degrees_lon<span class="w"> </span>between<span class="w"> </span>-5<span class="w"> </span>AND<span class="w"> </span><span class="m">15</span><span class="w">  </span>LIMIT<span class="w"> </span><span class="m">10</span><span class="p">;</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.3063<span class="p">|</span><span class="m">5</span>.2333<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210937</span><span class="p">|</span><span class="m">0</span>.0320263852790326<span class="p">|</span><span class="m">101754</span>.512366896<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.3063<span class="p">|</span><span class="m">5</span>.2333<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210937</span><span class="p">|</span>-0.0923374476412209<span class="p">|</span><span class="m">101754</span>.512366896<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.34035<span class="p">|</span><span class="m">5</span>.51212<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210937</span><span class="p">|</span><span class="m">0</span>.542813296700668<span class="p">|</span><span class="m">101786</span>.251421662<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.34035<span class="p">|</span><span class="m">5</span>.51212<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210937</span><span class="p">|</span>-0.493466633364241<span class="p">|</span><span class="m">101786</span>.251421662<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.37374<span class="p">|</span><span class="m">5</span>.79119<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210937</span><span class="p">|</span><span class="m">0</span>.667882580297611<span class="p">|</span><span class="m">101793</span>.058252627<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.37374<span class="p">|</span><span class="m">5</span>.79119<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210937</span><span class="p">|</span>-0.583875525852227<span class="p">|</span><span class="m">101793</span>.058252627<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.06644<span class="p">|</span><span class="m">1</span>.85671<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210941</span><span class="p">|</span>-0.905055759851888<span class="p">|</span><span class="m">101702</span>.331313069<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.06644<span class="p">|</span><span class="m">1</span>.85671<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210941</span><span class="p">|</span><span class="m">0</span>.707447059008582<span class="p">|</span><span class="m">101702</span>.331313069<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.18992<span class="p">|</span><span class="m">2</span>.6865<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210941</span><span class="p">|</span>-0.507586435107384<span class="p">|</span><span class="m">101760</span>.207672596<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+<span class="m">3</span><span class="p">|</span><span class="m">37</span>.18992<span class="p">|</span><span class="m">2</span>.6865<span class="p">|</span><span class="m">124</span><span class="p">|</span><span class="m">9</span><span class="p">|</span><span class="m">139</span><span class="p">|</span><span class="m">20240622</span><span class="p">|</span><span class="m">210941</span><span class="p">|</span><span class="m">0</span>.517408241576685<span class="p">|</span><span class="m">101760</span>.207672596<span class="o">||</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">0</span><span class="p">|</span><span class="m">1</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>By default, the <code class="docutils literal notranslate"><span class="pre">odb_to_sqlite</span></code> method generates a table called <code class="docutils literal notranslate"><span class="pre">ODB</span></code>.
+To support more dynamic workflows, the table name can be given as an argument.
+This flexibility allows users to consolidate results from multiple <em>ODB</em> queries into separate SQLite tables within a single output file.</p>
+</div>
+</section>
+</section>
+<section id="multiple-tables-in-one-sqlite-file">
+<h2>Multiple tables in one sqlite file<a class="headerlink" href="#multiple-tables-in-one-sqlite-file" title="Link to this heading"></a></h2>
+<p>Create multiple SQLite tables according to ODB <em>obstype</em> column. The same MetCOop <code class="docutils literal notranslate"><span class="pre">CCMA</span></code> is used ( date/time : 20240104 at 00h00 UTC ).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding : utf-8 -*-</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># Import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.convert</span><span class="w"> </span><span class="kn">import</span>  <span class="n">odb_to_sqlite</span>
+
+<span class="c1"># Path to ODB</span>
+<span class="n">dbpath</span><span class="o">=</span><span class="s2">&quot;/path/to/CCMA&quot;</span>  <span class="c1"># or ECMA.&lt;obstype&gt;</span>
+
+<span class="c1"># Start</span>
+<span class="n">start</span>   <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+<span class="c1"># Parser object</span>
+<span class="n">p</span> <span class="o">=</span><span class="n">SqlParser</span><span class="p">()</span>
+
+
+<span class="c1"># The sql query</span>
+<span class="n">query</span><span class="o">=</span><span class="s2">&quot;select  statid ,</span><span class="se">\</span>
+<span class="s2">        degrees(lat)   ,</span><span class="se">\</span>
+<span class="s2">        degrees(lon)   ,</span><span class="se">\</span>
+<span class="s2">        varno          ,</span><span class="se">\</span>
+<span class="s2">        date           ,</span><span class="se">\</span>
+<span class="s2">        time           ,</span><span class="se">\</span>
+<span class="s2">        fg_depar       ,</span><span class="se">\</span>
+<span class="s2">        an_depar       ,</span><span class="se">\</span>
+<span class="s2">        obsvalue       ,</span><span class="se">\</span>
+<span class="s2">        FROM hdr,body &quot;</span>
+
+<span class="c1"># Declare the obstyses to be extracted</span>
+<span class="c1"># 1  --&gt; synop</span>
+<span class="c1"># 2  --&gt; AMDAR</span>
+<span class="c1"># 5  --&gt; TEMP</span>
+<span class="c1"># 13 --&gt; Radar</span>
+<span class="n">obstype_list</span><span class="o">=</span><span class="p">[</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;13&quot;</span><span class="p">]</span>
+
+<span class="c1"># The output SQLite file</span>
+<span class="n">sqlite_output</span><span class="o">=</span><span class="s2">&quot;ccma_obstypes_2024010400.sqlite&quot;</span>
+
+<span class="k">for</span> <span class="n">obst</span> <span class="ow">in</span>  <span class="n">obstype_list</span> <span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    THE PATH TO THE ODB IS THE SAME FOR EVERY OTERATION.</span>
+<span class="sd">    WE DON&#39;T NEED TO UPDATE THE VARIABLES RELATIVE TO THE PATH</span>
+<span class="sd">    INSIDE THE LOOP :</span>
+<span class="sd">    IOASSIGN</span>
+<span class="sd">    ODB_SRCPATH_CCMA</span>
+<span class="sd">    ODB_DATAPATH_CCMA</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># SQLite table names</span>
+    <span class="n">table_name</span>  <span class="o">=</span> <span class="s2">&quot;obstype_&quot;</span><span class="o">+</span><span class="n">obst</span>
+
+    <span class="c1"># Change the SQL query according to obstype value ( Add WHERE condition )</span>
+    <span class="n">query_by_obstype</span> <span class="o">=</span> <span class="n">sql_query</span> <span class="o">+</span> <span class="s2">&quot; WHERE obstype ==&quot;</span> <span class="o">+</span><span class="n">obst</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+    <span class="c1"># Parsing the query must be updated, since the query is changing for every iteration</span>
+    <span class="n">nf</span>  <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">get_nfunc</span>    <span class="p">(</span> <span class="n">query_by_obstype</span> <span class="p">)</span>
+    <span class="n">sql</span> <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">clean_string</span> <span class="p">(</span> <span class="n">query_by_obstype</span> <span class="p">)</span>
+
+    <span class="c1"># Convert</span>
+    <span class="n">re</span> <span class="o">=</span><span class="n">odb_to_sqlite</span><span class="p">(</span><span class="n">database</span>  <span class="o">=</span><span class="n">dbpath</span><span class="p">,</span>
+                      <span class="n">sql_query</span> <span class="o">=</span> <span class="n">sql</span>  <span class="p">,</span>
+                      <span class="n">nfunc</span>     <span class="o">=</span> <span class="n">nf</span>   <span class="p">,</span>
+                      <span class="n">sqlite_db</span> <span class="o">=</span> <span class="n">sqlite_output</span> <span class="p">,</span>
+                      <span class="n">table_name</span><span class="o">=</span> <span class="n">table_name</span>  <span class="p">,</span>
+                      <span class="n">pbar</span>      <span class="o">=</span> <span class="kc">True</span> <span class="p">,</span>
+                      <span class="n">verbose</span>   <span class="o">=</span> <span class="kc">True</span>  <span class="p">)</span>
+
+    <span class="c1"># Check if it failed</span>
+    <span class="k">if</span> <span class="n">re</span>  <span class="o">!=</span> <span class="mi">0</span> <span class="p">:</span>
+       <span class="nb">print</span><span class="p">(</span> <span class="s2">&quot;Failed to convert data. ODB :&quot;</span> <span class="p">,</span> <span class="n">dbpath</span>  <span class="p">)</span>
+       <span class="k">continue</span>
+
+    <span class="c1"># End</span>
+    <span class="n">end</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span>  <span class="n">start</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Runtime duration:&quot;</span> <span class="p">,</span> <span class="n">duration</span>  <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>********<span class="w"> </span>New<span class="w"> </span>ODB<span class="w"> </span>I/O<span class="w"> </span>opened<span class="w"> </span>with<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>environment
+*******<span class="w">        </span><span class="nv">ODB_CONSIDER_TABLES</span><span class="o">=</span>*
+<span class="w">        </span><span class="nv">ODB_IO_KEEP_INCORE</span><span class="o">=</span><span class="m">1</span>
+<span class="w">           </span><span class="nv">ODB_IO_FILESIZE</span><span class="o">=</span><span class="m">32</span><span class="w"> </span>MB
+<span class="w">            </span><span class="nv">ODB_IO_BUFSIZE</span><span class="o">=</span><span class="m">4194304</span><span class="w"> </span>bytes
+<span class="w">            </span><span class="nv">ODB_IO_GRPSIZE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="o">(</span>or<span class="w"> </span>max<span class="w"> </span>no.<span class="w"> </span>of<span class="w"> </span>pools<span class="o">)</span>
+<span class="w">            </span><span class="nv">ODB_IO_PROFILE</span><span class="o">=</span><span class="m">0</span>
+<span class="w">            </span><span class="nv">ODB_IO_VERBOSE</span><span class="o">=</span><span class="m">0</span>
+<span class="w">             </span><span class="nv">ODB_IO_METHOD</span><span class="o">=</span><span class="m">5</span>
+<span class="nv">ODB_CONSIDER_TABLES</span><span class="o">=</span>*
+<span class="nv">ODB_WRITE_TABLES</span><span class="o">=</span>*
+--odb4py<span class="w"> </span>:<span class="w"> </span>Executing<span class="w"> </span>query<span class="w"> </span>from<span class="w"> </span>string:
+<span class="w">  </span><span class="s1">&#39;select  statid ,degrees(lat),degrees(lon),varno ,date  , time,fg_depar, an_depar, obsvalue,FROM hdr,body WHERE obstype ==1&#39;</span>
+--odb4py<span class="w"> </span>:<span class="w"> </span>Number<span class="w"> </span>of<span class="w"> </span>requested<span class="w"> </span>columns<span class="w"> </span>:<span class="w"> </span><span class="m">9</span>
+<span class="w">  </span><span class="o">[</span><span class="c1">##################################################] Complete 100%  (Total: 3898 rows)</span>
+--odb4py<span class="w"> </span>:<span class="w"> </span>Rows<span class="w"> </span>have<span class="w"> </span>been<span class="w"> </span>successfully<span class="w"> </span>written<span class="w"> </span>into<span class="w"> </span>the<span class="w"> </span>SQLITE<span class="w"> </span>db<span class="w"> </span>:<span class="w"> </span>output.sqlite
+--odb4py<span class="w"> </span>:<span class="w"> </span>Total<span class="w"> </span>written<span class="w"> </span>data<span class="w"> </span>size<span class="w">  </span>:<span class="w"> </span><span class="m">215338</span><span class="w"> </span>Bytes
+
+--odb4py<span class="w"> </span>:<span class="w"> </span>Executing<span class="w"> </span>query<span class="w"> </span>from<span class="w"> </span>string:
+<span class="w">  </span><span class="s1">&#39;select  statid ,degrees(lat),degrees(lon),varno ,date  , time,fg_depar, an_depar, obsvalue,FROM hdr,body WHERE obstype ==2&#39;</span>
+
+--odb4py<span class="w"> </span>:<span class="w"> </span>Number<span class="w"> </span>of<span class="w"> </span>requested<span class="w"> </span>columns<span class="w"> </span>:<span class="w"> </span><span class="m">9</span>
+<span class="w">  </span><span class="o">[</span><span class="c1">##################################################] Complete 100%  (Total: 51 rows)</span>
+--odb4py<span class="w"> </span>:<span class="w"> </span>Rows<span class="w"> </span>have<span class="w"> </span>been<span class="w"> </span>successfully<span class="w"> </span>written<span class="w"> </span>into<span class="w"> </span>the<span class="w"> </span>SQLITE<span class="w"> </span>db<span class="w"> </span>:<span class="w"> </span>output.sqlite
+--odb4py<span class="w"> </span>:<span class="w"> </span>Total<span class="w"> </span>written<span class="w"> </span>data<span class="w"> </span>size<span class="w">  </span>:<span class="w"> </span><span class="m">3111</span><span class="w"> </span>Bytes
+
+--odb4py<span class="w"> </span>:<span class="w"> </span>Executing<span class="w"> </span>query<span class="w"> </span>from<span class="w"> </span>string:
+<span class="w">  </span><span class="s1">&#39;select  statid ,degrees(lat),degrees(lon),varno ,date  , time,fg_depar, an_depar, obsvalue,FROM hdr,body WHERE obstype ==5&#39;</span>
+
+--odb4py<span class="w"> </span>:<span class="w"> </span>Number<span class="w"> </span>of<span class="w"> </span>requested<span class="w"> </span>columns<span class="w"> </span>:<span class="w"> </span><span class="m">9</span>
+<span class="w">  </span><span class="o">[</span><span class="c1">##################################################] Complete 100%  (Total: 15991 rows)</span>
+--odb4py<span class="w"> </span>:<span class="w"> </span>Rows<span class="w"> </span>have<span class="w"> </span>been<span class="w"> </span>successfully<span class="w"> </span>written<span class="w"> </span>into<span class="w"> </span>the<span class="w"> </span>SQLITE<span class="w"> </span>db<span class="w"> </span>:<span class="w"> </span>output.sqlite
+--odb4py<span class="w"> </span>:<span class="w"> </span>Total<span class="w"> </span>written<span class="w"> </span>data<span class="w"> </span>size<span class="w">  </span>:<span class="w"> </span><span class="m">962611</span><span class="w"> </span>Bytes
+
+--odb4py<span class="w"> </span>:<span class="w"> </span>Executing<span class="w"> </span>query<span class="w"> </span>from<span class="w"> </span>string:
+<span class="w">  </span><span class="s1">&#39;select  statid ,degrees(lat),degrees(lon),varno ,date  , time,fg_depar, an_depar, obsvalue,FROM hdr,body WHERE obstype ==13&#39;</span>
+
+--odb4py<span class="w"> </span>:<span class="w"> </span>Number<span class="w"> </span>of<span class="w"> </span>requested<span class="w"> </span>columns<span class="w"> </span>:<span class="w"> </span><span class="m">9</span>
+<span class="w">  </span><span class="o">[</span><span class="c1">##################################################] Complete 100%  (Total: 34818 rows)</span>
+--odb4py<span class="w"> </span>:<span class="w"> </span>Rows<span class="w"> </span>have<span class="w"> </span>been<span class="w"> </span>successfully<span class="w"> </span>written<span class="w"> </span>into<span class="w"> </span>the<span class="w"> </span>SQLITE<span class="w"> </span>db<span class="w"> </span>:<span class="w"> </span>output.sqlite
+--odb4py<span class="w"> </span>:<span class="w"> </span>Total<span class="w"> </span>written<span class="w"> </span>data<span class="w"> </span>size<span class="w">  </span>:<span class="w"> </span><span class="m">2010698</span><span class="w"> </span>Bytes
+
+Runtime<span class="w"> </span>duration:<span class="w"> </span><span class="m">0</span>:00:05.994993
+</pre></div>
+</div>
+<p>A tables is created for each <em>obtype</em> inside the same SQLite file.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqlite3<span class="w">   </span>ccma_obstypes.sqlite
+SQLite<span class="w"> </span>version<span class="w"> </span><span class="m">3</span>.26.0<span class="w"> </span><span class="m">2018</span>-12-01<span class="w"> </span><span class="m">12</span>:34:55
+Enter<span class="w"> </span><span class="s2">&quot;.help&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>usage<span class="w"> </span>hints.
+sqlite&gt;<span class="w"> </span>.tables
+odb_obstype_1<span class="w">   </span>odb_obstype_13<span class="w">  </span>odb_obstype_2<span class="w">   </span>odb_obstype_5
+sqlite&gt;
+</pre></div>
+</div>
+<section id="convert-odb-to-netcdf-format">
+<h3>Convert ODB to NetCDF format<a class="headerlink" href="#convert-odb-to-netcdf-format" title="Link to this heading"></a></h3>
+<p>In addition to SQLite, odb4py supports the conversion of ODB data to <a class="reference external" href="https://docs.unidata.ucar.edu/netcdf-c/current/file_format_specifications.html">NetCDF</a> format using the <code class="docutils literal notranslate"><span class="pre">odb_to_nc</span></code> function.
+As with the <code class="docutils literal notranslate"><span class="pre">odb_to_sqlite</span></code> function, this conversion does not require an <em>ODBConnection</em> object. The function handles the entire process internally: it opens the ODB database, reads the requested data, writes the NetCDF output file, and closes the database automatically.</p>
+<div class="line-block">
+<div class="line">The function returns 0 on success and -1 on failure.</div>
+</div>
+<div class="line-block">
+<div class="line">Example</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding : utf-8 -*-</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqlParser</span>
+
+<span class="c1"># Import the method</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.convert</span><span class="w"> </span><span class="kn">import</span> <span class="n">odb2nc</span>
+
+
+<span class="c1"># Start</span>
+<span class="n">end</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+<span class="c1"># ODB path</span>
+<span class="n">dbpath</span> <span class="o">=</span><span class="s2">&quot;/path/to/CCMA&quot;</span>  <span class="c1"># or ECMA.&lt;obstype&gt;</span>
+
+<span class="c1"># Get some needed attributes</span>
+<span class="n">db</span>        <span class="o">=</span> <span class="n">OdbObject</span> <span class="p">(</span> <span class="n">dbpath</span> <span class="p">)</span>
+<span class="n">db_attr</span>   <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">get_attrib</span><span class="p">()</span>
+<span class="n">db_date</span>   <span class="o">=</span> <span class="n">db_attr</span><span class="p">[</span><span class="s2">&quot;observation_date&quot;</span><span class="p">]</span>  <span class="c1"># Observation datatime</span>
+
+<span class="c1"># For NetCDF filename</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">db_date</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Date</span>
+<span class="n">tm</span> <span class="o">=</span> <span class="n">db_date</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Time</span>
+
+<span class="c1"># Output filename</span>
+<span class="n">ncfile</span>  <span class="o">=</span> <span class="s2">&quot;radar_dow_&quot;</span><span class="o">+</span><span class="n">dt</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">tm</span><span class="o">+</span><span class="s2">&quot;.nc&quot;</span>
+
+<span class="c1"># Set up the sql query :  Get the radial Doppler wind  (varno == 195)</span>
+<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;select  statid ,</span><span class="se">\</span>
+<span class="s2">           degrees(lat)   ,</span><span class="se">\</span>
+<span class="s2">           degrees(lon)   ,</span><span class="se">\</span>
+<span class="s2">           varno          ,</span><span class="se">\</span>
+<span class="s2">           date           ,</span><span class="se">\</span>
+<span class="s2">           time           ,</span><span class="se">\</span>
+<span class="s2">           fg_depar       ,</span><span class="se">\</span>
+<span class="s2">           an_depar       ,</span><span class="se">\</span>
+<span class="s2">           obsvalue       ,</span><span class="se">\</span>
+<span class="s2">           FROM hdr,body WHERE obstype ==13 and varno ==195&quot;</span>
+
+
+<span class="c1">#Parse the query</span>
+<span class="n">p</span>  <span class="o">=</span><span class="n">SqlParser</span><span class="p">()</span>
+<span class="n">nf</span> <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">get_nfunc</span>    <span class="p">(</span> <span class="n">sql_query</span> <span class="p">)</span>
+<span class="n">sql</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">clean_string</span> <span class="p">(</span> <span class="n">sql_query</span> <span class="p">)</span>
+
+<span class="c1"># Fetch the data and convert to NetCDF</span>
+<span class="n">status</span> <span class="o">=</span><span class="n">odb2nc</span>   <span class="p">(</span><span class="n">database</span> <span class="o">=</span><span class="n">dbpath</span> <span class="p">,</span>      <span class="c1"># (dtype -&gt; str  )     ODB path</span>
+                  <span class="n">sql_query</span><span class="o">=</span><span class="n">sql</span>    <span class="p">,</span>      <span class="c1"># (dtype -&gt; str  )     The sql query</span>
+                  <span class="n">nfunc</span>    <span class="o">=</span><span class="n">nf</span>     <span class="p">,</span>      <span class="c1"># (dtype -&gt; integer )  Number of functions found in the sql query</span>
+                  <span class="n">ncfile</span>   <span class="o">=</span><span class="n">ncfile</span> <span class="p">,</span>      <span class="c1"># (dtype -&gt; str )      The output NetCDF file</span>
+                  <span class="n">lalon_deg</span><span class="o">=</span> <span class="kc">True</span>  <span class="p">,</span>      <span class="c1"># (dtype -&gt; boolean)   Encode the corrdinates lat/lon in degrees or radians ( True -&gt; degrees , False -&gt; radians)</span>
+                  <span class="n">pbar</span>     <span class="o">=</span> <span class="kc">True</span>  <span class="p">,</span>      <span class="c1"># (dtype -&gt; boolean)   Enable the progress bar</span>
+                  <span class="n">verbose</span>  <span class="o">=</span> <span class="kc">True</span>  <span class="p">)</span>      <span class="c1"># (dtype -&gt; boolean)   verbosity on/off</span>
+
+<span class="c1"># End</span>
+<span class="n">end</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span>  <span class="n">start</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Runtime duration:&quot;</span> <span class="p">,</span> <span class="n">duration</span>  <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Writing<span class="w"> </span>ODB<span class="w"> </span>data<span class="w"> </span>into<span class="w"> </span>NetCDF<span class="w"> </span>file<span class="w"> </span>...
+List<span class="w"> </span>of<span class="w"> </span>written<span class="w"> </span>columns<span class="w"> </span>:
+Column<span class="w">   </span>:<span class="w">  </span>statid@hdr
+Column<span class="w">   </span>:<span class="w">  </span>degrees<span class="o">(</span>lat@hdr<span class="o">)</span>
+Column<span class="w">   </span>:<span class="w">  </span>degrees<span class="o">(</span>lon@hdr<span class="o">)</span>
+Column<span class="w">   </span>:<span class="w">  </span>varno@body
+Column<span class="w">   </span>:<span class="w">  </span>date@hdr
+Column<span class="w">   </span>:<span class="w">  </span>time@hdr
+Column<span class="w">   </span>:<span class="w">  </span>fg_depar@body
+Column<span class="w">   </span>:<span class="w">  </span>an_depar@body
+Column<span class="w">   </span>:<span class="w">  </span>obsvalue@body
+ODB<span class="w"> </span>data<span class="w"> </span>have<span class="w"> </span>been<span class="w"> </span>successfully<span class="w"> </span>written<span class="w"> </span>to<span class="w"> </span>NetCDF<span class="w"> </span>file<span class="w"> </span>:<span class="w"> </span>radar_dow_20230101_000000.nc
+Total<span class="w"> </span>written<span class="w"> </span>data<span class="w"> </span>size<span class="w"> </span>:<span class="w"> </span><span class="m">2506896</span><span class="w"> </span>bytes
+</pre></div>
+</div>
+<p>The <strong>ncdump -h</strong>  command show the structure, the data and metadat of encoded data.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>netcdf<span class="w"> </span>radar_dow_2024011000<span class="w"> </span><span class="o">{</span>
+dimensions:
+<span class="w">     </span><span class="nv">nobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">7825</span><span class="w"> </span><span class="p">;</span>
+<span class="w">     </span><span class="nv">strlen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span><span class="w"> </span><span class="p">;</span>
+variables:
+<span class="w">     </span>char<span class="w"> </span>statid_hdr<span class="o">(</span>nobs,<span class="w"> </span>strlen<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>double<span class="w"> </span>degrees_lat_<span class="o">(</span>nobs<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>degrees_lat_:long_name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;degrees(lat@hdr)&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>degrees_lat_:_FillValue<span class="w"> </span><span class="o">=</span><span class="w"> </span>NaN<span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>double<span class="w"> </span>degrees_lon_<span class="o">(</span>nobs<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>degrees_lon_:long_name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;degrees(lon@hdr)&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>degrees_lon_:_FillValue<span class="w"> </span><span class="o">=</span><span class="w"> </span>NaN<span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>double<span class="w"> </span>varno_body<span class="o">(</span>nobs<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>varno_body:long_name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;varno@body&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>varno_body:_FillValue<span class="w"> </span><span class="o">=</span><span class="w"> </span>NaN<span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>double<span class="w"> </span>date_hdr<span class="o">(</span>nobs<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>date_hdr:long_name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;date@hdr&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>date_hdr:_FillValue<span class="w"> </span><span class="o">=</span><span class="w"> </span>NaN<span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>double<span class="w"> </span>time_hdr<span class="o">(</span>nobs<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>time_hdr:long_name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;time@hdr&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>time_hdr:_FillValue<span class="w"> </span><span class="o">=</span><span class="w"> </span>NaN<span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>double<span class="w"> </span>fg_depar_body<span class="o">(</span>nobs<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>fg_depar_body:long_name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;fg_depar@body&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>fg_depar_body:_FillValue<span class="w"> </span><span class="o">=</span><span class="w"> </span>NaN<span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>double<span class="w"> </span>an_depar_body<span class="o">(</span>nobs<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>an_depar_body:long_name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;an_depar@body&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>an_depar_body:_FillValue<span class="w"> </span><span class="o">=</span><span class="w"> </span>NaN<span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>double<span class="w"> </span>obsvalue_body<span class="o">(</span>nobs<span class="o">)</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>obsvalue_body:long_name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;obsvalue@body&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>obsvalue_body:_FillValue<span class="w"> </span><span class="o">=</span><span class="w"> </span>NaN<span class="w"> </span><span class="p">;</span>
+<span class="w">     </span>//<span class="w"> </span>global<span class="w"> </span>attributes:
+<span class="w">             </span>:Conventions<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;CF-1.10&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:NetCDF_library_version<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;4.3.3.1 of Dec 10 2015 16:44:18 </span>$<span class="s2">&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:Title<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ODB data in NetCDF format&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:History<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Created by: odb4py python package&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:odb4py_version<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1.3.1&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:Institution<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Royal Meteorological Institute of Belgium (RMI)&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:Native_fomrat<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ECMWF ODB&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:sql_query<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;select statid , degrees(lat) , degrees(lon) , varno , date , time , fg_depar , an_depar , obsvalue , FROM hdr,body WHERE obstype ==13 and varno ==195&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:featureType<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;point&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:NetCDF_datetime_creation<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2026-03-17 10:14:27 UTC&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:ODB_analysis_datetime<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2024-01-05 00:00:00 UTC&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:ODB_creation_datetime<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2024-11-14 08:44:28 UTC&quot;</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:ODB_software_version<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">46</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:major_version<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:npools<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">128</span><span class="w"> </span><span class="p">;</span>
+<span class="w">             </span>:ntables<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">393</span><span class="w"> </span><span class="p">;</span>
+<span class="w">       </span><span class="o">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="open_odb_loop.html" class="btn btn-neutral float-left" title="Using odb4py inside loops" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odb_utilities.html" class="btn btn-neutral float-right" title="Utility functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Idir Dehmous, Royal Meteorological Institute of Belgium -(RMI). March 2026.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

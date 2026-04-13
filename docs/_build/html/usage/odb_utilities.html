@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Utility functions &mdash; odb4py 1.3.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=28d163b9"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API documentation" href="../api/api.html" />
+    <link rel="prev" title="ODB data conversion" href="odb_conversion.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            odb4py
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="inspect_odb.html">Inspect the ODB metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_dca.html">Creating Column Direct Access files (DCA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_io.html">Open and close an ODB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_retrieval.html">SQL query and data retrieval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odb_in_python_ecosystem.html">Integration with the python ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="open_odb_loop.html">Using odb4py inside loops</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ODB conversion and utilities</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odb_conversion.html">ODB data conversion</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utility functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#geospatial-functions">Geospatial functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#odb-metadata-utilities-info">ODB metadata utilities (info)</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence.html">Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">odb4py</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Utility functions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="utility-functions">
+<h1>Utility functions<a class="headerlink" href="#utility-functions" title="Link to this heading"></a></h1>
+<p>In addition to data querying and conversion, odb4py provides a set of utility functions to simplify common operations on ODB datasets.
+These functions are available in the core and info modules.</p>
+<section id="geospatial-functions">
+<h2>Geospatial functions<a class="headerlink" href="#geospatial-functions" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">odb_geopoints</span></code> function extracts commonly used geospatial and temporal fields from an ODB database, including:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Station identifier (statid)</p></li>
+<li><p>Latitude and longitude</p></li>
+<li><p>Altitude and pressure</p></li>
+<li><p>Date and time</p></li>
+<li><p>Observation value</p></li>
+</ul>
+</div></blockquote>
+<p>This function provides a convenient way to retrieve standard observation metadata without writing explicit SQL queries (equivalent to the <code class="docutils literal notranslate"><span class="pre">odbsql</span></code> when the <strong>‘geo’</strong> argument is gievn as output format).
+The returned geopoints are stored in a Python dictionary, similarly to <code class="docutils literal notranslate"><span class="pre">odb_dict</span></code>.
+Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">odb_geopoints</span>
+
+<span class="c1"># Path to ODB</span>
+<span class="n">dbpath</span> <span class="o">=</span> <span class="s2">&quot;/path/to/CCMA&quot;</span>  <span class="c1"># ECMA.&lt;obstype&gt;</span>
+
+<span class="c1"># Open ODB</span>
+<span class="n">conn</span><span class="o">=</span><span class="n">odb_open</span> <span class="p">(</span> <span class="n">dbpath</span>   <span class="p">)</span>
+
+<span class="c1"># Get the geopoints</span>
+<span class="n">gp</span>  <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">odb_geopoints</span><span class="p">(</span><span class="n">database</span><span class="o">=</span> <span class="n">dbpath</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>The odb_geopoints function provides several optional arguments to refine the extraction:</p>
+<ul class="simple">
+<li><p><strong>condition</strong> : Adds a filtering condition to the query (equivalent to a SQL WHERE clause).</p></li>
+<li><p><strong>unit</strong>      : Specifies the unit for latitude and longitude values  (degrees or radians ). Possible values are “degrees” (default) or “radians”.</p></li>
+<li><p><strong>extent</strong>    : Restricts the extraction to a sub-domain instead of the full spatial domain.</p></li>
+<li><p><strong>pbar</strong>      : Enables a progress bar during data extraction.</p></li>
+<li><p><strong>verbose</strong>   : Enables more detailed output during execution.</p></li>
+</ul>
+<div class="line-block">
+<div class="line">Example with more arguments</div>
+</div>
+<div class="line-block">
+<div class="line">Extract a sub-domain from an <em>ARPEGE IASI</em> database.</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding :utf-8 -*-</span>
+<span class="c1"># Import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">odb_geopoints</span>
+
+<span class="c1"># Path to ODB</span>
+<span class="n">dbpath</span> <span class="o">=</span> <span class="s2">&quot;/path/to/ECMA.iasi&quot;</span>
+
+<span class="c1"># Open ODB</span>
+<span class="n">conn</span><span class="o">=</span><span class="n">odb_open</span> <span class="p">(</span> <span class="n">dbpath</span>   <span class="p">)</span>
+
+<span class="c1"># Get the geopoints</span>
+<span class="n">data</span><span class="o">=</span><span class="n">conn</span><span class="o">.</span><span class="n">odb_geopoints</span> <span class="p">(</span><span class="n">database</span>  <span class="o">=</span> <span class="n">dbpath</span>   <span class="p">,</span>
+                         <span class="n">condition</span> <span class="o">=</span><span class="s2">&quot;vertco_reference_1@body &gt;  100  AND vertco_reference_1@body&lt;= 500 AND obsvalue is not NULL&quot;</span> <span class="p">,</span>
+                         <span class="n">unit</span>      <span class="o">=</span> <span class="s2">&quot;degrees&quot;</span><span class="p">,</span>
+                         <span class="n">extent</span>    <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">],</span>    <span class="c1"># Extent is given ALWAYS in degrees even the unit is radians  [lon1, lon2, lat1, lat2 ]</span>
+                         <span class="n">pbar</span>      <span class="o">=</span> <span class="kc">True</span>  <span class="p">,</span>
+                         <span class="n">verbose</span>   <span class="o">=</span> <span class="kc">True</span> <span class="p">)</span>
+
+
+<span class="c1"># Get lat/lon and obsvalue</span>
+<span class="n">lats</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;degrees(lat)&quot;</span> <span class="p">]</span>
+<span class="n">lons</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;degrees(lon)&quot;</span> <span class="p">]</span>
+<span class="n">obs</span> <span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;obsvalue@body&quot;</span><span class="p">]</span>
+
+<span class="c1"># Plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">ax</span>  <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span><span class="n">projection</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">Mollweide</span><span class="p">())</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">coastlines</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_global</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="n">cfeature</span><span class="o">.</span><span class="n">BORDERS</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">gridlines</span><span class="p">(</span><span class="n">draw_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span> <span class="p">(</span> <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span> <span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">obs</span> <span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">jet</span> <span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">zorder</span> <span class="o">=</span><span class="mi">111</span><span class="p">,</span><span class="n">transform</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">()</span> <span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span> <span class="s2">&quot;IASI brightness temperature (Channels 100 to 500 ). Nobs = 1852014  </span><span class="se">\n</span><span class="s2"> Datetime :20240623 00h00 UTC&quot;</span> <span class="p">)</span>
+<span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax_cb</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">new_horizontal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">ax_cb</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">ax_cb</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;arpege_iasi_subdomain.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="../_images/arpege_iasi.png"><img alt="ODB observations plotted with Cartopy" src="../_images/arpege_iasi.png" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Example:IASI satellite  from an ARPEGE ODB(100 &lt; Channel &lt; 500) Extent [lon1,lon2,lat1,lat2]=[-60, 80, 0., 80.].</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The other function is <code class="docutils literal notranslate"><span class="pre">odb_gcdist</span></code>. The function computes great-circle distances between pairs of latitude/longitude coordinates.
+The implementation follows the same approach as used in the sp R package, ensuring consistency with existing scientific workflows.
+It does not rely on the classical Haversine formula, but instead uses a more accurate formulation for geodetic distances.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding :utf-8 -*-</span>
+<span class="c1"># Import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.core</span><span class="w"> </span><span class="kn">import</span>  <span class="n">odb_geopoints</span> <span class="p">,</span> <span class="n">odb_gcdist</span>
+
+<span class="c1"># Path to an MetCOop  ODB</span>
+<span class="n">dbpath</span> <span class="o">=</span> <span class="s2">&quot;/path/metcoop/ODB/CCMA&quot;</span>
+
+<span class="c1"># Open ODB</span>
+<span class="n">conn</span><span class="o">=</span><span class="n">odb_open</span> <span class="p">(</span> <span class="n">dbpath</span>   <span class="p">)</span>
+
+
+<span class="c1"># Execute the query</span>
+<span class="n">data</span><span class="o">=</span><span class="n">conn</span><span class="o">.</span><span class="n">odb_geopoints</span> <span class="p">(</span> <span class="n">database</span>  <span class="o">=</span><span class="n">dbpath</span>   <span class="p">,</span>
+                          <span class="n">condition</span> <span class="o">=</span><span class="s2">&quot;obstype== 1  AND varno == 39 &quot;</span><span class="p">,</span>   <span class="c1"># We need all the T2m points from SYNOP</span>
+                          <span class="n">unit</span><span class="o">=</span> <span class="s2">&quot;degrees&quot;</span> <span class="p">,</span>
+                          <span class="n">pbar</span>  <span class="o">=</span> <span class="kc">True</span>  <span class="p">,</span>
+                          <span class="n">verbose</span><span class="o">=</span> <span class="kc">True</span> <span class="p">)</span>
+
+<span class="c1"># Convert to np arrays</span>
+<span class="n">lats</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;degrees(lat)&quot;</span> <span class="p">])</span>
+<span class="n">lons</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;degrees(lon)&quot;</span> <span class="p">])</span>
+
+<span class="c1"># Create the two other arrays</span>
+<span class="n">lons2</span><span class="o">=</span><span class="n">lons</span>
+<span class="n">lats2</span><span class="o">=</span><span class="n">lats</span>
+
+<span class="c1"># Compute the distances matrix</span>
+<span class="n">distmat</span>  <span class="o">=</span>  <span class="n">odb_gcdist</span><span class="p">(</span>  <span class="n">lons</span> <span class="p">,</span><span class="n">lats</span> <span class="p">,</span> <span class="n">lons2</span> <span class="p">,</span> <span class="n">lats2</span>  <span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Matrix type      :&quot;</span> <span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">distmat</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Matrix shape     :&quot;</span> <span class="p">,</span> <span class="n">distmat</span><span class="o">.</span><span class="n">shape</span> <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Average distance :&quot;</span> <span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span> <span class="n">distmat</span> <span class="p">))</span>
+
+<span class="c1"># Close</span>
+<span class="n">conn</span><span class="o">.</span><span class="n">odb_close</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Matrix<span class="w"> </span><span class="nb">type</span><span class="w">      </span>:<span class="w">  </span>&lt;class<span class="w"> </span><span class="s1">&#39;numpy.ndarray&#39;</span>&gt;
+Matrix<span class="w"> </span>shape<span class="w">     </span>:<span class="w"> </span><span class="o">(</span><span class="m">1249</span>,<span class="w"> </span><span class="m">1249</span><span class="o">)</span>
+Average<span class="w"> </span>distance<span class="w"> </span>:<span class="w">  </span><span class="m">901</span>.1969545352
+</pre></div>
+</div>
+</section>
+<section id="odb-metadata-utilities-info">
+<h2>ODB metadata utilities (info)<a class="headerlink" href="#odb-metadata-utilities-info" title="Link to this heading"></a></h2>
+<p>The info module provides functions to inspect the structure and available content of an ODB database.
+Three function are contained in the module : <code class="docutils literal notranslate"><span class="pre">odb_tables</span></code>, <code class="docutils literal notranslate"><span class="pre">odb_varno</span></code>  and  <code class="docutils literal notranslate"><span class="pre">odb_functions</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The information returned by these functions is derived from the ARPEGE/IFS cycle 43t2 source code
+and may be subject to additions or modifications in the most recent cycles.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding :utf-8 -*-</span>
+<span class="c1"># Import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.info</span><span class="w"> </span><span class="kn">import</span> <span class="n">odb_tables</span> <span class="p">,</span><span class="n">odb_varno</span> <span class="p">,</span> <span class="n">odb_functions</span>
+
+
+<span class="c1"># These function are independant and doesn&#39;t need an ODB connection  !</span>
+
+<span class="n">tabs</span> <span class="o">=</span>  <span class="n">odb_tables</span><span class="p">()</span>      <span class="c1"># Returns a list</span>
+<span class="n">varno</span><span class="o">=</span>  <span class="n">odb_varno</span> <span class="p">()</span>      <span class="c1"># Returns a list</span>
+<span class="n">funcs</span><span class="o">=</span>  <span class="n">odb_functions</span><span class="p">()</span>   <span class="c1"># Returns a disctionary   {varno :( shortname ,  description   ) }</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tables     :</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="p">,</span> <span class="n">tabs</span>  <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Functions  :</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="p">,</span> <span class="n">funcs</span> <span class="p">)</span>
+
+<span class="c1"># Print by   key/value</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;varno , ( shortname ,  description ) :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">k</span> <span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">varno</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span> <span class="n">k</span> <span class="p">,</span> <span class="n">v</span> <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Tables<span class="w"> </span>:
+<span class="o">(</span><span class="s1">&#39;desc&#39;</span>,<span class="w"> </span><span class="s1">&#39;ddrs&#39;</span>,<span class="w"> </span><span class="s1">&#39;hdr&#39;</span>,<span class="w"> </span><span class="s1">&#39;body&#39;</span>,<span class="w"> </span><span class="s1">&#39;index&#39;</span>,<span class="w"> </span><span class="s1">&#39;poolmask&#39;</span>,<span class="w"> </span><span class="s1">&#39;errstat&#39;</span>,<span class="w"> </span><span class="s1">&#39;bufr&#39;</span>,<span class="w"> </span><span class="s1">&#39;bufr_tables&#39;</span>,<span class="w"> </span><span class="s1">&#39;bufr_tables_desc&#39;</span>,<span class="w"> </span><span class="s1">&#39;aeolus_auxmet&#39;</span>,<span class="w"> </span><span class="s1">&#39;aeolus_hdr&#39;</span>,<span class="w"> </span><span class="s1">&#39;aeolus_l2c&#39;</span>,<span class="w"> </span><span class="s1">&#39;resat&#39;</span>,<span class="w"> </span><span class="s1">&#39;rtovs&#39;</span>,<span class="w"> </span><span class="s1">&#39;rtovs_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;rtovs_mlev&#39;</span>,<span class="w"> </span><span class="s1">&#39;rtovs_pred&#39;</span>,<span class="w"> </span><span class="s1">&#39;rtovs_slev&#39;</span>,<span class="w"> </span><span class="s1">&#39;sat&#39;</span>,<span class="w"> </span><span class="s1">&#39;satem&#39;</span>,<span class="w"> </span><span class="s1">&#39;satob&#39;</span>,<span class="w"> </span><span class="s1">&#39;scatt&#39;</span>,<span class="w"> </span><span class="s1">&#39;scatt_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;smos&#39;</span>,<span class="w"> </span><span class="s1">&#39;ralt&#39;</span>,<span class="w"> </span><span class="s1">&#39;ssmi&#39;</span>,<span class="w"> </span><span class="s1">&#39;ssmi_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;ssmi_mlev&#39;</span>,<span class="w"> </span><span class="s1">&#39;ssmi_slev&#39;</span>,<span class="w"> </span><span class="s1">&#39;timeslot_index&#39;</span>,<span class="w"> </span><span class="s1">&#39;update&#39;</span>,<span class="w"> </span><span class="s1">&#39;limb&#39;</span>,<span class="w"> </span><span class="s1">&#39;resat_averaging_kernel&#39;</span>,<span class="w"> </span><span class="s1">&#39;radar&#39;</span>,<span class="w"> </span><span class="s1">&#39;radar_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;radar_station&#39;</span>,<span class="w"> </span><span class="s1">&#39;surfbody_feedback&#39;</span>,<span class="w"> </span><span class="s1">&#39;modsurf&#39;</span>,<span class="w"> </span><span class="s1">&#39;radiance&#39;</span>,<span class="w"> </span><span class="s1">&#39;allsky&#39;</span>,<span class="w"> </span><span class="s1">&#39;co2_sink&#39;</span>,<span class="w"> </span><span class="s1">&#39;cloud_sink&#39;</span>,<span class="w"> </span><span class="s1">&#39;collocated_imager_information&#39;</span>,<span class="w"> </span><span class="s1">&#39;auxiliary&#39;</span>,<span class="w"> </span><span class="s1">&#39;auxiliary_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;radiance_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;allsky_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;fcdiagnostic&#39;</span>,<span class="w"> </span><span class="s1">&#39;gbrad&#39;</span>,<span class="w"> </span><span class="s1">&#39;gbrad_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;gnssro&#39;</span>,<span class="w"> </span><span class="s1">&#39;gnssro_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;ensemble&#39;</span>,<span class="w"> </span><span class="s1">&#39;conv&#39;</span>,<span class="w"> </span><span class="s1">&#39;conv_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;raingg&#39;</span>,<span class="w"> </span><span class="s1">&#39;raingg_body&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_1&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_2&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_3&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_4&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_5&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_6&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_7&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_8&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_9&#39;</span>,<span class="w"> </span><span class="s1">&#39;update_10&#39;</span>,<span class="w"> </span><span class="s1">&#39;enkf_[1-$NUMAUX]&#39;</span>,<span class="w"> </span><span class="s1">&#39;enda_[1-$NUMAUX]&#39;</span>,<span class="w"> </span><span class="s1">&#39;surfbody_feedback_[1-$NUMAUX]&#39;</span>,<span class="w"> </span><span class="s1">&#39;fcdiagnostic_body_[1-$NUMAUX]&#39;</span><span class="o">)</span>
+
+Functions<span class="w"> </span>:
+<span class="o">(</span><span class="s1">&#39;Ln&#39;</span>,<span class="w"> </span><span class="s1">&#39;Lg&#39;</span>,<span class="w"> </span><span class="s1">&#39;ftrunc&#39;</span>,<span class="w"> </span><span class="s1">&#39;Cot&#39;</span>,<span class="w"> </span><span class="s1">&#39;ACot&#39;</span>,<span class="w"> </span><span class="s1">&#39;ACot2&#39;</span>,<span class="w"> </span><span class="s1">&#39;Coth&#39;</span>,<span class="w"> </span><span class="s1">&#39;Asinh&#39;</span>,<span class="w">  </span>......<span class="w"> </span>,<span class="w"> </span><span class="s1">&#39;maxloc&#39;</span>,<span class="w"> </span><span class="s1">&#39;Conv_llu2&#39;</span><span class="o">)</span>
+
+Varno<span class="w"> </span>,<span class="w"> </span><span class="o">(</span>shortname<span class="w">   </span>,<span class="w"> </span>description<span class="w">  </span><span class="o">)</span><span class="w"> </span>:
+<span class="m">3</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;u&#39;</span>,<span class="w"> </span><span class="s1">&#39;upper air u component&#39;</span><span class="o">)</span>
+<span class="m">4</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;v&#39;</span>,<span class="w"> </span><span class="s1">&#39;upper air v component&#39;</span><span class="o">)</span>
+<span class="m">1</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;z&#39;</span>,<span class="w"> </span><span class="s1">&#39;geopotential&#39;</span><span class="o">)</span>
+<span class="m">57</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;dz&#39;</span>,<span class="w"> </span><span class="s1">&#39;thickness&#39;</span><span class="o">)</span>
+<span class="m">29</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;rh&#39;</span>,<span class="w"> </span><span class="s1">&#39;upper air rel. humidity&#39;</span><span class="o">)</span>
+<span class="m">9</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;pwc&#39;</span>,<span class="w"> </span><span class="s1">&#39;precipitable water content&#39;</span><span class="o">)</span>
+<span class="m">58</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;rh2m&#39;</span>,<span class="w"> </span><span class="s1">&#39;2m rel. humidity&#39;</span><span class="o">)</span>
+<span class="m">2</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;t&#39;</span>,<span class="w"> </span><span class="s1">&#39;upper air temperature (K)&#39;</span><span class="o">)</span>
+<span class="m">59</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;td&#39;</span>,<span class="w"> </span><span class="s1">&#39;upper air dew point (K)&#39;</span><span class="o">)</span>
+<span class="m">39</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;t2m&#39;</span>,<span class="w"> </span><span class="s1">&#39;2m temperature (K)&#39;</span><span class="o">)</span>
+<span class="m">40</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;td2m&#39;</span>,<span class="w"> </span><span class="s1">&#39;2m dew point (K)&#39;</span><span class="o">)</span>
+<span class="m">11</span><span class="w"> </span><span class="o">(</span><span class="s1">&#39;ts&#39;</span>,<span class="w"> </span><span class="s1">&#39;surface temperature (K)&#39;</span><span class="o">)</span>
+...
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odb_conversion.html" class="btn btn-neutral float-left" title="ODB data conversion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/api.html" class="btn btn-neutral float-right" title="API documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Idir Dehmous, Royal Meteorological Institute of Belgium -(RMI). March 2026.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
