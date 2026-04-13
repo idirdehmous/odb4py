@@ -1,13 +1,13 @@
 #ifndef NCDF_H
 #define NCDF_H
-
-
+// C
 #include <unistd.h>
 #include <sys/stat.h>
-
 #include <ctype.h>
 #include <string.h>
 #include <libgen.h>
+
+// nc header
 #include "netcdf.h"
 
 // Define Pi 
@@ -31,6 +31,7 @@ typedef struct  {
 
 
 /*static int   check_scratch  (const char *varname) {   
+ * to be used later !!
  * Check whether the *TMPDIR , SCRATCH or SCRATCHDIR  exist and have rw access
     char *val = getenv(varname);
     struct stat info;
@@ -60,53 +61,18 @@ return 0;
 void poolfile(char *outfile, 
 	      size_t size,
 	      char *filename , 
-              char *index_str )
-{
+              char *index_str ) {
     const char *dot = strrchr(filename, '.');
-
     if (dot) {
         size_t base_len = dot - filename;
         snprintf(outfile, size, "%.*s_%s%s", (int)base_len, filename,index_str, dot);
-          printf( "From ncdf.h %s\n", outfile  ) ; 
     } else {
         snprintf(outfile, size, "%s_%s",filename, index_str);
-	printf( "From ncdf.h %s\n", outfile  ) ;
-
     }
 }
 
 
-
-
-
-/*static int is_coord(const char *name){
-if (!name) return 0;
-return (!strcmp(name,"lat")  || !strcmp(name,"lon")  || !strcmp(name,"latitude") || !strcmp(name,"longitude"));}*/
-/*static void convert_rad_to_deg(double *buffer,
-                                   int nrows,
-                                   int ncols,
-                               nc_column_t *cols)
-{
-    for (int c = 0; c < ncols; c++)
-    {
-        if (cols[c].is_string)
-            continue;
-        const char *name = cols[c].meta->name;
-        char varname[128];
-        strncpy(varname, name , sizeof(varname)-1);
-        varname[sizeof(varname)-1] = '\0';
-        sanitize_name(varname);
-        if (!is_coord(varname))
-            continue;
-        for (int r = 0; r < nrows; r++)
-        {
-            int idx = r*ncols + c;
-            buffer[idx] *= RAD2DEG;
-        }
-    }
-}*/
-
-
+// The dbname.dd file  path
 void build_dd_path(const char *path, char *ddfile, size_t size)
 {
     char tmp[512];
@@ -124,7 +90,7 @@ void build_dd_path(const char *path, char *ddfile, size_t size)
 }
 
 
-
+// read the file  dbname.dd
 void   scan_dd_file ( const char *database   , 
                              int *vers , 
 			     int *majv ,
@@ -205,7 +171,7 @@ size_t nc_var_size_bytes(int ncid, int varid)
 }
 
 
-
+// remove spaces 
 void normalize_spaces( char *s)
 {
     char *src = s;
@@ -227,7 +193,7 @@ void normalize_spaces( char *s)
 
 
 
-
+// SQL 
 char *read_sql_file(const char *filename){
     FILE *f = fopen(filename, "r");
     if (!f) return NULL;
@@ -244,7 +210,7 @@ char *read_sql_file(const char *filename){
     fclose(f);
     return buffer;
 }
-
+// Get select statement 
 char *extract_select( char *sql)
 {
     char *p = sql;
@@ -257,9 +223,7 @@ char *extract_select( char *sql)
     return NULL;
 }
 
-
-
-
+// Trim 
 void trim(char *s)
 {
     char *start = s;
