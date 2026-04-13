@@ -1,25 +1,33 @@
 # CMakeLists.txt : Compile the C/Python  extension 
 
 
-find_package(SQLite3)
+
+
+find_package(SQLite3  )
+find_package( NetCDF4 COMPONENTS ${NETCDF_FIND_COMPONENTS} )
+find_package(ecbuild )
+find_package(eckit   )
+find_package(odc     )
+list(APPEND CMAKE_PREFIX_PATH "/usr/local")
+
+
 
 set ( NCLIB       "/usr/lib")  
 set ( SQLITE_LIB  "/usr/local/lib")
-set ( ECKIT_LIB   "/home/micro/Bureau/pkg/lib")
-set ( ECBUILD_LIB "/home/micro/Bureau/pkg/lib")
-set ( ODC_LIB     "/home/micro/Bureau/pkg/lib")
-
-
+#set ( ECKIT_LIB   "/home/micro/Bureau/pkg/lib")
+#set ( ECBUILD_LIB "/home/micro/Bureau/pkg")
+#set ( ODC_LIB     "/home/micro/Bureau/pkg/lib")
 
 list(APPEND CMAKE_PREFIX_PATH  ${NCLIB} )
 list(APPEND CMAKE_PREFIX_PATH  ${SQLITE_LIB} )
-list(APPEND CMAKE_PREFIX_PATH  ${SQLITE_DIR} )
-list(APPEND CMAKE_PREFIX_PATH  ${ODC_LIB} )
-list(APPEND CMAKE_PREFIX_PATH  ${ECKIT_LIB} )
+list(APPEND CMAKE_PREFIX_PATH  ${ECBUILD_LIB})
+list(APPEND CMAKE_PREFIX_PATH "/usr/local")
 
 
 
-find_package( NetCDF4 COMPONENTS ${NETCDF_FIND_COMPONENTS} )
+
+
+
 
 execute_process( COMMAND ${Python3_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
     OUTPUT_VARIABLE NumPy_INCLUDE_DIR
@@ -33,8 +41,8 @@ set (NETCDF_C_INCLUDE_DIRS  ${NETCDF_INCLUDE_DIR})
 set (NETCDF_C_LIBRARIES     ${NETCDF_LIBRARY}    )
 
 # eckit , odc 
-set (ODC_INCLUDE   "/home/micro/Bureau/pkg/include")
-set (ECKIT_INCLUDE   "/home/micro/Bureau/pkg/include")
+set (ODC_INCLUDE   "/usr/local/include")
+set (ECKIT_INCLUDE "/usr/local/include")
 
 
 
@@ -52,7 +60,8 @@ target_include_directories(convert PRIVATE    ${Python3_INCLUDE_DIRS}
 					      ${CMAKE_SOURCE_DIR}/include  
 					      ${SQLite3_INCLUDE_DIRS}
 					      ${ODC_INCLUDE}
-					      ${ECKIT_INCLUDE} )
+					      ${ECKIT_INCLUDE} 
+					      )
 
 
 
@@ -67,8 +76,8 @@ target_link_libraries(convert    PRIVATE Python3::Module sqlite3
 							 ${NETCDF_C_LIBRARIES} 
 							 ${Python3_LIBRARIES}  
 							 ${SQLite3_LIBRARIES} 
-							 ${ODC_LIB}
-							 ${ECKIT_LIB} 
+							 #							 ${ODC_LIB}
+							 #${ECKIT_LIB} 
 							 )
 
 
@@ -76,6 +85,7 @@ target_link_libraries(convert    PRIVATE Python3::Module sqlite3
 set_target_properties(core    PROPERTIES OUTPUT_NAME  "core"    PREFIX ""   BUILD_RPATH "\$ORIGIN/lib"  INSTALL_RPATH "\$ORIGIN/lib")
 set_target_properties(info    PROPERTIES OUTPUT_NAME  "info"    PREFIX ""   BUILD_RPATH "\$ORIGIN/lib"  INSTALL_RPATH "\$ORIGIN/lib")
 set_target_properties(convert PROPERTIES OUTPUT_NAME  "convert" PREFIX ""   BUILD_RPATH "\$ORIGIN/lib"  INSTALL_RPATH "\$ORIGIN/lib")
+
 
 # Install  the modules
 install( TARGETS core  LIBRARY DESTINATION     . )
