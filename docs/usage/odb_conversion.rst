@@ -137,14 +137,14 @@ The output ODB2 file can be checked using the ECMWF  `odc <https://odc.readthedo
              9	      20240622	                        0	           139	        210000	                            0	'     005'	                       0	                         1	     15.695730	   -173.721710	      1.552125	           124
              9	      20240622	                        0	           139	        210000	                            0	'     005'	                       0	                         1	     15.742160	   -173.949980	     -7.635057	           125
 
+
+
 .. figure:: ../source/_static/figures/arpege_ascat_u.png
    :width: 80%
    :align: center
    :alt: ODB observervation 
 
    Example : ASCAT satellite from an ARPEGE ECMA ODB converted to ODB2.
-
-
 
 
 Convert ODB to Sqlite database
