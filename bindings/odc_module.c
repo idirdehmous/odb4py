@@ -13,17 +13,8 @@
 #include <fcntl.h>
 #include <Python.h>
 
-# include "odc/api/odc.h"
-
-#define CHECK_RESULT(x)  \
-    do {                 \
-        int rc = (x);    \
-        if (rc != ODC_SUCCESS) {   \
-            fprintf(stderr, "Error calling odc function \"%s\": %s\n", #x, odc_error_string(rc)); \
-            exit(1);      \
-        }                 \
-    } while (false);
-
+// odc 
+#include "odc/api/odc.h"
 
 // Custom
 #include "pyspam.h"
@@ -31,13 +22,25 @@
 #include "rows.h"
 #include "ncdf.h"
 
-
+// Constants 
 #define ODB_STRLEN 8      // 8 chars + '\0'
 #define ODC_STRLEN 16     // 8 is default in ODB but in ODB2 it's extended to 16 byte (such AMDAR wigos identifiers )
-#define DEFAULT_CHUNK 100
+#define DEFAULT_CHUNK 10
 #define ODB_RMDI     -2147483647
 #define ODB_NMDI      2147483647
 #define ODC_BITFIELD  0  
+
+// macros 
+#define CHECK_RESULT(x) \
+    do {                \
+        int rc = (x);   \
+        if (rc != ODC_SUCCESS) {   \
+            fprintf(stderr, "Error calling odc function \"%s\": %s\n", #x, odc_error_string(rc)); \
+            exit(1);    \
+        }               \
+    } while (false);
+
+
 
 
 
@@ -191,14 +194,14 @@ for (int i = 0; i < ncols; i++) {
 }
 
 // INIT ODC & declare the encoder 
-odc_initialise_api();
+//odc_initialise_api();   NOT INIT here ! it should be initiliazed only once !
+ensure_odc_init()     ;
 odc_encoder_t* encoder;
 odc_new_encoder(&encoder);
 
 // Missing values 
 if (odc_set_missing_integer(NMDI) != ODC_SUCCESS ) {  printf( "%s\n", "Failed to set integer missing value"  ) ; PyLong_FromLong(-1) ;  }
 if (odc_set_missing_double (RMDI) != ODC_SUCCESS ) {  printf( "%s\n", "Failed to set real missing value"     ) ; PyLong_FromLong(-1) ;  }
-
 
 // output filename 
 int fd = open(outfile , O_CREAT | O_TRUNC | O_WRONLY, 0666);
@@ -333,12 +336,12 @@ value[3]="Royal_Meteorological_Institute_of_Belgium_(RMI)";
 value[4]="ODB1";
 value[5]="1.6.3";
 
+// set the propreties 
 for (int i=0 ; i < tab_size ; i++) {
-printf( "%s  %s\n" , key[i]  ,  value[i])  ;
 CHECK_RESULT(odc_encoder_add_property(encoder, key[i]  ,  value[i] ));
 }
 
-
+// close file descriptor
 close(fd);
 CHECK_RESULT(odc_free_encoder(encoder));
 
