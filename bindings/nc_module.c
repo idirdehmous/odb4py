@@ -24,7 +24,8 @@
 
 
 #define ODB_STRLEN 8  // 8 chars + '\0'
-#define CHUNK 10000
+//#define CHUNK 5000
+#define DEFAULT_CHUNK  5000
 
 
 
@@ -32,9 +33,8 @@
 static int DefineNcfile       (  const char *database,
                                   char *filename     ,
                                   char *sql_query    ,
-                            //    const char *queryfile,
                                   char *poolmask_str ,
-                                  int *ncid         )
+                                  int  *ncid         )
 
 {
 // Local date & Time 
@@ -94,9 +94,9 @@ strcpy(version  ,nc_version  );
 normalize_spaces ( sql_stmt  );
 normalize_spaces ( version   );
 
+
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "Title"      ,strlen(title) , title);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
-
 
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "NetCDF_filename" ,strlen(filename),filename );
    if (check != NC_NOERR) { ERR(check);    return -1;  }
@@ -110,17 +110,14 @@ check = nc_put_att_text(*ncid, NC_GLOBAL, "NetCDF_datetime_creation", strlen(dat
 if (sql_query) {
     check = nc_put_att_text(*ncid, NC_GLOBAL, "Data_SQL_statement", strlen(sql_stmt),sql_stmt);
     if (check != NC_NOERR) { ERR(check); return -1; }
-}
-    
+}    
 if (poolmask_str) {
     check = nc_put_att_text(*ncid, NC_GLOBAL, "pool#", strlen(poolmask_str), poolmask_str);
     if (check != NC_NOERR) { ERR(check); return -1; }
 }
-
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "NetCDF_library_version" ,strlen(nc_version),nc_version);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
-/*check  =nc_put_att_text(  *ncid, NC_GLOBAL, "Title"      ,strlen(title) , title);
-   if (check != NC_NOERR) { ERR(check);    return -1;  }*/
+
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "History"    ,strlen(history) , history);
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 check  =nc_put_att_text(  *ncid, NC_GLOBAL, "odb4py_version"    ,strlen(ODB4PY_VERSION) , ODB4PY_VERSION);
@@ -151,13 +148,13 @@ check  =nc_put_att_int(  *ncid, NC_GLOBAL, "Number_of_ODB_pools"       , NC_INT,
    if (check != NC_NOERR) { ERR(check);    return -1;  }
 check  =nc_put_att_int(  *ncid, NC_GLOBAL, "Number_of_considered_ODB_tables"      , NC_INT, 1, &ntabs);
    if (check != NC_NOERR) { ERR(check);    return -1;  }  
-
    return 0;
 }
 
 
 
-// Function  : odb2nc_method
+
+// Function  : odb_to_nc_method
 static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
                                  PyObject *args,
                                  PyObject *kwargs) {
@@ -166,10 +163,12 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
     const char *database  = NULL;
     char *sql_query = NULL;
     char *queryfile = NULL;
-    char *ncfile    = NULL ;
+    char *ncfile    = NULL;
 
-    int   fcols     = 0;
+    int   fcols     = 0   ;
     int   fmt_float = 15  ;
+    int   nrows_chunk=10  ;
+
 
     // Objects
     PyObject *poolmask_obj = Py_None;
@@ -188,6 +187,7 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
 	                       "sql_query" ,
 			       "nfunc"     ,
 			       "outfile"   ,
+			       "rows_per_chunk", 
 			       "fmt_float",
                                "queryfile",
 			       "poolmask" ,
@@ -196,11 +196,12 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
 			        NULL
                              };
     // Parse keyword args
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "szis|izOOO", kwlist,   // 3 requiered , 5 optional
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "szisi|izOOO", kwlist,   // 3 requiered , 5 optional
                                      &database,
                                      &sql_query,
                                      &fcols    ,
 				     &ncfile   ,
+				     &nrows_chunk,
                                      &fmt_float,
                                      &queryfile,
                                      &poolmask_obj,
@@ -215,8 +216,8 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
      return PyLong_FromLong(-1);
     }
 
-    // Convert to string
-     char *poolmask_str = NULL;
+    // Convert poolmask to string
+    char *poolmask_str = NULL;
     if (poolmask_obj != Py_None) {
         if (!PyUnicode_Check(poolmask_obj)) {
          PyErr_SetString(PyExc_TypeError, "--odb4py : poolmask must be a string.  ex: '1 2 3 N' or '1:N' N=Number of pools'  \n") ;
@@ -227,8 +228,24 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
     // Conversion to boolean C variable
     lpbar   = PyObj_ToBool ( pbar , lpbar      ) ;
     verbose = PyObj_ToBool ( pverb , verbose   ) ;
+
+// Normalize strings  .. remove blanks 
+char sql_stmt [4096] ;
+char poolmask [4096] ;
+// Operate on local strings  
+
+if ( sql_query ) {
+strcpy(sql_stmt , sql_query  );	
+normalize_spaces ( sql_stmt  );
+}
+
+if ( poolmask_str ){
+    strcpy(poolmask , poolmask_str  );
+    normalize_spaces ( poolmask   );
+}
+
     if (verbose && poolmask_str ) {
-        printf("Fetch data from pool(s) #: %s\n", poolmask_str );
+        printf("Fetch data from pool(s) #: %s\n", poolmask );
     }
     char  *varvalue = NULL;
     int    maxlines = -1;
@@ -253,7 +270,7 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
     if (maxlines == 0) return PyLong_FromLong(rc);
     if (verbose) {
         if (sql_query)
-            printf("--odb4py : Executing query from string: %s\n", sql_query);
+            printf("--odb4py : Executing query from string: %s\n", sql_stmt);
     }   else if (queryfile) {
             printf("--odb4py : Executing query from file   : %s\n", queryfile);
 	    printf("%s\n", "--odb4py : WARNING --> Executing the queries from SQL file is DEPRECATED. Not completly stable");
@@ -270,6 +287,12 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
 
 
 
+// Reset the number of rows per chunk (frame)
+int rows_by_chunk=DEFAULT_CHUNK  ;
+if ( nrows_chunk   &&  nrows_chunk !=  DEFAULT_CHUNK ) {
+     rows_by_chunk = nrows_chunk ;    // override  if argument is given 
+}
+
 
 // Init nc vars 
 int ncid, dimid, strlen_dimid;
@@ -277,17 +300,17 @@ int *varid     = malloc(ncols * sizeof(int));
 int *is_string = malloc(ncols * sizeof(int));
 int check = 0 ; 
 
+
 // create ncetcdf   file 
 check = nc_create(ncfile  , NC_NETCDF4, &ncid);
      if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
 
 
-
 // Encode the metadata  
-if ( DefineNcfile  (database    ,
-                    ncfile      ,
-	            sql_query   , 
-		  poolmask_str  ,  
+if ( DefineNcfile  (database  ,
+                  ncfile      ,
+	          sql_query   , 
+		  poolmask_str,  
 		  &ncid   ) != 0 ) {
       printf("%s\n" ,   "--odb4py : Failed to write meta data" )   ; 
       return PyLong_FromLong(-1)   ; 
@@ -302,6 +325,8 @@ if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
 
 //  ODB data are returned here !
 double *d = malloc(maxcols * sizeof(double));
+//char *colnames= calloc (  maxcols * ODB_STRLEN  ) ; 
+char **colnames = calloc(ncols, sizeof(char*));
 
 // Temporary data buffers 
 double **buffers     = malloc(ncols * sizeof(double*));
@@ -312,9 +337,10 @@ if ( !buffers || !str_buffers )  {
       printf("%s\n", "--odb4py : Failed to allocate buffer for NetCDF encoding.") ; 
       return PyLong_FromLong(-1) ;
 }
+
 for (int i = 0; i < ncols; i++) {
-    buffers[i]     = malloc(CHUNK * sizeof(double));
-    str_buffers[i] = malloc(CHUNK * ODB_STRLEN * sizeof(char));
+    buffers[i]     = malloc(rows_by_chunk * sizeof(double));
+    str_buffers[i] = malloc(rows_by_chunk * ODB_STRLEN * sizeof(char));
     is_string  [i] = 0;
     if ( !buffers[i] || !str_buffers[i]  ) {
          
@@ -356,6 +382,8 @@ while (nextrow(h, d, maxcols, &new_dataset) > 0) {
             strcpy(cname, name);
             sanitize_name(cname);
 
+	    colnames [i] = strdup(cname);
+
             int odb_dtype = ci[i].dtnum;
             if (odb_dtype == DATATYPE_STRING) {
                 is_string[i] = 1;   // ---> this col  is  string  dtype 
@@ -371,43 +399,27 @@ while (nextrow(h, d, maxcols, &new_dataset) > 0) {
                     case DATATYPE_INT2:
                     case DATATYPE_INT4:
                     case DATATYPE_YYYYMMDD:
-                    case DATATYPE_HHMMSS:  
-			    nc_type = NC_INT64   ; break;
-                    default:               
-			    nc_type = NC_DOUBLE  ; break;
+                    case DATATYPE_HHMMSS:  nc_type = NC_INT64 ; break;
+                    default:               nc_type = NC_DOUBLE; break;
                 }
 		// def vars according to  datatype 
                 check = nc_def_var(ncid, cname, nc_type, 1, &dimid, &varid[i]);
                    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
 
-		// Set standard names and units for coordinates 
-                if (strcmp(cname,"degrees_lat")==0 || strcmp(cname,"lat_hdr")==0) {
-                   check = nc_put_att_text(ncid, varid[i], "units", strlen("degrees_north"),"degrees_north");
-                      if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
-                   check =nc_put_att_text(ncid, varid[i],"standard_name",strlen("latitude"),"latitude");
-	              if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
-                 } // lat
-                if (strcmp(cname,"degrees_lon")==0 || strcmp(cname,"lon_hdr")==0) {
-                   check=nc_put_att_text(ncid, varid[i], "units", strlen("degrees_east"), "degrees_east");
-	              if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
-                  check=nc_put_att_text(ncid, varid[i], "standard_name", strlen("longitude"), "longitude");
-	              if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
-                 } // lon
-
-        // Missing values 
-if (nc_type == NC_DOUBLE) {
-    double ffill = -999999.0;
-    check = nc_put_att_double(ncid, varid[i], "_FillValue", NC_DOUBLE, 1, &ffill);
-    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1); }
-}
-// Encode integer on 64bits integer 
-else if (nc_type == NC_INT64) {
-    long long nfill = -999999;
-    check = nc_put_att_longlong(ncid, varid[i], "_FillValue", NC_INT64, 1, &nfill);
-    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1); }
-}
-        
-	size_t chunk[1] = {CHUNK};
+        if (strcmp(cname,"degrees_lat")==0 || strcmp(cname,"lat_hdr")==0) {
+         check = nc_put_att_text(ncid, varid[i], "units", strlen("degrees_north"),"degrees_north");
+            if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+         check =nc_put_att_text(ncid, varid[i],"standard_name",strlen("latitude"),"latitude");
+	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+        } // lat
+        if (strcmp(cname,"degrees_lon")==0 || strcmp(cname,"lon_hdr")==0) {
+         check=nc_put_att_text(ncid, varid[i], "units", strlen("degrees_east"), "degrees_east");
+	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+         check=nc_put_att_text(ncid, varid[i], "standard_name", strlen("longitude"), "longitude");
+	    if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
+        } // lon
+ 
+	size_t chunk[1] = {rows_by_chunk};
         check  = nc_def_var_chunking(ncid, varid[i], NC_CHUNKED, chunk);
              if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
             }
@@ -416,7 +428,6 @@ else if (nc_type == NC_INT64) {
 	   if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
         first_dataset = 0;
     }   // first dataset 
-
 
     //  FILL BUFFERS 
     for (int i = 0; i < ncols; i++) {        	    
@@ -438,16 +449,18 @@ else if (nc_type == NC_INT64) {
         } else {		    
 	// In netcdf lat/lon are in degrees 
 	// the function 'sanitize_name'  removes '@' character and replace with '_'.
- 	if (strcmp(cname,"lon_hdr")==0  || strcmp(cname,"lat_hdr")==0 ) {
-             buffers[i][k] = d[i] *RAD2DEG;            
+	if ( ABS(d[i]) == mdi )  { 
+		buffers[i][k]  =   NAN ;
+	}else if (strcmp(cname,"lon_hdr")==0  || strcmp(cname,"lat_hdr")==0  ) {	    	     
+             buffers[i][k] =  format_float(  d[i]*RAD2DEG, fmt_float)  ;             
         }else {	
-	     buffers[i][k] = d[i];
+	     buffers[i][k] =   format_float(d[i] ,  fmt_float) ;
 	      }
 	}
     }  // for ncols  2 -- > fill buffers 
     k++;
     // write  data by CHUNKS 
-    if (k == CHUNK) {
+    if (k == rows_by_chunk) {
         for (int i = 0; i < ncols; i++) {
             if (is_string[i]) {
                 size_t start[2] = {global_index, 0};
@@ -463,9 +476,8 @@ else if (nc_type == NC_INT64) {
         }
         global_index += k;   // Update global index 
         k = 0;
-      }  // k == CHUNK 
+      }  // k == rows_by_chunk 
 }
-
 // Final bloc 
 if (k > 0) {
     for (int i = 0; i < ncols; i++) {
@@ -483,6 +495,21 @@ if (k > 0) {
     }
 }
 
+/* get the number of written bytes 
+int nvars;
+nc_inq_nvars(ncid, &nvars);
+size_t total = 0;
+for (int v = 0; v < nvars; v++)
+    total += nc_var_size_bytes(ncid, varid[v] );*/
+
+if (verbose  ) {
+    printf( "%s %s\n" ,  "List of column names in ", ncfile   ) ;
+    for ( int c =0; c< ncols ; c++ ){
+         printf  ( "%s  :  %s \n" , "Column " ,  colnames[c] )  ;
+        }
+}
+
+
 //  Close the NETCDF file  
 check = nc_close(ncid);
 if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
@@ -492,5 +519,10 @@ if (str_buffers) free(str_buffers);
 // free structures 
 if (ci)   odbdump_destroy_colinfo(ci, nci);
 if (h)    odbdump_close(h);
+
+// Check file creation and size 
+check_file ( ncfile ,   verbose  ) ; 
+
+
 return PyLong_FromLong(0);
 }
