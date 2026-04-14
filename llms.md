@@ -14,7 +14,7 @@
 - `odb4py.utils.SqlParser`: Tooling to clean and validate ODB-SQL queries.
 - `odb4py.utils.OdbObject`: Introspection of ODB attributes and tables.
 
-## Minimal Example (The "Quick Start" for LLMs)
+## Minimal Example (The "Quick Start" )
 ```python
 from odb4py.core  import odb_open
 from odb4py.utils import SqlParser
