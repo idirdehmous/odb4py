@@ -30,11 +30,16 @@ The **odb4py** package can be installed from PyPI using `pip`:
 ```bash
 pip install odb4py  
 ```
+## Quick start  
+`from odb4py import core      # The extension core ` <br>
+`from odb4py import convert   # An extension for format conversion`    <br>
+`from odb4py import utils     # Pure python modules helpers`   <br>
 
-## Installation test 
-`>>> from odb4py import core      # The extension core ` <br>
-`>>> from odb4py import convert   # An extension for format conversion`    <br>
-`>>> from odb4py import utils     # Pure python modules helpers`   <br>
+`conn = core.odb_open( database  = "/path/to/ODB")   # ECMA or CCMA
+`data = conn.odb_dict( database  ="/path/to/ODB" ,  `
+`                       sql_query="SELECT * FROM hdr")`
+`                       nfunc    = 0 )  `
+`print(data)`
 
 
 
