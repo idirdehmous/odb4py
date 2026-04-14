@@ -147,10 +147,168 @@ The output ODB2 file can be checked using the ECMWF  `odc <https://odc.readthedo
    Example : ASCAT satellite from an ARPEGE ECMA ODB converted to ODB2.
 
 
+
+
+Convert ODB to NetCDF format
+----------------------------
+
+To perform the conversion into NetCDF format the ``odb_to_nc`` function has to be called. The data encoding is handled in the backend, ensuring compatibility with the ODB internal format. The NetCDF variables are automatically created by mapping the data types returned by the ODB query to the corresponding types supported by the latter.
+
+| The function returns **0** on success and **-1** on failure.
+
+| The ARPEGE ``ECMA.ascat`` is used also in the following example.
+
+.. code-block:: python
+
+   #-*- coding : utf-8 -*-
+   from datetime import datetime 
+
+   # utils 
+   from odb4py import SqlParser  
+
+   # Import the method 
+   from odb4py.convert import odb_to_nc
+
+   # Start
+   end  = datetime.now()
+
+   # ODB path 
+   dbpath ="/path/to/ECMA.ascat"  
+
+   # Get some needed attributes 
+   db        = OdbObject ( dbpath )
+   db_attr   = db.get_attrib()
+   db_tables = db_attr ["tables"]
+   db_date   = db_attr ["observation_date"]  # Observation datatime 
+   
+   # NetCDF filename  
+   dt = db_date.split()[0]  # Date 
+   tm = db_date.split()[1]  # Time 
+
+   # Output filename 
+   ncfile  = "arpege_ascat_"+dt+"_"+tm+".nc"
+
+   # Set up the sql query :  Get the ambigous U wind component  (obstype =9, codetype=139, varno=124)
+   sql_query="select  statid ,   \
+              degrees(lat)   ,\
+              degrees(lon)   ,\
+              varno          ,\
+              obstype        ,\
+              codetype       ,\
+              date           ,\
+              time           ,\
+              obsvalue       ,\
+              vertco_reference_1,\
+              vertco_reference_2,\
+              datum_status.active@body , \
+              datum_status.blacklisted@body,   \
+              datum_status.passive@body, \
+              datum_status.rejected@body,\
+              FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno ==124  ORDER BY date,time"
+
+
+   #Parse the query
+   p  =SqlParser()
+   nf =p.get_nfunc    ( sql_query )
+   sql=p.clean_string ( sql_query )
+
+   # Fetch the data and convert to NetCDF
+   status =odb_to_nc(database =dbpath ,      # (dtype -> str  )     ODB path 
+                     sql_query=sql    ,      # (dtype -> str  )     The sql query 
+                     nfunc    =nf     ,      # (dtype -> integer )  Number of functions found in the sql query 
+                     outfile  =ncfile ,      # (dtype -> str )      The output NetCDF file
+                     rows_per_chunk = 1000,  # (dtype -> int )      The number of written rows per chunk ( default is 5000)
+                     poolmask = None  ,      # (dtype-> str  )      Poolmask 
+                     queryfile= None  ,      # (dtype-> str  )
+                     pbar     = True  ,      # (dtype -> boolean)   Enable the progress bar 
+                     verbose  = True  )      # (dtype -> boolean)   verbosity on/off  
+
+   # End           
+   end  = datetime.now()
+   duration = end -  start
+   print("Runtime duration:" , duration  )
+
+
+.. code-block:: bash
+
+   List of column names in  arpage_ascat_2024062300.nc
+   Column   :  statid_hdr 
+   Column   :  lat_hdr 
+   Column   :  lon_hdr 
+   Column   :  varno_body 
+   Column   :  obstype_hdr 
+   Column   :  codetype_hdr 
+   Column   :  date_hdr 
+   Column   :  time_hdr 
+   Column   :  obsvalue_body 
+   Column   :  an_depar_body 
+   Column   :  vertco_reference_1_body 
+   Column   :  vertco_reference_2_body 
+   Column   :  datum_status_active_body 
+   Column   :  datum_status_blacklisted_body 
+   Column   :  datum_status_passive_body 
+   Column   :  datum_status_rejected_body 
+   ODB data have been written to file : arpage_ascat_2024062300.nc
+   File size  : 6466010  Bytes
+
+   Runtime duration: 0:00:03.98810
+
+
+The **ncdump -h**  command show the structure, the data and metadat of encoded data.
+
+.. code-block:: bash
+
+   netcdf arpage_ascat_2024062300.nc {
+   dimensions:
+        obs = UNLIMITED ; // (684451 currently)
+        strlen = 8 ;
+   variables:
+        char statid_hdr(obs, strlen) ;
+        double lat_hdr(obs) ;
+               lat_hdr:units = "degrees_north" ;
+               lat_hdr:standard_name = "latitude" ;
+        double lon_hdr(obs) ;
+               lon_hdr:units = "degrees_east" ;
+               lon_hdr:standard_name = "longitude" ;
+        int64 varno_body(obs) ;
+        int64 obstype_hdr(obs) ;
+        int64 codetype_hdr(obs) ;
+        int64 date_hdr(obs) ;
+        int64 time_hdr(obs) ;
+        double obsvalue_body(obs) ;
+        double an_depar_body(obs) ;
+        double vertco_reference_1_body(obs) ;
+        double vertco_reference_2_body(obs) ;
+        int64 datum_status_active_body(obs) ;
+        int64 datum_status_blacklisted_body(obs) ;
+        int64 datum_status_passive_body(obs) ;
+        int64 datum_status_rejected_body(obs) ;
+   
+    // global attributes:
+                :Title = "ODB data in NetCDF format" ;
+                :NetCDF_filename = "output.nc" ;
+                :Conventions = "CF-1.10" ;
+                :NetCDF_datetime_creation = "2026-04-14 15:46:30 UTC" ;
+                :Data_SQL_statement = "select statid , lat , lon , varno , obstype , codetype , date , time , obsvalue , an_depar, vertco_reference_1, vertco_reference_2, datum_status.active@body , datum_status.blacklisted@body, datum_status.passive@body, datum_status.rejected@body, FROM hdr,body WHERE obstype==9 AND codetype==139 AND varno ==124 AND entryno <100 ORDER BY date,time " ;
+                :NetCDF_library_version = "4.9.3 of Mar 14 2025 07:27:28 $" ;
+                :History = "Created by: odb4py python package" ;
+                :odb4py_version = "1.3.3" ;
+                :Institution = "Royal Meteorological Institute of Belgium (RMI)" ;
+                :Native_fomrat = "ECMWF ODB" ;
+                :featureType = "point" ;
+                :ODB_analysis_datetime = "2024-06-23 00:00:00 UTC" ;
+                :ODB_creation_datetime = "2024-11-04 11:24:13 UTC" ;
+                :ODB_software_version = 48 ;
+                :ODB_major_version = 0 ;
+                :Number_of_ODB_pools = 32 ;
+                :Number_of_considered_ODB_tables = 388 ;
+
+
+
 Convert ODB to Sqlite database
 -------------------------------
 
-To perform such a conversion, the ``odb_to_sqlite`` has to be used. The data encoding is handled in the backend, ensuring compatibility with the ODB internal format. SQLite tables are automatically created by mapping the data types returned by the ODB query to the corresponding types supported by SQLite.
+The function ``odb_to_sqlite`` is needed to perform such a conversion. As in the case of NetCDF  conversion this function needs no *ODBConnection* object and all the variables and structures and datatype mapping are handled in the backend
 
 | The function returns **0** on success and **-1** on failure.
 
@@ -196,14 +354,15 @@ To perform such a conversion, the ``odb_to_sqlite`` has to be used. The data enc
    
 
    # ODB2 output filename
-   odb2file="arpege_ascat_"+dt+"_"+tm+".sqlite"
+   sqlite_file="arpege_ascat_"+dt+"_"+tm+".sqlite"
 
    # Call odb2sqlite method
-   status =odb_to_sqlite (database=dbpath,       
+   status =odb_to_sqlite (database  = dbpath   ,       
                           sql_query = sql_query,
-                          sqlite_db = outfile  ,  
-                          nfunc     = nf    , 
-                          pbar      = True  , 
+                          outfile   = sqlite_file, 
+                          table_name= "ASCAT", 
+                          nfunc     = nf     , 
+                          pbar      = True   , 
                           verbose   = True  )
 
    # End  
@@ -280,28 +439,36 @@ Create multiple SQLite tables according to ODB *obstype* column. The same MetCOo
 
 
    # The sql query
-   query="select  statid ,\
-           degrees(lat)   ,\
-           degrees(lon)   ,\
+   scat_query="select  statid ,\
+           lat   ,\
+           lon   ,\
            varno          ,\
+           obstype        ,\
+           codetype       ,\
            date           ,\
            time           ,\
-           fg_depar       ,\
-           an_depar       ,\
            obsvalue       ,\
-           FROM hdr,body "
+           an_depar,      \
+           vertco_reference_1,\
+           vertco_reference_2,\
+           datum_status.active@body , \
+           datum_status.blacklisted@body,   \
+           datum_status.passive@body, \
+           datum_status.rejected@body,\
+           FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno ==  {}  ORDER BY   date,time"
+
 
    # Declare the obstyses to be extracted 
-   # 1  --> synop 
-   # 2  --> AMDAR
-   # 5  --> TEMP 
-   # 13 --> Radar 
-   obstype_list=[ "1","2", "5", "13"]
+   # 124  --> Umbegous U component of wind 
+   # 125  -->  ''      V      ''   
+   
+   # Declare the varno list  
+   varno_list=["124", "125"]
 
    # The output SQLite file 
-   sqlite_output="ccma_obstypes_2024010400.sqlite"
+   sqlite_output="arpege_ascat_uv_2024010400.sqlite"
 
-   for obst in  obstype_list :
+   for var in  varno_list :
        """
        THE PATH TO THE ODB IS THE SAME FOR EVERY OTERATION. 
        WE DON'T NEED TO UPDATE THE VARIABLES RELATIVE TO THE PATH 
@@ -311,22 +478,22 @@ Create multiple SQLite tables according to ODB *obstype* column. The same MetCOo
        ODB_DATAPATH_CCMA  
        """   
 
-       # SQLite table names 
-       table_name  = "obstype_"+obst
-
-       # Change the SQL query according to obstype value ( Add WHERE condition )
-       query_by_obstype = sql_query + " WHERE obstype ==" +obst.rstrip()
+       # Change the SQL query according to varno  
+       query_by_var = scat_query.format(var )  
 
        # Parsing the query must be updated, since the query is changing for every iteration
-       nf  =p.get_nfunc    ( query_by_obstype )
-       sql =p.clean_string ( query_by_obstype )
+       nf  =p.get_nfunc    ( query_by_var )
+       sql =p.clean_string ( query_by_var )
+
+       # Table names  
+       tabname="varno_"+var  
 
        # Convert
        re =odb_to_sqlite(database  =dbpath,
                          sql_query = sql  ,
                          nfunc     = nf   ,
                          sqlite_db = sqlite_output ,
-                         table_name= table_name  ,
+                         table_name= tabname ,
                          pbar      = True ,
                          verbose   = True  )
 
@@ -354,203 +521,24 @@ Create multiple SQLite tables according to ODB *obstype* column. The same MetCOo
 	        ODB_IO_METHOD=5
    ODB_CONSIDER_TABLES=*
    ODB_WRITE_TABLES=*
-   --odb4py : Executing query from string: 
-     'select  statid ,degrees(lat),degrees(lon),varno ,date  , time,fg_depar, an_depar, obsvalue,FROM hdr,body WHERE obstype ==1'
-   --odb4py : Number of requested columns : 9
-     [##################################################] Complete 100%  (Total: 3898 rows)
-   --odb4py : Rows have been successfully written into the SQLITE db : output.sqlite
-   --odb4py : Total written data size  : 215338 Bytes
+   --odb4py : Executing query from string: select statid , lat , lon , varno , obstype , codetype , date , time , obsvalue , an_depar, vertco_reference_1, vertco_reference_2, datum_status.active@body , datum_status.blacklisted@body, datum_status.passive@body, datum_status.rejected@body, FROM hdr,body WHERE obstype==9 AND codetype==139 AND varno == 124 ORDER BY date,time 
+   --odb4py : Number of requested columns : 16
+    [##################################################] Complete 100%  (Total: 684451 rows)
+   ODB data have been written to file : output.sqlite.sqlite
+   File size  : 55656448  Bytes
 
-   --odb4py : Executing query from string:
-     'select  statid ,degrees(lat),degrees(lon),varno ,date  , time,fg_depar, an_depar, obsvalue,FROM hdr,body WHERE obstype ==2'
+   --odb4py : Executing query from string: select statid , lat , lon , varno , obstype , codetype , date , time , obsvalue , an_depar, vertco_reference_1, vertco_reference_2, datum_status.active@body , datum_status.blacklisted@body, datum_status.passive@body, datum_status.rejected@body, FROM hdr,body WHERE obstype==9 AND codetype==139 AND varno == 125 ORDER BY date,time 
+   --odb4py : Number of requested columns : 16
+   [##################################################] Complete 100%  (Total: 684451 rows)
+   ODB data have been written to file : output.sqlite.sqlite
+   File size  : 111308800  Bytes
 
-   --odb4py : Number of requested columns : 9
-     [##################################################] Complete 100%  (Total: 51 rows)
-   --odb4py : Rows have been successfully written into the SQLITE db : output.sqlite
-   --odb4py : Total written data size  : 3111 Bytes
+   Runtime duration: 0:00:10.348313
 
-   --odb4py : Executing query from string:
-     'select  statid ,degrees(lat),degrees(lon),varno ,date  , time,fg_depar, an_depar, obsvalue,FROM hdr,body WHERE obstype ==5'
-
-   --odb4py : Number of requested columns : 9
-     [##################################################] Complete 100%  (Total: 15991 rows)
-   --odb4py : Rows have been successfully written into the SQLITE db : output.sqlite
-   --odb4py : Total written data size  : 962611 Bytes
-
-   --odb4py : Executing query from string:
-     'select  statid ,degrees(lat),degrees(lon),varno ,date  , time,fg_depar, an_depar, obsvalue,FROM hdr,body WHERE obstype ==13'
-
-   --odb4py : Number of requested columns : 9
-     [##################################################] Complete 100%  (Total: 34818 rows)
-   --odb4py : Rows have been successfully written into the SQLITE db : output.sqlite
-   --odb4py : Total written data size  : 2010698 Bytes
-
-   Runtime duration: 0:00:05.994993
-
-A tables is created for each *obtype* inside the same SQLite file.
+A table is created for each *varno* inside the same SQLite file.
 
 .. code-block:: bash  
 
-   sqlite3   ccma_obstypes.sqlite
-   SQLite version 3.26.0 2018-12-01 12:34:55
-   Enter ".help" for usage hints.
-   sqlite> .tables
-   odb_obstype_1   odb_obstype_13  odb_obstype_2   odb_obstype_5
-   sqlite>
-
-
-
-
-
-
-Convert ODB to NetCDF format
-----------------------------
-In addition to SQLite, odb4py supports the conversion of ODB data to `NetCDF <https://docs.unidata.ucar.edu/netcdf-c/current/file_format_specifications.html>`_ format using the ``odb_to_nc`` function.
-As with the ``odb_to_sqlite`` function, this conversion does not require an *ODBConnection* object. The function handles the entire process internally: it opens the ODB database, reads the requested data, writes the NetCDF output file, and closes the database automatically. 
-
-| The function returns 0 on success and -1 on failure.
-
-| For a comparison purpose, thehe ARPEGE ``ECMA.ascat`` is used also in the following example.
-
-.. code-block:: python
-
-   #-*- coding : utf-8 -*-
-   from datetime import datetime 
-
-   # utils 
-   from odb4py import SqlParser  
-
-   # Import the method 
-   from odb4py.convert import odb2nc
-
-   # Start
-   end  = datetime.now()
-
-   # ODB path 
-   dbpath ="/path/to/ECMA.ascat"  
-
-   # Get some needed attributes 
-   db        = OdbObject ( dbpath )
-   db_attr   = db.get_attrib()
-   db_tables = db_attr ["tables"]
-   db_date   = db_attr ["observation_date"]  # Observation datatime 
-   
-   # For NetCDF filename  
-   dt = db_date.split()[0]  # Date 
-   tm = db_date.split()[1]  # Time 
-
-   # Output filename 
-   ncfile  = "arpege_ascat_"+dt+"_"+tm+".nc"
-
-   # Set up the sql query :  Get the ambigous U wind component  (obstype =9, codetype=139, varno=124)
-   sql_query="select  statid ,   \
-              degrees(lat)   ,\
-              degrees(lon)   ,\
-              varno          ,\
-              obstype        ,\
-              codetype       ,\
-              date           ,\
-              time           ,\
-              obsvalue       ,\
-              vertco_reference_1,\
-              vertco_reference_2,\
-              datum_status.active@body , \
-              datum_status.blacklisted@body,   \
-              datum_status.passive@body, \
-              datum_status.rejected@body,\
-              FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno ==124  ORDER BY date,time"
-
-
-   #Parse the query
-   p  =SqlParser()
-   nf =p.get_nfunc    ( sql_query )
-   sql=p.clean_string ( sql_query )
-
-   # Fetch the data and convert to NetCDF
-   status =odb_to_nc(database =dbpath ,      # (dtype -> str  )     ODB path 
-                     sql_query=sql    ,      # (dtype -> str  )     The sql query 
-                     nfunc    =nf     ,      # (dtype -> integer )  Number of functions found in the sql query 
-                     outfile  =ncfile ,      # (dtype -> str )      The output NetCDF file
-                     lalon_deg= True  ,      # (dtype -> boolean)   Encode the corrdinates lat/lon in degrees or radians ( True -> degrees , False -> radians)
-                     pbar     = True  ,      # (dtype -> boolean)   Enable the progress bar 
-                     verbose  = True  )      # (dtype -> boolean)   verbosity on/off  
-
-   # End           
-   end  = datetime.now()
-   duration = end -  start
-   print("Runtime duration:" , duration  )
-
-
-
-.. code-block:: bash
-
-   Writing ODB data into NetCDF file ...
-   List of written columns :
-   Column   :  statid@hdr
-   Column   :  degrees(lat@hdr)
-   Column   :  degrees(lon@hdr)
-   Column   :  varno@body
-   Column   :  date@hdr
-   Column   :  time@hdr
-   Column   :  fg_depar@body
-   Column   :  an_depar@body
-   Column   :  obsvalue@body
-   ODB data have been successfully written to NetCDF file : arpege_ascat_20240623_000000.nc
-   Total written data size : 2506896 bytes
-
-
-
-The **ncdump -h**  command show the structure, the data and metadat of encoded data.
-
-.. code-block:: bash
-
-   netcdf radar_dow_2024011000 {
-   dimensions:
-        nobs = 7825 ;
-        strlen = 8 ;
-   variables:
-	char statid_hdr(nobs, strlen) ;
-	double degrees_lat_(nobs) ;
-		degrees_lat_:long_name = "degrees(lat@hdr)" ;
-		degrees_lat_:_FillValue = NaN ;
-	double degrees_lon_(nobs) ;
-		degrees_lon_:long_name = "degrees(lon@hdr)" ;
-		degrees_lon_:_FillValue = NaN ;
-	double varno_body(nobs) ;
-		varno_body:long_name = "varno@body" ;
-		varno_body:_FillValue = NaN ;
-	double date_hdr(nobs) ;
-		date_hdr:long_name = "date@hdr" ;
-		date_hdr:_FillValue = NaN ;
-	double time_hdr(nobs) ;
-		time_hdr:long_name = "time@hdr" ;
-		time_hdr:_FillValue = NaN ;
-	double fg_depar_body(nobs) ;
-		fg_depar_body:long_name = "fg_depar@body" ;
-		fg_depar_body:_FillValue = NaN ;
-	double an_depar_body(nobs) ;
-		an_depar_body:long_name = "an_depar@body" ;
-		an_depar_body:_FillValue = NaN ;
-	double obsvalue_body(nobs) ;
-		obsvalue_body:long_name = "obsvalue@body" ;
-		obsvalue_body:_FillValue = NaN ;
-        // global attributes:
-		:Conventions = "CF-1.10" ;
-		:NetCDF_library_version = "4.3.3.1 of Dec 10 2015 16:44:18 $" ;
-		:Title = "ODB data in NetCDF format" ;
-		:History = "Created by: odb4py python package" ;
-		:odb4py_version = "1.3.1" ;
-		:Institution = "Royal Meteorological Institute of Belgium (RMI)" ;
-		:Native_fomrat = "ECMWF ODB" ;
-		:sql_query = "select statid , degrees(lat) , degrees(lon) , varno , date , time , fg_depar , an_depar , obsvalue , FROM hdr,body WHERE obstype ==13 and varno ==195" ;
-		:featureType = "point" ;
-		:NetCDF_datetime_creation = "2026-03-17 10:14:27 UTC" ;
-		:ODB_analysis_datetime = "2024-01-05 00:00:00 UTC" ;
-		:ODB_creation_datetime = "2024-11-14 08:44:28 UTC" ;
-		:ODB_software_version = 46 ;
-		:major_version = 0 ;
-		:npools = 128 ;
-		:ntables = 393 ;
-          }
-
+   sqlite3   arpege_ascat_uv_2024010400.sqlite   .tables
+   varno_124  varno_125
 
