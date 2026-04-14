@@ -5,27 +5,35 @@
 // Version
 #define ODB4PY_VERSION "1.3.3"
 
+
 #define PY_SSIZE_T_CLEAN
-#define ODB_STRLEN 8  
+#define ODB_STRLEN 8  // 8 chars + '\0' 
 #include <numpy/arrayobject.h>
 #include <numpy/ndarraytypes.h>
 
 #include  <stdio.h> 	
 #include  <ctype.h>
+#include <sys/stat.h> 
 #include  <Python.h>
 #include  "odbdump.h"
-#include  "odc/api/odc.h"
+#include "odc/api/odc.h"
 
 #define SMAX 50 
 
 
+
 //  The unclude file could be renamed diffently , BUT  it stays  "pyspam.h"
-// Contains diffrent functions not specific to a given module or C method 
+//  since with a module called  pyspam.c  that i learned writing 
+//  C extension for py  :-)  !
+//  Link could be found here :
+//  https://docs.python.org/3/extending/extending.html  
+//  Valid the : 11/03/2026
 
 
 
-// This avoid printing the message (ODC initialized twice !) when conversion to odb2 is used in a loop
-// Init only one time
+
+// This avoid to print the message (ODC initialized twice !)
+// Init only one time 
 static int odc_initialized = 0;
 static void ensure_odc_init() {
     if (!odc_initialized) {
@@ -34,6 +42,28 @@ static void ensure_odc_init() {
         odc_initialized = 1;
     }
 }
+
+
+// POSIX  : check filename and size 
+int check_file(const char *filename, Bool verbose  ) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        if (st.st_size > 0) {
+	    if (verbose ) {
+            printf("ODB data have been written to file : %s\n", filename);
+	    printf("File size  : %ld  Bytes\n", st.st_size ) ; 
+	    }
+            return 0;
+        } else {
+            printf("File exists but is empty : %s\n", filename);
+            return -1;
+        }
+    } else {
+            printf("Failed to create the file : %s\n", filename);
+            return -1;
+    }
+}
+
 
 
 // Remove @ from the returned column names and replace by underscore 
@@ -92,7 +122,7 @@ x = atof(str );
 return   x ;
 }
 
-// Set the number of decimal digits 
+
 static inline double format_float  (double val, int precision) {
     if (!isfinite(val)) return val;
 
@@ -110,25 +140,28 @@ static inline double format_float  (double val, int precision) {
     return atof(buffer);
 }
 
-// String concat
-char* concat(const char *s1, const char *s2){
+
+char* concat(const char *s1, const char *s2)
+{
     char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
     strcpy(result, s1);
     strcat(result, s2);
     return result;
 }
 
-// str to num 
+
 void strtonum(char [], int);
 void strtonum(char str[], int num)
 {
     int i, rem, len = 0, n; 
     n = num;
-    while (n != 0) {
+    while (n != 0)
+    {
         len++;
         n /= 10;
     }
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < len; i++)
+    {
         rem = num % 10;
         num = num / 10;
         str[len - (i + 1)] = rem + '0';
@@ -136,11 +169,9 @@ void strtonum(char str[], int num)
     str[len] = '\0';
 }
 
-// string len 
 int get_strlen (  const char *  string  ) {  int str_len  ;
 if ( string  ) { str_len=  strlen( string ); } else  { str_len=0   ;  };
 return str_len ;
 }
-
 #endif 
 
