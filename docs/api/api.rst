@@ -351,9 +351,9 @@ The ``odb4py.core`` module is implemented in C as an extension module (``core.so
 odb4py ``convert`` module (C API)
 ---------------------------------
 
-The ``odb4py.convert`` is also written in C. At present,  It provides only one function ``odb2nc`` to write the ODB rows in NetCDF format.
+The ``odb4py.convert`` is also written in C. At present,  It provides only two functions ``odb_to_nc`` to write the ODB rows in NetCDF format and ``odb_to_sqlite`` to convert ODB into SQLite file.
 
-.. c:function:: PyObject *odb2nc (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
+.. c:function:: PyObject *odb_to_nc (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
 
    Independent method from the PyTypeObject *ODBConnection*. 
    Convert the returned ODB rows into NetCDF format (in backend ) 
@@ -362,7 +362,7 @@ The ``odb4py.convert`` is also written in C. At present,  It provides only one f
 
    - **database**  : Path to the ODB  , type **str** (required)  
    - **sql_query** : SQL string query , type **str** (required)
-   - **ncfile**    : Output NetCDF file name, type **str** 'fpath' (required).  
+   - **outfile**   : Output NetCDF file name, type **str** 'fpath' (required).  
    - **poolmask**  : Get the data from defined pools, type str (optional). Default: None (All pools)
    - **fmt_float** : Number of the decimal digits for floats , type int (optional). Default: 15
    - **pbar**      : Show the progress bar , type boolean (optional). Default: False
@@ -371,16 +371,16 @@ The ``odb4py.convert`` is also written in C. At present,  It provides only one f
   :return:          Type *int* : 0 if succeeds or -1 if it fails.    
 
 
-.. c:function:: PyObject *odb2sqlite (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
+.. c:function:: PyObject *odb_to_sqlite (PyObject *Py_UNUSED(self), PyObject *args , PyObject *kwargs)
 
    Independent method from the PyTypeObject *ODBConnection*.
-   Convert the requested rows into sqlite database.
+   Convert the requested rows into SQLite database (in backend ).
 
   :parameter:
 
    - **database**  : Path to the ODB  , type **str** (required)
    - **sql_query** : SQL string query , type **str** (required)
-   - **sqlite_db** : Output sqlite database name, type **str** 'fpath' (required).
+   - **outfile**   : Output sqlite database name, type **str** 'fpath' (required).
    - **table_name**: The SQLite table which has to be created,  type **str** (optional).  default : "ODB".
    - **poolmask**  : Get the data from defined pools, type str (optional). Default: None (All pools)
    - **fmt_float** : Number of the decimal digits for floats , type int (optional). Default: 15
