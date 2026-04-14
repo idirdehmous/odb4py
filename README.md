@@ -48,7 +48,7 @@ data = conn.odb_dict( database  ="/path/to/ODB" ,   # ODB path
 print(data)
 ```
 For more documentation, please refer to:
-![https://odb4py.readthedocs.io/en/latest](https://odb4py.readthedocs.io/en/latest)
+![https://odb4py.readthedocs.io/en/latest/](https://odb4py.readthedocs.io/en/latest/)
 
 
 ## Requirements
