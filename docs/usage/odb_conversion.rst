@@ -150,8 +150,7 @@ The output ODB2 file can be checked using the ECMWF  `odc <https://odc.readthedo
 
 
 Convert ODB to NetCDF format
-----------------------------
-
+============================
 To perform the conversion into NetCDF format the ``odb_to_nc`` function has to be called. The data encoding is handled in the backend, ensuring compatibility with the ODB internal format. The NetCDF variables are automatically created by mapping the data types returned by the ODB query to the corresponding types supported by the latter.
 
 | The function returns **0** on success and **-1** on failure.
@@ -307,7 +306,6 @@ The **ncdump -h**  command show the structure, the data and metadat of encoded d
 
 Convert ODB to Sqlite database
 -------------------------------
-
 The function ``odb_to_sqlite`` is needed to perform such a conversion. As in the case of NetCDF  conversion this function needs no *ODBConnection* object and all the variables and structures and datatype mapping are handled in the backend
 
 | The function returns **0** on success and **-1** on failure.
@@ -541,4 +539,3 @@ A table is created for each *varno* inside the same SQLite file.
 
    sqlite3   arpege_ascat_uv_2024010400.sqlite   .tables
    varno_124  varno_125
-
