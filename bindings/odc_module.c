@@ -25,7 +25,7 @@
 // Constants 
 #define ODB_STRLEN 8      // 8 chars + '\0'
 #define ODC_STRLEN 16     // 8 is default in ODB but in ODB2 it's extended to 16 byte (such AMDAR wigos identifiers )
-#define DEFAULT_CHUNK 10
+#define DEFAULT_CHUNK 5000
 #define ODB_RMDI     -2147483647
 #define ODB_NMDI      2147483647
 #define ODC_BITFIELD  0  
@@ -187,9 +187,9 @@ if ( nrows_chunk   &&  nrows_chunk !=  DEFAULT_CHUNK ) {
 }
 
 for (int i = 0; i < ncols; i++) {
-    buffers[i]     = malloc(CHUNK * sizeof(double));
-    int_buffers[i] = malloc(CHUNK * sizeof(double));
-    str_buffers[i] = malloc(CHUNK * ODC_STRLEN);
+    buffers[i]     = malloc(rows_by_chunk * sizeof(double));
+    int_buffers[i] = malloc(rows_by_chunk * sizeof(double));
+    str_buffers[i] = malloc(rows_by_chunk * ODC_STRLEN);
     is_string  [i] = 0;
 }
 
