@@ -107,11 +107,27 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
          }
      poolmask_str  = PyUnicode_AsUTF8(poolmask_obj);
     }   
-
-
     // Conversion to boolean C variable
     lpbar   = PyObj_ToBool ( pbar , lpbar      ) ; 
     verbose = PyObj_ToBool ( pverb , verbose   ) ; 
+
+// Normalize strings  .. remove blanks 
+char sql_stmt [4096] ;
+char poolmask [4096] ;
+// Operate on local strings  
+
+if ( sql_query ) {
+strcpy(sql_stmt , sql_query  ); 
+normalize_spaces ( sql_stmt  );
+}
+
+if ( poolmask_str ){
+    strcpy(poolmask , poolmask_str  );
+    normalize_spaces ( poolmask   );
+}
+
+
+
     if (verbose && poolmask_str ) {
         printf("Fetch data from pool(s) #: %s\n", poolmask_str );
     }
@@ -138,7 +154,7 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
     if (maxlines == 0) return PyLong_FromLong(rc);
     if (verbose) {
         if (sql_query)
-            printf("--odb4py : Executing query from string: %s\n", sql_query);
+            printf("--odb4py : Executing query from string: %s\n", sql_stmt);
     }   else if (queryfile) {
             printf("--odb4py : Executing query from file   : %s\n", queryfile);
 	    printf("%s\n", "--odb4py : WARNING --> Executing the queries from SQL file is DEPRECATED. Not completly stable");
@@ -179,14 +195,13 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
 
 
     // Bytes counter (for the extract & written ONLY without the file structure )
-    size_t  total_bytes =0   ; 
     while (nextrow(h, d, maxcols, &new_dataset) > 0) {
         if (lpbar) {  ++ip;            print_progress(ip, prog_max); }   // useful for  large ODBs
 
         if (new_dataset) {
 
             ci = odbdump_destroy_colinfo(ci, nci);
-            ci = odbdump_create_colinfo(h, &nci);
+            ci = odbdump_create_colinfo (h, &nci);
 
             const char *default_table = "ODB";
             const char *final_table = default_table;
@@ -213,7 +228,7 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
 
                 for (int i = 0; i < ncols; i++) {
                     const char *name = ci[i].nickname ? ci[i].nickname : ci[i].name;
-                    char cname [128];    // cleaned 
+                    char cname [128];    // cleaned  colname 
 
                     strcpy(cname , name);
                     sanitize_name (cname ) ; 
@@ -223,22 +238,18 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
                     strcat(sql, " ");
 		    char *dtype = map_type  ( odb_dtype )  ; 
 
-		    if (  strcmp(dtype ,"INTEGER") ) {
-                           strcat(sql, "INTEGER");
-		    } else if ( strcmp(dtype,"TEXT") ) {
-                          strcat(sql, "TEXT");
-		    }
-		     else {
-                          strcat(sql, "REAL");
-		     }                    
+		    if ( strcmp(dtype ,"INTEGER"   ) ) {  strcat(sql, "INTEGER");
+		    } else if ( strcmp(dtype,"TEXT") ) {  strcat(sql, "TEXT");
+		    } else    { strcat(sql, "REAL" );
+		    }                    
 		    strcat(insert_sql, "?");
                     if (i < ncols - 1) {
                         strcat(sql, ", ");
                         strcat(insert_sql, ",");
-                    }
+                    } // add a comma 
                 }  // for 
                 strcat(sql, ");");
-                strcat(insert_sql, ");");
+                strcat(insert_sql, ");"); // semi colonne by the end 
 
 		// Create table 
                 rc = sqlite3_exec(db, sql, 0, 0, 0);
@@ -257,7 +268,7 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
         for (int i = 0; i < ncols; i++) {
             int type = ci[i].dtnum;
                if ( type  != DATATYPE_STRING && ABS(d[i]) == mdi)  {
-	            rc = sqlite3_bind_null  ( stmt ,i+1  );
+	            rc = sqlite3_bind_null  ( stmt ,i+1  );     // Set NULL pointer if mdi  
 	       } else {
             switch (type)   {
 		case  DATATYPE_STRING : 
@@ -270,8 +281,6 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
 			*scc++ = isprint(c) ? c : ' ' ; 
 		       }
                      *scc = '\0';
-		      total_bytes+= sizeof(  cc) ; 
-
                       rc = sqlite3_bind_text(stmt, i+1,  cc   , -1, SQLITE_TRANSIENT) ;
                    } 
 		break  ; 			
@@ -281,11 +290,9 @@ static PyObject *odb_to_sqlite_method(PyObject *Py_UNUSED(self),
                 case DATATYPE_YYYYMMDD:
                 case DATATYPE_HHMMSS:		 
            	 rc=sqlite3_bind_int( stmt, i+1 , (int) d[i]);
-		 total_bytes+= sizeof( (int) d[i])  ; 
                 break  ;
 		default :
-                 rc=sqlite3_bind_double(stmt, i+1, d[i]);
-                 total_bytes+= sizeof( d[i])  ;		 
+                 rc=sqlite3_bind_double(stmt, i+1,   format_float( d[i], fmt_float)  ) ;
  		 break  ; 
 	          }  // switch 		 
 
@@ -315,9 +322,8 @@ sqlite_error:
     if (ci)   odbdump_destroy_colinfo(ci, nci);
     if (h)    odbdump_close(h);
 
-if ( verbose )  {
-   printf( "%s : %s\n" , "--odb4py : ODB successfully written into the SQLite file" , sqlite_db ) ;
-   printf( "%s : %ld Bytes\n" , "--odb4py : Total written data size ",  total_bytes  ) ;
-}
+// Check file creation and size     
+check_file ( sqlite_db , verbose   )  ; 
+
 return PyLong_FromLong(0);
 }
