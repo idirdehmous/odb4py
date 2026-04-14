@@ -51,7 +51,7 @@ The example below extracts the ASCAT *ambiguous v and u component of wind* from 
    # ODB2 output filename 
    odb2file="arpege_ascat_"+dt+"_"+tm+".odb2"
 
-   # Set up the sql query :  Get the ambigous U wind component  (obstype =9, codetype=139, varno=124)
+   # Set up the sql query :  Get the ambiguous U wind component  (obstype =9, codetype=139, varno=124)
    sql_query="select  statid ,   \
               degrees(lat)   ,\
               degrees(lon)   ,\
@@ -305,7 +305,7 @@ The **ncdump -h**  command show the structure, the data and metadat of encoded d
 
 
 Convert ODB to Sqlite database
--------------------------------
+==============================
 The function ``odb_to_sqlite`` is needed to perform such a conversion. As in the case of NetCDF  conversion this function needs no *ODBConnection* object and all the variables and structures and datatype mapping are handled in the backend
 
 | The function returns **0** on success and **-1** on failure.
@@ -344,17 +344,14 @@ The function ``odb_to_sqlite`` is needed to perform such a conversion. As in the
               datum_status.blacklisted@body,   \
               datum_status.passive@body, \
               datum_status.rejected@body,\
-              47FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno ==124  ORDER BY   date,time"
+              FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno ==124  ORDER BY date,time"
 
    # Same as the previous example 
    # ...
    
    
 
-   # ODB2 output filename
-   sqlite_file="arpege_ascat_"+dt+"_"+tm+".sqlite"
-
-   # Call odb2sqlite method
+   #  odb_to_sqlite method
    status =odb_to_sqlite (database  = dbpath   ,       
                           sql_query = sql_query,
                           outfile   = sqlite_file, 
@@ -379,7 +376,6 @@ The following sqlite commands :
 
  - Open the sqlite output database and see whether the datatypes have been correctly mapped from ODB1 to SQLite.
  - Fetch the first 10 rows from all available columns.
-
 
 .. code-block:: bash
 
@@ -415,8 +411,8 @@ The following sqlite commands :
    This flexibility allows users to consolidate results from multiple *ODB* queries into separate SQLite tables within a single output file.
 
 Multiple tables in one sqlite file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Create multiple SQLite tables according to ODB *obstype* column. The same MetCOop ``CCMA`` is used ( date/time : 20240104 at 00h00 UTC ).
+----------------------------------
+Create multiple SQLite tables according to ODB *varno* column. The same ECMA is used, however the both components of ambiguous wind u,v will be written in to sqlite tables in the same SQLite file.
 
 .. code-block:: python 
 
@@ -427,16 +423,18 @@ Create multiple SQLite tables according to ODB *obstype* column. The same MetCOo
    from odb4py.convert import  odb_to_sqlite
 
    # Path to ODB 
-   dbpath="/path/to/CCMA"  # or ECMA.<obstype>
+   dbpath="/path/to/ECMA.ascat"
 
    # Start 
    start   = datetime.now()
+   # Same as the previous example
+   # ...
 
-   # Parser object 
-   p =SqlParser()
+
 
 
    # The sql query
+   # Note the substitution of varno in the query  '{}' !
    scat_query="select  statid ,\
            lat   ,\
            lon   ,\
@@ -453,18 +451,15 @@ Create multiple SQLite tables according to ODB *obstype* column. The same MetCOo
            datum_status.blacklisted@body,   \
            datum_status.passive@body, \
            datum_status.rejected@body,\
-           FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno ==  {}  ORDER BY   date,time"
+           FROM hdr,body  WHERE obstype==9 AND codetype==139 AND varno == {}  ORDER BY date,time"
 
 
    # Declare the obstyses to be extracted 
-   # 124  --> Umbegous U component of wind 
+   # 124  --> Ambiguous U component of wind 
    # 125  -->  ''      V      ''   
    
    # Declare the varno list  
    varno_list=["124", "125"]
-
-   # The output SQLite file 
-   sqlite_output="arpege_ascat_uv_2024010400.sqlite"
 
    for var in  varno_list :
        """
@@ -507,18 +502,7 @@ Create multiple SQLite tables according to ODB *obstype* column. The same MetCOo
 
 
 .. code-block:: bash 
-
-   ******** New ODB I/O opened with the following environment
-   *******	  ODB_CONSIDER_TABLES=*
-	   ODB_IO_KEEP_INCORE=1
-	      ODB_IO_FILESIZE=32 MB
-	       ODB_IO_BUFSIZE=4194304 bytes
-	       ODB_IO_GRPSIZE=1 (or max no. of pools)
-	       ODB_IO_PROFILE=0
-	       ODB_IO_VERBOSE=0
-	        ODB_IO_METHOD=5
-   ODB_CONSIDER_TABLES=*
-   ODB_WRITE_TABLES=*
+   
    --odb4py : Executing query from string: select statid , lat , lon , varno , obstype , codetype , date , time , obsvalue , an_depar, vertco_reference_1, vertco_reference_2, datum_status.active@body , datum_status.blacklisted@body, datum_status.passive@body, datum_status.rejected@body, FROM hdr,body WHERE obstype==9 AND codetype==139 AND varno == 124 ORDER BY date,time 
    --odb4py : Number of requested columns : 16
     [##################################################] Complete 100%  (Total: 684451 rows)
