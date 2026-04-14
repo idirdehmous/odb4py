@@ -2,16 +2,6 @@
 [![Documentation Status](https://readthedocs.org/projects/odb4py/badge/?version=latest)](https://odb4py.readthedocs.io)
 ![Python](https://img.shields.io/pypi/pyversions/odb4py)
 
-              _ _      _  _                 
-             | | |    | || |                
-  ___   _  __| | |__  | || |_ _ __  _   _ 
- / _ \ / _` | | '_ \ |__   _| '_ \| | | |
-| (_) | (_| | | |_) |   | | | |_) | |_| |
- \___/ \__,_|_|_.__/    |_| | .__/ \__, |
-                            | |     __/ |
-                            |_|    |___/ 
-      > Python interface for ODB1 <
-
 # odb4py 1.3.3 release
 
 ## Description
