@@ -35,11 +35,15 @@ pip install odb4py
  
 from odb4py import core      # The extension core  <br>
 
-conn = core.odb_open( database  = "/path/to/ODB")   # ECMA or CCMA   <br>
-data = conn.odb_dict( database  ="/path/to/ODB" ,                    <br>
-                       sql_query="SELECT * FROM hdr")                <br>
-                       nfunc    = 0 )                                <br>
-print(data)`  <br>
+# Select lat/lon and obvalue 
+conn = core.odb_open( database  = "/path/to/ODB")   # ECMA or CCMA 
+query="SELECT degrees(lat), degrees(lon) , obsvalue FROM hdr, body"
+
+# Get the data as a Python dictionary 
+data = conn.odb_dict( database  ="/path/to/ODB" ,   # ODB path
+                       sql_query= query   ,  #  SQL query              
+                       nfunc    = 2       )  #  Number of function in the query
+print(data)
 ```
 
 
