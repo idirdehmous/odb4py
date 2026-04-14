@@ -47,9 +47,7 @@ data = conn.odb_dict( database  ="/path/to/ODB" ,   # ODB path
                        nfunc    = 2       )         #  Number of functions in the query
 print(data)
 ```
-For more documentation, please refer to:
-![https://odb4py.readthedocs.io/en/latest/](https://odb4py.readthedocs.io/en/latest/)
-
+For more documentation, please refer to the [Official Documentation](https://odb4py.readthedocs.io/en/latest/).
 
 ## Requirements
 Python ≥ 3.9 <br>
