@@ -42,7 +42,7 @@ query="SELECT degrees(lat), degrees(lon) , obsvalue FROM hdr, body"
 # Get the data as a Python dictionary 
 data = conn.odb_dict( database  ="/path/to/ODB" ,   # ODB path
                        sql_query= query   ,  #  SQL query              
-                       nfunc    = 2       )  #  Number of function in the query
+                       nfunc    = 2       )  #  Number of functions in the query
 print(data)
 ```
 
