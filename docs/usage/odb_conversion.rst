@@ -411,7 +411,7 @@ The following sqlite commands :
    This flexibility allows users to consolidate results from multiple *ODB* queries into separate SQLite tables within a single output file.
 
 Multiple tables in one sqlite file
-----------------------------------
+===================================
 Create multiple SQLite tables according to ODB *varno* column. The same ECMA is used, however the both components of ambiguous wind u,v will be written in to sqlite tables in the same SQLite file.
 
 .. code-block:: python 
