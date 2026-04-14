@@ -35,11 +35,11 @@ pip install odb4py
 `from odb4py import convert   # An extension for format conversion`    <br>
 `from odb4py import utils     # Pure python modules helpers`   <br>
 
-`conn = core.odb_open( database  = "/path/to/ODB")   # ECMA or CCMA
-`data = conn.odb_dict( database  ="/path/to/ODB" ,  `
-`                       sql_query="SELECT * FROM hdr")`
-`                       nfunc    = 0 )  `
-`print(data)`
+`conn = core.odb_open( database  = "/path/to/ODB")   # ECMA or CCMA `  <br>
+`data = conn.odb_dict( database  ="/path/to/ODB" ,                  `  <br>
+`                       sql_query="SELECT * FROM hdr")              `  <br>
+`                       nfunc    = 0 )                              `  <br>
+`print(data)`  <br>
 
 
 
