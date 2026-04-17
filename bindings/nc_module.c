@@ -196,7 +196,7 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
 			        NULL
                              };
     // Parse keyword args
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "szisi|izOOO", kwlist,   // 3 requiered , 5 optional
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "szis|iizOOO", kwlist,   // 4 requiered , 6 optional
                                      &database,
                                      &sql_query,
                                      &fcols    ,
