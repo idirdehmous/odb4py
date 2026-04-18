@@ -217,9 +217,10 @@ To perform the conversion into NetCDF format the ``odb_to_nc`` function has to b
                      nfunc    =nf     ,      # (dtype -> integer )  Number of functions found in the sql query 
                      outfile  =ncfile ,      # (dtype -> str )      The output NetCDF file
                      rows_per_chunk = 1000,  # (dtype -> int )      The number of written rows per chunk ( default is 5000)
+                     zip_level   = 5  ,      # (dtype -> int )      Zlib compression level (1 to 9  )
                      poolmask = None  ,      # (dtype-> str  )      Poolmask 
-                     queryfile= None  ,      # (dtype-> str  )
-                     pbar     = True  ,      # (dtype -> boolean)   Enable the progress bar 
+                     queryfile= None  ,      # (dtype-> str  )      Sql query file
+                     pbar     = True  ,      # (dtype -> boolean)   Show the progress bar 
                      verbose  = True  )      # (dtype -> boolean)   verbosity on/off  
 
    # End           
@@ -230,7 +231,7 @@ To perform the conversion into NetCDF format the ``odb_to_nc`` function has to b
 
 .. code-block:: bash
 
-   List of column names in  arpage_ascat_2024062300.nc
+   List of column names in  arpege_ascat_2024062300.nc
    Column   :  statid_hdr 
    Column   :  lat_hdr 
    Column   :  lon_hdr 
@@ -247,7 +248,7 @@ To perform the conversion into NetCDF format the ``odb_to_nc`` function has to b
    Column   :  datum_status_blacklisted_body 
    Column   :  datum_status_passive_body 
    Column   :  datum_status_rejected_body 
-   ODB data have been written to file : arpage_ascat_2024062300.nc
+   ODB data have been written to file : arpege_ascat_2024062300.nc
    File size  : 6466010  Bytes
 
    Runtime duration: 0:00:03.98810
@@ -259,49 +260,50 @@ The **ncdump -h**  command show the structure, the data and metadat of encoded d
 
    netcdf arpage_ascat_2024062300.nc {
    dimensions:
-        obs = UNLIMITED ; // (684451 currently)
-        strlen = 8 ;
+	obs = UNLIMITED ; // (85536 currently)
+	strlen = 8 ;
    variables:
-        char statid_hdr(obs, strlen) ;
-        double lat_hdr(obs) ;
-               lat_hdr:units = "degrees_north" ;
-               lat_hdr:standard_name = "latitude" ;
-        double lon_hdr(obs) ;
-               lon_hdr:units = "degrees_east" ;
-               lon_hdr:standard_name = "longitude" ;
-        int64 varno_body(obs) ;
-        int64 obstype_hdr(obs) ;
-        int64 codetype_hdr(obs) ;
-        int64 date_hdr(obs) ;
-        int64 time_hdr(obs) ;
-        double obsvalue_body(obs) ;
-        double an_depar_body(obs) ;
-        double vertco_reference_1_body(obs) ;
-        double vertco_reference_2_body(obs) ;
-        int64 datum_status_active_body(obs) ;
-        int64 datum_status_blacklisted_body(obs) ;
-        int64 datum_status_passive_body(obs) ;
-        int64 datum_status_rejected_body(obs) ;
-   
-    // global attributes:
-                :Title = "ODB data in NetCDF format" ;
-                :NetCDF_filename = "output.nc" ;
-                :Conventions = "CF-1.10" ;
-                :NetCDF_datetime_creation = "2026-04-14 15:46:30 UTC" ;
-                :Data_SQL_statement = "select statid , lat , lon , varno , obstype , codetype , date , time , obsvalue , an_depar, vertco_reference_1, vertco_reference_2, datum_status.active@body , datum_status.blacklisted@body, datum_status.passive@body, datum_status.rejected@body, FROM hdr,body WHERE obstype==9 AND codetype==139 AND varno ==124 AND entryno <100 ORDER BY date,time " ;
-                :NetCDF_library_version = "4.9.3 of Mar 14 2025 07:27:28 $" ;
-                :History = "Created by: odb4py python package" ;
-                :odb4py_version = "1.3.3" ;
-                :Institution = "Royal Meteorological Institute of Belgium (RMI)" ;
-                :Native_fomrat = "ECMWF ODB" ;
-                :featureType = "point" ;
-                :ODB_analysis_datetime = "2024-06-23 00:00:00 UTC" ;
-                :ODB_creation_datetime = "2024-11-04 11:24:13 UTC" ;
-                :ODB_software_version = 48 ;
-                :ODB_major_version = 0 ;
-                :Number_of_ODB_pools = 32 ;
-                :Number_of_considered_ODB_tables = 388 ;
+	char statid_hdr(obs, strlen) ;
+	double lat_hdr(obs) ;
+		lat_hdr:units = "degrees_north" ;
+		lat_hdr:standard_name = "latitude" ;
+	double lon_hdr(obs) ;
+		lon_hdr:units = "degrees_east" ;
+		lon_hdr:standard_name = "longitude" ;
+	int64 varno_body(obs) ;
+	int64 obstype_hdr(obs) ;
+	int64 codetype_hdr(obs) ;
+	int64 date_hdr(obs) ;
+		date_hdr:Format = "YYYYMMDD" ;
+	int64 time_hdr(obs) ;
+		time_hdr:Format = "HHMMSS" ;
+	double obsvalue_body(obs) ;
+	double an_depar_body(obs) ;
+	double vertco_reference_1_body(obs) ;
+	double vertco_reference_2_body(obs) ;
+	int64 datum_status_active_body(obs) ;
+	int64 datum_status_blacklisted_body(obs) ;
+	int64 datum_status_passive_body(obs) ;
+	int64 datum_status_rejected_body(obs) ;
 
+    // global attributes:
+		:Title = "ODB data in NetCDF format" ;
+		:NetCDF_filename = "scat_with_compress_6.nc" ;
+		:Conventions = "CF-1.10" ;
+		:Data_SQL_query = "select statid , lat , lon , varno , obstype , codetype , date , time , obsvalue , an_depar, vertco_reference_1, vertco_reference_2, datum_status.active@body , datum_status.blacklisted@body, datum_status.passive@body, datum_status.rejected@body, FROM hdr,body WHERE obstype==9 AND codetype==139 AND varno == 124 ORDER BY date,time " ;
+		:NetCDF_library_version = "4.9.3 of Mar 14 2025 07:27:28 $" ;
+		:History = "Created by: odb4py python package" ;
+		:odb4py_version = "1.3.3" ;
+		:Institution = "Royal Meteorological Institute of Belgium (RMI)" ;
+		:Native_format = "ECMWF ODB" ;
+		:featureType = "point" ;
+		:File_datetime_creation = "2026-04-18 22:46:13 UTC" ;
+		:ODB_analysis_datetime = "2024-06-23 00:00:00 UTC" ;
+		:ODB_creation_datetime = "2024-11-04 11:24:13 UTC" ;
+		:Number_of_ODB_pools = 32 ;
+		:Number_of_considered_ODB_tables = 388 ;
+		:ODB_software_version = 48 ;
+		:ODB_major_version = 0 ;
 
 
 Convert ODB to Sqlite database
