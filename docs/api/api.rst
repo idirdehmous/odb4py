@@ -360,13 +360,15 @@ The ``odb4py.convert`` is also written in C. At present,  It provides only two f
 
   :parameter:
 
-   - **database**  : Path to the ODB  , type **str** (required)  
-   - **sql_query** : SQL string query , type **str** (required)
-   - **outfile**   : Output NetCDF file name, type **str** 'fpath' (required).  
-   - **poolmask**  : Get the data from defined pools, type str (optional). Default: None (All pools)
-   - **fmt_float** : Number of the decimal digits for floats , type int (optional). Default: 15
-   - **pbar**      : Show the progress bar , type boolean (optional). Default: False
-   - **verbose**   : Enable more verbosity , type boolean (optional). Default (False)
+   - **database**    : Path to the ODB  , type **str** (required)  
+   - **sql_query**   : SQL string query , type **str** (required)
+   - **outfile**     : Output NetCDF file name, type **str** 'fpath' (required)
+   - **rows_per_chunk** : Number of rows of a written chunk, type **int**  (optional). Default: 1000   
+   - **zip_level**   : zlib compression level (1 to 9), type **int**   (optional).  Default: 6 
+   - **poolmask**    : Get the data from defined pools, type str (optional). Default: None (All pools)
+   - **fmt_float**   : Number of the decimal digits for floats , type int (optional). Default: 15
+   - **pbar**        : Show the progress bar , type boolean (optional). Default: False
+   - **verbose**     : Enable more verbosity , type boolean (optional). Default: False
 
   :return:          Type *int* : 0 if succeeds or -1 if it fails.    
 
