@@ -4,7 +4,6 @@
 # Licensed under the Apache License, Version 2.0
 
 # -*- coding: utf-8 -*-
-
 from  .parser        import SqlParser
 from  .odb_ob        import OdbObject
 from  .odb_glossary  import OdbLexic
