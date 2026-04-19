@@ -1,8 +1,18 @@
+#
+#  odb4py
+#  Copyright (C) 2026 Royal Meteorological Institute of Belgium (RMI)
+# 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+# 
+#  http://www.apache.org/licenses/LICENSE-2.0
+# 
 # CMakeLists.txt : Compile the C/Python  extension 
+# Compiles in linux env or a Docker container
 
 
 
-
+# Dependencies 
 find_package(SQLite3  )
 find_package( NetCDF4 COMPONENTS ${NETCDF_FIND_COMPONENTS} )
 find_package(ecbuild )
@@ -10,23 +20,13 @@ find_package(eckit   )
 find_package(odc     )
 list(APPEND CMAKE_PREFIX_PATH "/usr/local")
 
-
-
 set ( NCLIB       "/usr/lib")  
 set ( SQLITE_LIB  "/usr/local/lib")
-#set ( ECKIT_LIB   "/home/micro/Bureau/pkg/lib")
-#set ( ECBUILD_LIB "/home/micro/Bureau/pkg")
-#set ( ODC_LIB     "/home/micro/Bureau/pkg/lib")
 
 list(APPEND CMAKE_PREFIX_PATH  ${NCLIB} )
 list(APPEND CMAKE_PREFIX_PATH  ${SQLITE_LIB} )
 list(APPEND CMAKE_PREFIX_PATH  ${ECBUILD_LIB})
 list(APPEND CMAKE_PREFIX_PATH "/usr/local")
-
-
-
-
-
 
 
 execute_process( COMMAND ${Python3_EXECUTABLE} -c "import numpy; print(numpy.get_include())"

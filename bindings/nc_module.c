@@ -1,6 +1,13 @@
-
+/*
+ * odb4py
+ * Copyright (C) 2026 Royal Meteorological Institute of Belgium (RMI)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
 #define PY_SSIZE_T_CLEAN
-
 //NUMPY API
 #include <numpy/arrayobject.h>
 #include <numpy/ndarraytypes.h>
@@ -186,7 +193,7 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
 	                       "sql_query" ,
 			       "nfunc"     ,
 			       "outfile"   ,
-			       "nrows_chunk", 
+			       "rows_per_chunk", 
 			       "fmt_float",
 			       "zip_level",
                                "queryfile",
@@ -226,7 +233,7 @@ static PyObject *odb_to_nc_method(PyObject *Py_UNUSED(self),
          }
      poolmask_str  = PyUnicode_AsUTF8(poolmask_obj);
     }
-    // Conversion to boolean C variable
+    // Conversion to boolean C variables
     lpbar   = PyObj_ToBool ( pbar , lpbar      ) ;
     verbose = PyObj_ToBool ( pverb , verbose   ) ;
 
@@ -296,14 +303,14 @@ if ( nrows_chunk   &&  nrows_chunk != NC_DEFAULT_CHUNK ) {
 
 
 // Init nc vars 
-int ncid, dimid, strlen_dimid;
+int  ncid, dimid, strlen_dimid;
 int *varid     = malloc(ncols * sizeof(int));
 int *is_string = malloc(ncols * sizeof(int));
-int check = 0 ; 
+int  check = 0 ; 
 
 
-// create ncetcdf   file 
-check = nc_create(ncfile  , NC_NETCDF4, &ncid);
+// create ncetcdf-4 file 
+check = nc_create(ncfile  , NC_NETCDF4 , &ncid);
      if (check != NC_NOERR) { ERR(check); return PyLong_FromLong(-1) ; }
 
 
@@ -486,8 +493,7 @@ while (nextrow(h, d, maxcols, &new_dataset) > 0) {
                 dst[j] = ' ';
             }
         } else {		    
-	// In netcdf lat/lon are in degrees 
-	// the function 'sanitize_name'  removes '@' character and replace with '_'.
+	// In netcdf lat/lon are by default in degrees 
 	if ( ABS(d[i]) == mdi )  { 
 		buffers[i][k]  =   NAN ;
 	}else if (is_lat[i] ==1 || is_lon [i] ==1 ) {
@@ -499,10 +505,10 @@ while (nextrow(h, d, maxcols, &new_dataset) > 0) {
 	     buffers[i][k] =   format_float(d[i] ,  fmt_float) ;
 	      }
 	}
-    }  // for ncols  2 -- > fill buffers 
+    }  // for ncols  loop 2 -- > fill buffers 
     k++;
 
-    // write  data by CHUNKS 
+    // write data by CHUNKS 
     if (k == rows_by_chunk) {
         for (int i = 0; i < ncols; i++) {
             if (is_string[i]) {

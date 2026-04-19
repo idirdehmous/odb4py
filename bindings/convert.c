@@ -1,3 +1,12 @@
+/*
+ * odb4py
+ * Copyright (C) 2026 Royal Meteorological Institute of Belgium (RMI)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
 #define PY_SSIZE_T_CLEAN
 #define NPY_NO_DEPRECATED_API NPY_2_0_API_VERSION
 #include <Python.h>
