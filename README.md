@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/odb4py/badge/?version=latest)](https://odb4py.readthedocs.io)
 ![Python](https://img.shields.io/pypi/pyversions/odb4py)
 
-# odb4py 1.3.3 release
+# odb4py 1.3.4rc1 release
 
 ## Description
 
@@ -18,7 +18,7 @@ The package embeds a customized version of the ECMWF ODB software [odb_api_bundl
 - Support for IFS and ARPEGE ODB databases
 - SQL-like query interface
 - Fast data access with [NumPy/C API](https://numpy.org/doc/2.1/reference/c-api/index.html) and pandas integration
-- No runtime dependency on system ODB or ECMWF bundles
+- No runtime dependency on system ODB libraries and binaries
 - Conversion to other formats : ODB2 ,NetcDF and SQLITE
 
 ---
@@ -43,7 +43,7 @@ conn = core.odb_open( database  = "/path/to/ODB")   # ECMA or CCMA
 # Select lat/lon and obsvalue
 sql_query="SELECT degrees(lat), degrees(lon) , obsvalue FROM hdr, body"
 
-# Parse the query & clean it 
+# Parse the query 
 p=utils.SqlParser ("/path/to/ODB")
 
 nf  =p.get_nfunc    ( sql_query )
@@ -51,7 +51,7 @@ sql =p.clean_string ( sql_query )
 
 
 # Get the data as a Python dictionary 
-data = conn.odb_dict( database  ="/path/to/ODB" ,   # ODB path
+data = conn.odb_dict( database  ="/path/to/ODB" ,   #  ODB path
                        sql_query= sql           ,   #  SQL query              
                        nfunc    = nf       )        #  Number of functions in the query
 print(data)
@@ -93,6 +93,6 @@ All original copyrights remain with ECMWF.
 ## Acknowledgements
 - This project incorporates and is derived from the ECMWF ODB software. <br/>
 ODB was developed at the European Centre for Medium-Range Weather Forecasts (ECMWF)
-by [S. Saarinen et al](https://www.ecmwf.int/sites/default/files/elibrary/2004/76278-ifs-documentation-cy36r1-part-i-observation-processing_1.pdf). All rights to the original ODB software remain with ECMWF and their respective owners.
-- The author would like to thank the other colleagues from ACCORD consortium (MetCOop , SHMI , AEMET & Meteo France ) for providing different samples of ODBs.
-- The author would also like to thank 'Mohand Ouali Ait Meziane' for testing odb4py and providing valuable feedback.
+by [S. Saarinen et al](https://www.ecmwf.int/sites/default/files/elibrary/2004/76278-ifs-documentation-cy36r1-part-i-observation-processing_1.pdf). All rights to the original ODB software remains with ECMWF and their respective owners.
+- The author would like S. Martinez from Météo France for to provide ARPEGE global model ODB samples. The latters have been used to evaluate the performance of the package.
+- The author would also like to thank 'M.O Ait Meziane' for testing odb4py and providing valuable feedback.
