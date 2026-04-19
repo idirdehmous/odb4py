@@ -3,7 +3,7 @@
 
 
 // Version
-#define ODB4PY_VERSION "1.3.3"
+#define ODB4PY_VERSION "1.3.4rc1"
 
 
 #define PY_SSIZE_T_CLEAN
