@@ -3,59 +3,67 @@
 All notable changes to this packages
 
 
+## [Release-Candidate1]
+- v1.3.4rc1  Optimisation of read/write.
+- v1.3.4rc1  Compress the NetCDF data before writing (using deflate function and chunking )
+- v1.3.4rc1  Read/Write by "streaming". Flush the data buffers even while the rows are being read.
+
+## [Release]
+- v1.3.3  Add the conversion feature : conversion to SQLITE database.
+- v1.3.3  Add the conversion feature : conversion to NetCDF format.
+- VERSION 1.3.3
+
+## [Release]
 - v1.3.2-rc1 Add the conversion feature : conversion to SQLITE database.
 - VERSION 1.3.2-rc1
-## [Release]
 
+## [Release]
 - v1.3.1 split the methods into context submodules  core, info and convert
 - v1.3.1 Add the conversion feature. Able to convert to ODB2 and Netcdf for the moment.
 - VERSION 1.3.1
+
+
 ## [Release]
-
-
 - v1.1.2 Clean the methods getting the ODB attributes 
 - v1.1.2 Add the poolmasking option to the odbDca method 
 - v1.1.2 Patch the  program poolmasking.c  , print only necessary info concerning the poolmask 
 - VERSION 1.1.2
-## [Release]
 
+## [Pre-Release]
 - v1.1.1 The backend ODB environment is set automatically by importing the package or any sub-package
 - v1.1.1 Add a function 'odbGeopoints' which gets the lat/lon and obsvalue only given some  options (e.i domain extent )
 - v1.1.1 Setting the ODB environment completly inside the wheel file (bin , lib + include ) 
 - VERSION 1.1.1
-## [Release]
 
 
+## [Pre-Release]
 - v1.1.0 First packaging on TestPyPi  
 - v1.1.0 Compilation using many linux and cuibuildwheel + docker environmment  ( 10/02/2026 )
 - v1.1.0 A module called geo_module.c was added. Contains functions to compute the great circle distances from latlon pairs (25-11-2025 )
 - v1.1.0 Tested with ODBs from different ACCORD countries (RMI , CHMI , CHMZ and the global ARPEGE ODBs )
 - v1.1.0 Date of pre-release : 15/12/2025
 - VERSION 1.1.0
-## [Pre-release]
 
+### Version 1.1.0
 - v1.1.0 The odbFetch function was moved to odbDict to return a python dictionnary with colnames as keys. 
 - v1.1.0 More stable I/O by enhacing the io_module.c  (odbConnect and odbClose methods )
 - v1.1.0 Replace the PyList_New structures by numpy arrays from C/numpy  API. The fetch rows process became ~8 times faster 
 - v1.1.0 Add a rows counter and compute the purcenbage of fetched rows (  pbar  = True ) ->  progress bar
 - v1.1.0 Add basic options like: verbosity, get the header , column names etc 
 - v1.1.0 Introduce positional arguments in the C side with PyKeywordsParseArgs  function (more flexibily to add options )
-### Version 1.1.0
 
-
+### Version 0.1.1
 - v0.1.1 Add some basic checks concerning the pointers and invalid data handling 
 - v0.1.1 The returned values can be processed after the fetch (in the python environment  ) 
-### Version 0.1.1
 
+### Version 0.1.0
 - v0.1.0 The data values are returned to python layer in a list of columns and lists of rows  (Pylist [nrows x ncols])
 - v0.1.0 Use of the C API macros such as PyList_New, PyDict_new , PyList_Append etc to get the data into python objects
 - v0.1.0 The data types are checked and stored in C arrays but not returned to python 
 - v0.1.0 Simple read of the ODB1 rows (equivalent to a dump  )
-### Version 0.1.0
 
-
-odb4py_0.1.0
 ## [Unreleased]
+odb4py_0.1.0
 
 
 
