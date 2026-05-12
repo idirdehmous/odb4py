@@ -93,7 +93,7 @@ queries from reaching the ODB runtime layer.
                          sql_query =sql    , 
                          nfunc     =nfunc  ,
                          fmt_float =ndigits,
-                         query_file=sql_file,                   
+                         queryfile =sql_file,                   
                          poolmask  =mask    , 
                          pbar      =progress, 
                          verbose   =lverb  )
