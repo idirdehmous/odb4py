@@ -54,7 +54,7 @@ queries from reaching the ODB runtime layer.
    from odb4py.utils import  OdbObject , SqlParser 
 
    # odb4py  core module 
-   from odb4py.core  import  odb_connect 
+   from odb4py.core  import  odb_open , odb_close  
    
    # Start 
    start  = datetime.now()  
@@ -84,6 +84,10 @@ queries from reaching the ODB runtime layer.
    nf      = nfunc    # (type -> integer ) Number of columns considring the functions in the sql statement (degrees, rad, avg etc ...)
    
 
+
+   # Create connection object  
+   conn = odb_open( db_path )
+
    # Send the query and fetch the data as a dictionary
    data =conn.odb_dict  (database  =db_path,
                          sql_query =sql    , 
@@ -94,11 +98,13 @@ queries from reaching the ODB runtime layer.
                          pbar      =progress, 
                          verbose   =lverb  )
    print( data ) 
-
+   
+   conn.odb_close()  
    # End 
    end  = datetime.now()
    duration = end -  start
    print("Runtime duration:" , duration  )
+
  
 Output :
 
