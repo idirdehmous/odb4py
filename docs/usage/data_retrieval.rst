@@ -81,7 +81,7 @@ queries from reaching the ODB runtime layer.
    progress= True     # (type -> bool    ) Progress bar (very useful in the case of large ODBs )
    ndigits = 8        # (type -> int     ) Number of decimal digits for floats  (default is 15)
    lverb   = False    # (type -> bool    ) Verbosity  on/off   
-   nf      = nfunc    # (type -> integer ) Number of columns considring the functions in the sql statement (degrees, rad, avg etc ...)
+   nfunc   = nf       # (type -> integer ) Number of columns considring the functions in the sql statement (degrees, rad, avg etc ...)
    
 
 
@@ -91,7 +91,7 @@ queries from reaching the ODB runtime layer.
    # Send the query and fetch the data as a dictionary
    data =conn.odb_dict  (database  =db_path,
                          sql_query =sql    , 
-                         nfunc     =nf     ,
+                         nfunc     =nfunc  ,
                          fmt_float =ndigits,
                          query_file=sql_file,                   
                          poolmask  =mask    , 
